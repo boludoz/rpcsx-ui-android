@@ -17,6 +17,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +43,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -751,24 +754,16 @@ fun DropUpFloatingActionButton(
                 )
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FloatingActionButton(
-                        onClick = { installPkgLauncher.launch("*/*"); expanded = false },
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_description),
-                            contentDescription = "Select Game"
-                        )
-                    }
-                    FloatingActionButton(
-                        onClick = { gameFolderPickerLauncher.launch(null); expanded = false },
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_folder),
-                            contentDescription = "Select Folder"
-                        )
-                    }
+                    LabeledFabAction(
+                        label = stringResource(R.string.select_game_file),
+                        icon = painterResource(id = R.drawable.ic_description),
+                        onClick = { installPkgLauncher.launch("*/*"); expanded = false }
+                    )
+                    LabeledFabAction(
+                        label = stringResource(R.string.select_game_folder),
+                        icon = painterResource(id = R.drawable.ic_folder),
+                        onClick = { gameFolderPickerLauncher.launch(null); expanded = false }
+                    )
                 }
             }
 
@@ -777,6 +772,35 @@ fun DropUpFloatingActionButton(
             ) {
                 Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Add")
             }
+        }
+    }
+}
+
+@Composable
+private fun LabeledFabAction(
+    label: String,
+    icon: androidx.compose.ui.graphics.painter.Painter,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer
+        ) {
+            Text(
+                text = label,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
+        FloatingActionButton(
+            onClick = onClick,
+            containerColor = MaterialTheme.colorScheme.secondary
+        ) {
+            Icon(painter = icon, contentDescription = label)
         }
     }
 }
