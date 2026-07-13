@@ -82,6 +82,8 @@ class RPCSX {
     external fun processCompilationQueue(): Boolean
     external fun startMainThreadProcessor(): Boolean
     external fun overlayPadData(digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
+    external fun multiPadData(playerIndex: Int, digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
+    external fun getMaxVirtualPads(): Int
     external fun collectGameInfo(rootDir: String, progressId: Long): Boolean
     external fun systemInfo(): String
     external fun settingsGet(path: String): String

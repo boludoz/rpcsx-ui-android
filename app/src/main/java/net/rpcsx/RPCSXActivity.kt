@@ -1,6 +1,9 @@
 package net.rpcsx
 
 import android.app.Activity
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
+import android.hardware.input.InputManager
 import android.os.Bundle
 import android.util.Log
 import android.view.InputDevice
@@ -21,14 +24,51 @@ import net.rpcsx.utils.InputBindingPrefs
 import kotlin.concurrent.thread
 import kotlin.math.abs
 
+private const val MAX_PLAYERS = 4
+
+private fun isGamepadDevice(device: InputDevice?): Boolean {
+    if (device == null || device.isVirtual) return false
+    val sources = device.sources
+    return (sources and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD ||
+        (sources and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
+}
+
 class RPCSXActivity : Activity() {
     private lateinit var binding: ActivityRpcs3Binding
     private lateinit var unregisterUsbEventListener: () -> Unit
-    private var gamePadState: State = State()
-    private var usesAxisL2 = false
-    private var usesAxisR2 = false
+
+    // One pad state per connected physical controller (device ID -> state),
+    // plus one player slot assignment per device. The on-screen overlay owns
+    // slot 0 directly (see PadOverlay.kt), so the first detected controller
+    // also targets slot 0 to preserve today's single-controller behavior;
+    // additional controllers (up to MAX_PLAYERS) take the remaining slots.
+    private val gamepadStates = mutableMapOf<Int, State>()
+    private val gamepadPlayerSlots = mutableMapOf<Int, Int>()
+    private val usesAxisL2 = mutableMapOf<Int, Boolean>()
+    private val usesAxisR2 = mutableMapOf<Int, Boolean>()
+
+    private var overlayAutoHidden = false
     private var bootThread: Thread? = null
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
+    private val maxVirtualPads by lazy {
+        RPCSX.instance.getMaxVirtualPads().coerceIn(1, MAX_PLAYERS)
+    }
+
+    private val inputDeviceListener = object : InputManager.InputDeviceListener {
+        override fun onInputDeviceAdded(deviceId: Int) {
+            if (isGamepadDevice(InputDevice.getDevice(deviceId))) {
+                assignGamepadSlot(deviceId)
+            }
+            onGamepadConnectionChanged()
+        }
+
+        override fun onInputDeviceRemoved(deviceId: Int) {
+            releaseGamepadSlot(deviceId)
+            onGamepadConnectionChanged()
+        }
+
+        override fun onInputDeviceChanged(deviceId: Int) {}
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,11 +77,16 @@ class RPCSXActivity : Activity() {
 
         unregisterUsbEventListener = listenUsbEvents(this)
         enableFullScreenImmersive()
+        registerGamepadListener()
+        updateOrientationForWindowMode()
 
         binding.oscToggle.setOnClickListener {
             binding.padOverlay.isInvisible = !binding.padOverlay.isInvisible
+            overlayAutoHidden = false
             binding.oscToggle.setImageResource(if (binding.padOverlay.isInvisible) R.drawable.ic_osc_off else R.drawable.ic_show_osc)
         }
+
+        applyOverlayAutoVisibility(connectedGamepadCount() > 0)
 
         val gamePath = intent.getStringExtra("path")!!
         RPCSX.lastPlayedGame = gamePath
@@ -84,24 +129,103 @@ class RPCSXActivity : Activity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterGamepadListener()
         RPCSX.state.value = EmulatorState.Paused
         unregisterUsbEventListener()
         bootThread?.interrupt()
         bootThread?.join()
     }
 
+    override fun onMultiWindowModeChanged(isInMultiWindowMode: Boolean, newConfig: Configuration) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig)
+        updateOrientationForWindowMode()
+    }
 
-    private fun keyCodeToPadBit(keyCode: Int): Pair<Int, Int> {
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        updateOrientationForWindowMode()
+    }
+
+    // Samsung DeX and Android's desktop windowing mode both host the activity
+    // in a resizable, freeform window; forcing landscape there fights the
+    // window manager, so only lock orientation during normal fullscreen play.
+    private fun updateOrientationForWindowMode() {
+        requestedOrientation = if (isInMultiWindowMode || isDesktopModeActive()) {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
+    }
+
+    private fun isDesktopModeActive(): Boolean {
+        val uiModeType = resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK
+        return uiModeType == Configuration.UI_MODE_TYPE_DESK
+    }
+
+    private fun registerGamepadListener() {
+        val inputManager = getSystemService(InputManager::class.java) ?: return
+        inputManager.registerInputDeviceListener(inputDeviceListener, null)
+        for (deviceId in InputDevice.getDeviceIds()) {
+            if (isGamepadDevice(InputDevice.getDevice(deviceId))) {
+                assignGamepadSlot(deviceId)
+            }
+        }
+    }
+
+    private fun unregisterGamepadListener() {
+        getSystemService(InputManager::class.java)?.unregisterInputDeviceListener(inputDeviceListener)
+    }
+
+    private fun connectedGamepadCount() = gamepadPlayerSlots.size
+
+    private fun onGamepadConnectionChanged() {
+        applyOverlayAutoVisibility(connectedGamepadCount() > 0)
+    }
+
+    // Skyline-style behavior: hide the touch overlay the moment a real
+    // controller shows up, and bring it back once none are left. The manual
+    // toggle button always takes priority in between these transitions.
+    private fun applyOverlayAutoVisibility(hasGamepad: Boolean) {
+        if (hasGamepad && !binding.padOverlay.isInvisible) {
+            binding.padOverlay.isInvisible = true
+            binding.oscToggle.setImageResource(R.drawable.ic_osc_off)
+            overlayAutoHidden = true
+        } else if (!hasGamepad && overlayAutoHidden) {
+            binding.padOverlay.isInvisible = false
+            binding.oscToggle.setImageResource(R.drawable.ic_show_osc)
+            overlayAutoHidden = false
+        }
+    }
+
+    private fun assignGamepadSlot(deviceId: Int): Int? {
+        gamepadPlayerSlots[deviceId]?.let { return it }
+        val usedSlots = gamepadPlayerSlots.values.toSet()
+        val freeSlot = (0 until maxVirtualPads).firstOrNull { it !in usedSlots } ?: return null
+        gamepadPlayerSlots[deviceId] = freeSlot
+        gamepadStates[deviceId] = State()
+        return freeSlot
+    }
+
+    private fun releaseGamepadSlot(deviceId: Int) {
+        val slot = gamepadPlayerSlots.remove(deviceId) ?: return
+        gamepadStates.remove(deviceId)
+        usesAxisL2.remove(deviceId)
+        usesAxisR2.remove(deviceId)
+        // Release any buttons/sticks this controller left pressed.
+        sendPadData(slot, State())
+    }
+
+    private fun keyCodeToPadBit(keyCode: Int, deviceId: Int): Pair<Int, Int> {
         val event = inputBindings[keyCode] ?: Pair(0, 0)
-        
+
         if (keyCode == KeyEvent.KEYCODE_BUTTON_R2) {
-            if (usesAxisR2) return Pair(0, 0) else return event
+            if (usesAxisR2[deviceId] == true) return Pair(0, 0) else return event
         }
-        
+
         if (keyCode == KeyEvent.KEYCODE_BUTTON_L2) {
-            if (usesAxisL2) return Pair(0, 0) else return event
+            if (usesAxisL2[deviceId] == true) return Pair(0, 0) else return event
         }
-        
+
         return event
     }
 
@@ -109,13 +233,16 @@ class RPCSXActivity : Activity() {
         if (event == null || (event.source and (InputDevice.SOURCE_GAMEPAD or InputDevice.SOURCE_JOYSTICK or InputDevice.SOURCE_DPAD)) == 0 || event.repeatCount != 0) {
             return super.onKeyDown(keyCode, event)
         }
-        val padBit = keyCodeToPadBit(keyCode)
+
+        val slot = assignGamepadSlot(event.deviceId) ?: return super.onKeyDown(keyCode, event)
+        val padBit = keyCodeToPadBit(keyCode, event.deviceId)
         if (padBit.first == 0) {
             return super.onKeyDown(keyCode, event)
         }
 
-        gamePadState.digital[padBit.second] = gamePadState.digital[padBit.second] or padBit.first
-        sendGamepadData()
+        val state = gamepadStates.getOrPut(event.deviceId) { State() }
+        state.digital[padBit.second] = state.digital[padBit.second] or padBit.first
+        sendPadData(slot, state)
         return true
     }
 
@@ -124,14 +251,16 @@ class RPCSXActivity : Activity() {
             return super.onKeyUp(keyCode, event)
         }
 
-        val padBit = keyCodeToPadBit(keyCode)
+        val slot = gamepadPlayerSlots[event.deviceId] ?: return super.onKeyUp(keyCode, event)
+        val padBit = keyCodeToPadBit(keyCode, event.deviceId)
         if (padBit.first == 0) {
             return super.onKeyUp(keyCode, event)
         }
 
-        gamePadState.digital[padBit.second] =
-            gamePadState.digital[padBit.second] and padBit.first.inv()
-        sendGamepadData()
+        val state = gamepadStates.getOrPut(event.deviceId) { State() }
+        state.digital[padBit.second] =
+            state.digital[padBit.second] and padBit.first.inv()
+        sendPadData(slot, state)
         return true
     }
 
@@ -140,69 +269,81 @@ class RPCSXActivity : Activity() {
             return super.onGenericMotionEvent(event)
         }
 
+        val slot = assignGamepadSlot(event.deviceId) ?: return super.onGenericMotionEvent(event)
+        val deviceId = event.deviceId
+        val state = gamepadStates.getOrPut(deviceId) { State() }
+
         if (event.getAxisValue(MotionEvent.AXIS_LTRIGGER) > 0.1) {
-            gamePadState.digital[1] =
-                gamePadState.digital[1] or Digital2Flags.CELL_PAD_CTRL_L2.bit
-            usesAxisL2 = true
-        } else if (usesAxisL2) {
-            usesAxisL2 = false
-            gamePadState.digital[1] =
-                gamePadState.digital[1] and Digital2Flags.CELL_PAD_CTRL_L2.bit.inv()
+            state.digital[1] = state.digital[1] or Digital2Flags.CELL_PAD_CTRL_L2.bit
+            usesAxisL2[deviceId] = true
+        } else if (usesAxisL2[deviceId] == true) {
+            usesAxisL2[deviceId] = false
+            state.digital[1] = state.digital[1] and Digital2Flags.CELL_PAD_CTRL_L2.bit.inv()
         }
 
         if (event.getAxisValue(MotionEvent.AXIS_RTRIGGER) > 0.1) {
-            gamePadState.digital[1] =
-                gamePadState.digital[1] or Digital2Flags.CELL_PAD_CTRL_R2.bit
-            usesAxisR2 = true
-        } else if (usesAxisR2) {
-            usesAxisR2 = false
-            gamePadState.digital[1] =
-                gamePadState.digital[1] and Digital2Flags.CELL_PAD_CTRL_R2.bit.inv()
+            state.digital[1] = state.digital[1] or Digital2Flags.CELL_PAD_CTRL_R2.bit
+            usesAxisR2[deviceId] = true
+        } else if (usesAxisR2[deviceId] == true) {
+            usesAxisR2[deviceId] = false
+            state.digital[1] = state.digital[1] and Digital2Flags.CELL_PAD_CTRL_R2.bit.inv()
         }
 
         val dpadX = event.getAxisValue(MotionEvent.AXIS_HAT_X)
         val dpadY = event.getAxisValue(MotionEvent.AXIS_HAT_Y)
 
-        gamePadState.digital[0] =
-            gamePadState.digital[0] and (Digital1Flags.CELL_PAD_CTRL_LEFT.bit or Digital1Flags.CELL_PAD_CTRL_RIGHT.bit or Digital1Flags.CELL_PAD_CTRL_UP.bit or Digital1Flags.CELL_PAD_CTRL_DOWN.bit).inv()
+        state.digital[0] =
+            state.digital[0] and (Digital1Flags.CELL_PAD_CTRL_LEFT.bit or Digital1Flags.CELL_PAD_CTRL_RIGHT.bit or Digital1Flags.CELL_PAD_CTRL_UP.bit or Digital1Flags.CELL_PAD_CTRL_DOWN.bit).inv()
         if (abs(dpadX) > 0.1f) {
             if (dpadX < 0) {
-                gamePadState.digital[0] =
-                    gamePadState.digital[0] or Digital1Flags.CELL_PAD_CTRL_LEFT.bit
+                state.digital[0] =
+                    state.digital[0] or Digital1Flags.CELL_PAD_CTRL_LEFT.bit
             } else {
-                gamePadState.digital[0] =
-                    gamePadState.digital[0] or Digital1Flags.CELL_PAD_CTRL_RIGHT.bit
+                state.digital[0] =
+                    state.digital[0] or Digital1Flags.CELL_PAD_CTRL_RIGHT.bit
             }
         }
 
         if (abs(dpadY) > 0.1f) {
             if (dpadY < 0) {
-                gamePadState.digital[0] =
-                    gamePadState.digital[0] or Digital1Flags.CELL_PAD_CTRL_UP.bit
+                state.digital[0] =
+                    state.digital[0] or Digital1Flags.CELL_PAD_CTRL_UP.bit
             } else {
-                gamePadState.digital[0] =
-                    gamePadState.digital[0] or Digital1Flags.CELL_PAD_CTRL_DOWN.bit
+                state.digital[0] =
+                    state.digital[0] or Digital1Flags.CELL_PAD_CTRL_DOWN.bit
             }
         }
 
-        gamePadState.leftStickX = (event.getAxisValue(MotionEvent.AXIS_X) * 127 + 128).toInt()
-        gamePadState.leftStickY = (event.getAxisValue(MotionEvent.AXIS_Y) * 127 + 128).toInt()
-        gamePadState.rightStickX = (event.getAxisValue(MotionEvent.AXIS_Z) * 127 + 128).toInt()
-        gamePadState.rightStickY = (event.getAxisValue(MotionEvent.AXIS_RZ) * 127 + 128).toInt()
+        state.leftStickX = (event.getAxisValue(MotionEvent.AXIS_X) * 127 + 128).toInt()
+        state.leftStickY = (event.getAxisValue(MotionEvent.AXIS_Y) * 127 + 128).toInt()
+        state.rightStickX = (event.getAxisValue(MotionEvent.AXIS_Z) * 127 + 128).toInt()
+        state.rightStickY = (event.getAxisValue(MotionEvent.AXIS_RZ) * 127 + 128).toInt()
 
-        sendGamepadData()
+        sendPadData(slot, state)
         return true
     }
 
-    private fun sendGamepadData() {
-        RPCSX.instance.overlayPadData(
-            gamePadState.digital[0],
-            gamePadState.digital[1],
-            gamePadState.leftStickX,
-            gamePadState.leftStickY,
-            gamePadState.rightStickX,
-            gamePadState.rightStickY
-        )
+    private fun sendPadData(slot: Int, state: State) {
+        if (slot == 0 || maxVirtualPads <= 1) {
+            RPCSX.instance.overlayPadData(
+                state.digital[0],
+                state.digital[1],
+                state.leftStickX,
+                state.leftStickY,
+                state.rightStickX,
+                state.rightStickY
+            )
+        } else {
+            RPCSX.instance.multiPadData(
+                slot,
+                state.digital[0],
+                state.digital[1],
+                state.leftStickX,
+                state.leftStickY,
+                state.rightStickX,
+                state.rightStickY
+            )
+        }
     }
 
     private fun enableFullScreenImmersive() {
