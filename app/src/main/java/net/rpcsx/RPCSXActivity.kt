@@ -24,26 +24,18 @@ import net.rpcsx.utils.InputBindingPrefs
 import kotlin.concurrent.thread
 import kotlin.math.abs
 
-private const val MAX_PLAYERS = 4
-
-private fun isGamepadDevice(device: InputDevice?): Boolean {
-    if (device == null || device.isVirtual) return false
-    val sources = device.sources
-    return (sources and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD ||
-        (sources and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
-}
-
 class RPCSXActivity : Activity() {
     private lateinit var binding: ActivityRpcs3Binding
     private lateinit var unregisterUsbEventListener: () -> Unit
+    private lateinit var unregisterGamepadEventListener: () -> Unit
 
-    // One pad state per connected physical controller (device ID -> state),
-    // plus one player slot assignment per device. The on-screen overlay owns
-    // slot 0 directly (see PadOverlay.kt), so the first detected controller
-    // also targets slot 0 to preserve today's single-controller behavior;
-    // additional controllers (up to MAX_PLAYERS) take the remaining slots.
+    // One pad state per connected physical controller, keyed by device ID.
+    // Slot assignment itself (device ID -> player index) lives in
+    // GamepadRepository, shared with the idle Controllers settings screen.
+    // The on-screen overlay owns slot 0 directly (see PadOverlay.kt), so the
+    // first detected controller also targets slot 0 to preserve today's
+    // single-controller behavior; additional controllers take the rest.
     private val gamepadStates = mutableMapOf<Int, State>()
-    private val gamepadPlayerSlots = mutableMapOf<Int, Int>()
     private val usesAxisL2 = mutableMapOf<Int, Boolean>()
     private val usesAxisR2 = mutableMapOf<Int, Boolean>()
 
@@ -51,19 +43,23 @@ class RPCSXActivity : Activity() {
     private var bootThread: Thread? = null
     private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
     private val maxVirtualPads by lazy {
-        RPCSX.instance.getMaxVirtualPads().coerceIn(1, MAX_PLAYERS)
+        RPCSX.instance.getMaxVirtualPads().coerceIn(1, MaxGamepadPlayers)
     }
 
     private val inputDeviceListener = object : InputManager.InputDeviceListener {
         override fun onInputDeviceAdded(deviceId: Int) {
-            if (isGamepadDevice(InputDevice.getDevice(deviceId))) {
-                assignGamepadSlot(deviceId)
-            }
             onGamepadConnectionChanged()
         }
 
         override fun onInputDeviceRemoved(deviceId: Int) {
-            releaseGamepadSlot(deviceId)
+            val slot = GamepadRepository.slotFor(deviceId)
+            gamepadStates.remove(deviceId)
+            usesAxisL2.remove(deviceId)
+            usesAxisR2.remove(deviceId)
+            // Release any buttons/sticks this controller left pressed.
+            if (slot != null) {
+                sendPadData(slot, State())
+            }
             onGamepadConnectionChanged()
         }
 
@@ -163,20 +159,16 @@ class RPCSXActivity : Activity() {
     }
 
     private fun registerGamepadListener() {
-        val inputManager = getSystemService(InputManager::class.java) ?: return
-        inputManager.registerInputDeviceListener(inputDeviceListener, null)
-        for (deviceId in InputDevice.getDeviceIds()) {
-            if (isGamepadDevice(InputDevice.getDevice(deviceId))) {
-                assignGamepadSlot(deviceId)
-            }
-        }
+        unregisterGamepadEventListener = listenGamepadEvents(this)
+        getSystemService(InputManager::class.java)?.registerInputDeviceListener(inputDeviceListener, null)
     }
 
     private fun unregisterGamepadListener() {
         getSystemService(InputManager::class.java)?.unregisterInputDeviceListener(inputDeviceListener)
+        unregisterGamepadEventListener()
     }
 
-    private fun connectedGamepadCount() = gamepadPlayerSlots.size
+    private fun connectedGamepadCount() = GamepadRepository.slots.size
 
     private fun onGamepadConnectionChanged() {
         applyOverlayAutoVisibility(connectedGamepadCount() > 0)
@@ -198,21 +190,12 @@ class RPCSXActivity : Activity() {
     }
 
     private fun assignGamepadSlot(deviceId: Int): Int? {
-        gamepadPlayerSlots[deviceId]?.let { return it }
-        val usedSlots = gamepadPlayerSlots.values.toSet()
-        val freeSlot = (0 until maxVirtualPads).firstOrNull { it !in usedSlots } ?: return null
-        gamepadPlayerSlots[deviceId] = freeSlot
-        gamepadStates[deviceId] = State()
-        return freeSlot
-    }
-
-    private fun releaseGamepadSlot(deviceId: Int) {
-        val slot = gamepadPlayerSlots.remove(deviceId) ?: return
-        gamepadStates.remove(deviceId)
-        usesAxisL2.remove(deviceId)
-        usesAxisR2.remove(deviceId)
-        // Release any buttons/sticks this controller left pressed.
-        sendPadData(slot, State())
+        val slot = GamepadRepository.attach(deviceId, InputDevice.getDevice(deviceId)?.name ?: "Gamepad")
+            ?: return null
+        if (deviceId !in gamepadStates) {
+            gamepadStates[deviceId] = State()
+        }
+        return slot
     }
 
     private fun keyCodeToPadBit(keyCode: Int, deviceId: Int): Pair<Int, Int> {
@@ -251,7 +234,7 @@ class RPCSXActivity : Activity() {
             return super.onKeyUp(keyCode, event)
         }
 
-        val slot = gamepadPlayerSlots[event.deviceId] ?: return super.onKeyUp(keyCode, event)
+        val slot = GamepadRepository.slotFor(event.deviceId) ?: return super.onKeyUp(keyCode, event)
         val padBit = keyCodeToPadBit(keyCode, event.deviceId)
         if (padBit.first == 0) {
             return super.onKeyUp(keyCode, event)

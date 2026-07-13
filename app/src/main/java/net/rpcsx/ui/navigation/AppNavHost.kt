@@ -158,7 +158,7 @@ fun AppNavHost() {
 
     if (prefs.getString("rpcsx_channel", "") == "") {
         prefs.edit {
-            putString("rpcsx_channel", ReleaseRpcsxChannel)
+            putString("rpcsx_channel", DevRpcsxChannel)
         }
     }
 
