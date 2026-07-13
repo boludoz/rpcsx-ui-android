@@ -25,7 +25,6 @@ import androidx.core.graphics.scale
 import net.rpcsx.Digital1Flags
 import net.rpcsx.Digital2Flags
 import net.rpcsx.R
-import net.rpcsx.RPCSX
 import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.GeneralSettings.int
 import kotlin.math.min
@@ -66,9 +65,11 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
     private val sticks = mutableListOf<PadOverlayStick>()
     private val prefs by lazy { context!!.getSharedPreferences("PadOverlayPrefs", Context.MODE_PRIVATE) }
     private val vibrator by lazy { 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            (context?.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager)?.defaultVibrator 
-        else context?.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            context?.getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            context?.getSystemService(Vibrator::class.java)
+        }
     }
     private var selectedInput: PadOverlayItem? = null
         set(value) {
@@ -77,6 +78,12 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
         }
         
     var onSelectedInputChange: ((Any?) -> Unit)? = null
+    // Fired whenever a touch changes `state`. The activity owns actually
+    // sending pad data to native, so it can merge this overlay's state with
+    // slot 0's physical controller instead of one silently overwriting the
+    // other's currently-held buttons.
+    var onPadStateChanged: (() -> Unit)? = null
+    val currentState: State get() = state
     var isEditing = false
 
     private var fadeHandler: Handler? = null
@@ -388,14 +395,7 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                 }
             }
 
-            RPCSX.instance.overlayPadData(
-                state.digital[0],
-                state.digital[1],
-                state.leftStickX,
-                state.leftStickY,
-                state.rightStickX,
-                state.rightStickY
-            )
+            onPadStateChanged?.invoke()
 
             if (!hit && (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)) {
                 val xInFloatingArea = x > buttonSize * 2 && x < totalWidth - buttonSize * 2

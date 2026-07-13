@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">Ajouter</string>
+    <string name="close">Fermer</string>
+    <string name="error">Erreur</string>
+    <string name="export">Exporter</string>
+    <string name="import_">Importer</string>
+    <string name="none">Aucun</string>
+    <string name="reset">Réinitialiser</string>
+
+    <!-- AppNavHost -->
+    <string name="about">À propos</string>
+    <string name="copied_to_clipboard">Copié dans le presse-papiers !</string>
+    <string name="device_info">Infos de l\'appareil</string>
+    <string name="driver_download_channel">Canal de téléchargement des pilotes GPU</string>
+    <string name="edit_overlay">Modifier l\'overlay tactile</string>
+    <string name="firmware">Firmware</string>
+    <string name="rpcsx_download_channel">Canal de téléchargement RPCSX</string>
+    <string name="select_game_file">Installer un PKG, ISO ou RAP</string>
+    <string name="select_game_folder">Ajouter un dossier de jeu</string>
+    <string name="settings">Paramètres</string>
+    <string name="ui_update_channel">Canal de mise à jour de l\'interface RPCSX Android</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">Installation du répertoire</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">Version actuelle : %1$s\nNouvelle version : %2$s</string>
+    <string name="deleting_game">Suppression du jeu</string>
+    <string name="delete">Supprimer</string>
+    <string name="downloading_latest_rpcsx">Téléchargement de la dernière version de RPCSX</string>
+    <string name="downloading_rpcsx">Téléchargement de RPCSX %1$s</string>
+    <string name="downloading_ui">Téléchargement de RPCSX UI Android %1$s</string>
+    <string name="failed_to_delete_game_cache">Échec de la suppression du cache du jeu</string>
+    <string name="failed_to_download_rpcsx">Échec du téléchargement de RPCSX</string>
+    <string name="game_compiling_not_finished">La compilation du jeu n\'est pas encore terminée</string>
+    <string name="game_require_key">Ce jeu nécessite une clé de licence pour y jouer</string>
+    <string name="install_custom_version">Installer une version personnalisée</string>
+    <string name="install_firmware_to_continue">Veuillez installer le firmware requis pour continuer.</string>
+    <string name="install_rap_file">Installer un fichier RAP</string>
+    <string name="license_installation">Installation de la licence</string>
+    <string name="missing_firmware">Firmware manquant</string>
+    <string name="missing_key">Clé manquante</string>
+    <string name="missing_rpcsx_lib">Bibliothèque RPCSX manquante</string>
+    <string name="retry">Réessayer</string>
+    <string name="rpcsx_update_available">Mise à jour RPCSX disponible</string>
+    <string name="ui_update_available">Mise à jour de l\'interface disponible</string>
+    <string name="unexpected_error">Erreur inattendue</string>
+    <string name="update">Mettre à jour</string>
+    <string name="wait_until_firmware_install">Veuillez attendre que le firmware soit installé avec succès pour continuer.</string>
+    <string name="wait_until_game_compile">Veuillez attendre la fin de la compilation du jeu pour continuer.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">Choisir</string>
+    <string name="download">Télécharger</string>
+    <string name="downloading">Téléchargement…</string>
+    <string name="drivers">Pilotes</string>
+    <string name="failed_to_load_selected_driver">Échec du chargement du pilote sélectionné</string>
+    <string name="fetching">Récupération…</string>
+    <string name="install">Installer</string>
+    <string name="installing">Installation…</string>
+    <string name="please_wait">Veuillez patienter</string>
+    <string name="select_driver">Sélectionner un pilote GPU</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">Échec du chargement de la nouvelle version, la version précédente a été restaurée.</string>
+    <string name="failed_to_update_rpcsx">Échec de la mise à jour de RPCSX</string>
+    <string name="installation_progress">Progression de l\'installation</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">Réinitialiser %1$s ?</string>
+    <string name="ask_if_reset_button_description">Êtes-vous sûr de vouloir réinitialiser %1$s ?</string>
+    <string name="control_panel">Panneau de configuration</string>
+    <string name="editing">Modification</string>
+    <string name="opacity">Opacité</string>
+    <string name="scale">Échelle</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">Installation du firmware</string>
+    <string name="package_installation">Installation du package</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">Erreur : %1$s</string>
+    <string name="failed_to_boot">Échec du démarrage</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">Redémarrez RPCSX UI pour appliquer les modifications</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">Utilisateur actif</string>
+    <string name="advanced_settings">Paramètres avancés</string>
+    <string name="advanced_settings_description">Configurer les paramètres avancés de l\'émulateur</string>
+    <string name="ask_if_reset_key">"Voulez-vous réinitialiser \'%1$s\' à sa valeur par défaut ?"</string>
+    <string name="automatic_mapping">Mappage automatique</string>
+    <string name="automatic_mapping_applied">Mappage connu appliqué pour %1$s</string>
+    <string name="automatic_mapping_defaults">Aucun mappage connu pour %1$s — valeurs par défaut appliquées</string>
+    <string name="automatic_mapping_no_device">Connectez d\'abord une manette à cet emplacement</string>
+    <string name="connected_controllers">Manettes connectées</string>
+    <string name="controller_not_connected">Non connectée</string>
+    <string name="controls">Contrôles</string>
+    <string name="controls_description">Configurer la manette</string>
+    <string name="custom_driver">Pilote GPU personnalisé</string>
+    <string name="custom_driver_description">Installer des pilotes alternatifs pour potentiellement de meilleures performances ou précision</string>
+    <string name="custom_driver_not_supported">Pilote personnalisé non pris en charge</string>
+    <string name="custom_driver_not_supported_description">Le chargement de pilotes personnalisés n\'est pas pris en charge sur cet appareil.</string>
+    <string name="download_channels">Canaux de téléchargement</string>
+    <string name="enable_haptic_feedback">Activer le retour haptique</string>
+    <string name="failed_to_assign_value">Échec de l\'attribution de la valeur %1$s à %2$s</string>
+    <string name="failed_to_reset_key">Échec de la réinitialisation de %1$s</string>
+    <string name="failed_to_view_internal_dir">Échec de l\'affichage du répertoire interne</string>
+    <string name="fsr_sharpening">Netteté FSR</string>
+    <string name="fsr_sharpening_requires_fsr">S\'applique uniquement lorsque le mode de mise à l\'échelle de sortie est FSR</string>
+    <string name="gamepad_overlay">Overlay manette</string>
+    <string name="graphics">Graphismes</string>
+    <string name="graphics_description">Mise à l\'échelle de sortie et netteté FSR</string>
+    <string name="install_custom_rpcsx_lib">Installer une bibliothèque RPCSX personnalisée</string>
+    <string name="key_mappings">Mappage des touches</string>
+    <string name="log_not_found">Fichier journal introuvable !</string>
+    <string name="manage_settings">Gérer les paramètres</string>
+    <string name="no_activity_to_handle_action">Aucune application trouvée pour gérer cette action</string>
+    <string name="output_scaling">Mise à l\'échelle de sortie</string>
+    <string name="perform_input">Simuler les entrées</string>
+    <string name="player_slot">Joueur %1$d</string>
+    <string name="reset_setting">Réinitialiser le paramètre</string>
+    <string name="search">Rechercher</string>
+    <string name="share_log">Partager le journal</string>
+    <string name="share_log_description">Partager le fichier journal de RPCSX pour aider au débogage</string>
+    <string name="touchpad">Pavé tactile</string>
+    <string name="users">Utilisateurs</string>
+    <string name="view_internal_dir">Afficher le répertoire interne</string>
+    <string name="view_internal_dir_description">Ouvrir le répertoire interne de RPCSX dans le gestionnaire de fichiers</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">La valeur doit être un multiple de la taille du pas %1$d entre %2$.0f et %3$.0f</string>
+    <string name="value">Valeur</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">Échec de la mise à jour de l\'interface</string>
+    <string name="permission_required">Permission requise</string>
+    <string name="permission_required_description">Activez la permission d\'installation depuis cette source pour mettre à jour.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">Saisir l\'URL du dépôt</string>
+    <string name="select_repo">Sélectionner le dépôt</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">Arrêter l\'émulateur ?</string>
+    <string name="ask_if_stop_emu_description">Pour changer d\'utilisateur, vous devez d\'abord arrêter l\'émulateur.\n\nArrêter l\'émulateur maintenant ?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Langue</string>
+    <string name="language_auto">Langue du système (Auto)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">Aucun jeu trouvé</string>
+    <string name="no_games_description">Appuyez sur le bouton \'+\' en bas à droite pour installer un fichier de jeu ou sélectionner un dossier.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">Graphismes avancés</string>
+    <string name="advanced_graphics_description">Mise à l\'échelle FSR, netteté et autres paramètres graphiques avancés</string>
+    <string name="resolution_scale">Mise à l\'échelle de la résolution</string>
+    <string name="directory_not_resolvable">Ce dossier ne peut pas être utilisé sur place. Choisissez un dossier sur le stockage local de l\'appareil et accordez \"Autoriser l\'accès pour gérer tous les fichiers\" lorsque vous y êtes invité.</string>
+    <string name="manage_directories">Gérer les répertoires</string>
+    <string name="game_settings">Paramètres du jeu</string>
+    <string name="per_game_overrides_note">Les modifications apportées ici s\'appliquent uniquement à ce jeu. Appuyez longuement sur une valeur pour la rétablir au paramètre global.</string>
+    <string name="custom_mapping">Mappage personnalisé</string>
+    <string name="delete_cache">Supprimer les caches</string>
+    <string name="delete_cache_desc">Supprime les caches shaders et PPU compilés de ce jeu</string>
+    <string name="cache_deleted">Caches supprimés</string>
+    <string name="reset_game_settings">Réinitialiser les paramètres du jeu</string>
+    <string name="reset_game_settings_desc">Supprime la configuration personnalisée et les mappages de touches de ce jeu</string>
+    <string name="reset_game_settings_done">Paramètres du jeu réinitialisés</string>
+    <string name="ask_if_reset_game">Réinitialiser tous les paramètres personnalisés pour %1$s ?</string>
+    <string name="no_directories">Aucun répertoire ajouté pour le moment. Ajoutez un dossier de jeu ou un répertoire ISO pour le voir ici.</string>
+    <string name="rescan_directory">Analyser de nouveau</string>
+    <string name="remove_directory">Supprimer</string>
+    <string name="directory_kind_games">Dossier de jeu</string>
+    <string name="directory_kind_iso">Répertoire ISO</string>
+    <string name="touchpad_port">Port du pavé tactile</string>
+    <string name="touchpad_port_desc">Quel port de joueur le pavé tactile à l\'écran contrôle. Il partage le port avec n\'importe quelle manette qui lui est assignée.</string>
+    <string name="touchpad_auto_hide">Masquer automatiquement le pavé tactile</string>
+    <string name="touchpad_auto_hide_desc">Masque automatiquement le pavé tactile après une période d\'inactivité.</string>
+    <string name="never">Jamais</string>
+    <string name="seconds_2">2 secondes</string>
+    <string name="seconds_5">5 secondes</string>
+    <string name="seconds_10">10 secondes</string>
+    <string name="seconds_15">15 secondes</string>
+    <string name="seconds_30">30 secondes</string>
+    <string name="controller_port">Port</string>
+    <string name="select_iso_folder">Ajouter un répertoire ISO</string>
+</resources>

@@ -1,6 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme (used by RPCSXActivity and OverlayEditActivity). -->
     <style name="Theme.RPCSX" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- nothing -->
+    </style>
+
+    <!-- AppCompat-compatible theme for MainActivity so that AppCompatActivity
+         can apply per-app locale changes via AppCompatDelegate. Compose renders
+         its own Material3 theme on top; this theme is only needed for the
+         Activity host layer. -->
+    <style name="Theme.RPCSX.Main" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
     </style>
 </resources>

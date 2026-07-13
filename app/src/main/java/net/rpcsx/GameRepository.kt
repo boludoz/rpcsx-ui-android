@@ -1,7 +1,10 @@
 package net.rpcsx
 
+import android.content.Context
 import android.content.res.Resources.NotFoundException
+import android.net.Uri
 import androidx.annotation.Keep
+import androidx.documentfile.provider.DocumentFile
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,14 +29,18 @@ data class GameInfo @Keep constructor(
     val path: String,
     var name: String? = null,
     var iconPath: String? = null,
-    var gameFlags: Int = 0
+    var gameFlags: Int = 0,
+    var sourceUri: String? = null,
+    var uuid: String = java.util.UUID.randomUUID().toString()
 )
 
 data class GameInfoStore(
     val path: String,
     val name: MutableState<String?> = mutableStateOf(null),
     val iconPath: MutableState<String?> = mutableStateOf(null),
-    val gameFlags: MutableIntState = mutableIntStateOf(0)
+    val gameFlags: MutableIntState = mutableIntStateOf(0),
+    val sourceUri: MutableState<String?> = mutableStateOf(null),
+    val uuid: String = java.util.UUID.randomUUID().toString()
 )
 
 enum class GameProgressType {
@@ -73,11 +80,13 @@ private fun toStore(info: GameInfo) =
         info.path,
         mutableStateOf(info.name),
         mutableStateOf(info.iconPath),
-        mutableIntStateOf(info.gameFlags)
+        mutableIntStateOf(info.gameFlags),
+        mutableStateOf(info.sourceUri),
+        info.uuid.ifEmpty { java.util.UUID.randomUUID().toString() }
     )
 
 private fun toInfo(store: GameInfoStore) =
-    GameInfo(store.path, store.name.value, store.iconPath.value, store.gameFlags.intValue)
+    GameInfo(store.path, store.name.value, store.iconPath.value, store.gameFlags.intValue, store.sourceUri.value, store.uuid)
 
 class GameRepository {
     private val games = mutableStateListOf<Game>()
@@ -172,6 +181,12 @@ class GameRepository {
                         existsGame.info.iconPath.value =
                             info.iconPath ?: existsGame.info.iconPath.value
                         existsGame.info.gameFlags.intValue = info.gameFlags
+                        // Re-registering a game must refresh where it boots
+                        // from, or an entry whose old source went away (e.g.
+                        // a dead content:// URI) stays unbootable forever even
+                        // after the user re-adds the ISO.
+                        existsGame.info.sourceUri.value =
+                            info.sourceUri ?: existsGame.info.sourceUri.value
                         if (progressId >= 0) {
                             existsGame.addProgress(
                                 GameProgress(
@@ -219,6 +234,55 @@ class GameRepository {
             synchronized(instance) {
                 instance.games -= game
                 save()
+            }
+        }
+
+        // Drops games whose path or sourceUri falls under `directoryPath` from
+        // the list only (does not touch any files on disk). Used when a
+        // user-managed game/ISO directory is removed from Manage Directories.
+        fun removeByDirectory(directoryPath: String) {
+            synchronized(instance) {
+                val prefix = if (directoryPath.endsWith("/")) directoryPath else "$directoryPath/"
+                val removed = instance.games.removeIf { game ->
+                    val path = game.info.path
+                    val source = game.info.sourceUri.value
+                    (path.startsWith(prefix) || path == directoryPath) ||
+                        (source != null && (source.startsWith(prefix) || source == directoryPath))
+                }
+                if (removed) {
+                    save()
+                }
+            }
+        }
+
+        // Drops library entries whose source is gone: content:// URIs that no
+        // longer open (file deleted or permission revoked) and filesystem
+        // paths that no longer exist. Entries without a source are left
+        // alone. Runs content-provider queries - call from a worker thread.
+        fun pruneInvalid(context: Context) {
+            synchronized(instance) {
+                val removed = instance.games.removeIf { game ->
+                    val source = game.info.sourceUri.value ?: return@removeIf false
+                    if (source.isEmpty()) {
+                        return@removeIf false
+                    }
+
+                    val valid = if (source.startsWith("content:")) {
+                        try {
+                            DocumentFile.fromSingleUri(context, Uri.parse(source))?.exists() == true
+                        } catch (_: Exception) {
+                            false
+                        }
+                    } else {
+                        File(source).exists()
+                    }
+
+                    !valid
+                }
+
+                if (removed) {
+                    save()
+                }
             }
         }
 

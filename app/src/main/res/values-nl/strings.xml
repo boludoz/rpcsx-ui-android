@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">Toevoegen</string>
+    <string name="close">Sluiten</string>
+    <string name="error">Fout</string>
+    <string name="export">Exporteren</string>
+    <string name="import_">Importeren</string>
+    <string name="none">Geen</string>
+    <string name="reset">Resetten</string>
+
+    <!-- AppNavHost -->
+    <string name="about">Over</string>
+    <string name="copied_to_clipboard">Gekopieerd naar klembord!</string>
+    <string name="device_info">Apparaatinfo</string>
+    <string name="driver_download_channel">GPU-stuurprogramma downloadkanaal</string>
+    <string name="edit_overlay">Touch-overlay bewerken</string>
+    <string name="firmware">Firmware</string>
+    <string name="rpcsx_download_channel">RPCSX-downloadkanaal</string>
+    <string name="select_game_file">PKG, ISO of RAP installeren</string>
+    <string name="select_game_folder">Gamemap toevoegen</string>
+    <string name="settings">Instellingen</string>
+    <string name="ui_update_channel">RPCSX UI Android updatekanaal</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">Katalog installeren</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">Huidige versie: %1$s\nNieuwe versie: %2$s</string>
+    <string name="deleting_game">Spel verwijderen</string>
+    <string name="delete">Verwijderen</string>
+    <string name="downloading_latest_rpcsx">Nieuwste RPCSX downloaden</string>
+    <string name="downloading_rpcsx">RPCSX %1$s downloaden</string>
+    <string name="downloading_ui">RPCSX UI Android %1$s downloaden</string>
+    <string name="failed_to_delete_game_cache">Spelcache verwijderen mislukt</string>
+    <string name="failed_to_download_rpcsx">RPCSX downloaden mislukt</string>
+    <string name="game_compiling_not_finished">Spelcompilatie is nog niet voltooid</string>
+    <string name="game_require_key">Dit spel vereist een licentiesleutel om te spelen</string>
+    <string name="install_custom_version">Aangepaste versie installeren</string>
+    <string name="install_firmware_to_continue">Installeer de vereiste firmware om door te gaan.</string>
+    <string name="install_rap_file">RAP-bestand installeren</string>
+    <string name="license_installation">Licentie-installatie</string>
+    <string name="missing_firmware">Ontbrekende firmware</string>
+    <string name="missing_key">Ontbrekende licentiesleutel</string>
+    <string name="missing_rpcsx_lib">Ontbrekende RPCSX-bibliotheek</string>
+    <string name="retry">Opnieuw proberen</string>
+    <string name="rpcsx_update_available">RPCSX-update beschikbaar</string>
+    <string name="ui_update_available">UI-update beschikbaar</string>
+    <string name="unexpected_error">Onverwachte fout</string>
+    <string name="update">Bijwerken</string>
+    <string name="wait_until_firmware_install">Wacht tot de firmware succesvol is geïnstalleerd om door te gaan.</string>
+    <string name="wait_until_game_compile">Wacht tot het spel is gecompileerd om door te gaan.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">Kiezen</string>
+    <string name="download">Downloaden</string>
+    <string name="downloading">Downloaden…</string>
+    <string name="drivers">Stuurprogramma\'s</string>
+    <string name="failed_to_load_selected_driver">Geselecteerd stuurprogramma laden mislukt</string>
+    <string name="fetching">Ophalen…</string>
+    <string name="install">Installeren</string>
+    <string name="installing">Installeren…</string>
+    <string name="please_wait">Wacht even</string>
+    <string name="select_driver">Selecteer een GPU-stuurprogramma</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">Nieuwe versie laden mislukt, vorige versie is hersteld.</string>
+    <string name="failed_to_update_rpcsx">RPCSX bijwerken mislukt</string>
+    <string name="installation_progress">Installatievoortgang</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">%1$s resetten?</string>
+    <string name="ask_if_reset_button_description">Weet u zeker dat u %1$s wilt resetten?</string>
+    <string name="control_panel">Configuratiescherm</string>
+    <string name="editing">Bewerken</string>
+    <string name="opacity">Ondoorzichtigheid</string>
+    <string name="scale">Schaal</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">Firmware-installatie</string>
+    <string name="package_installation">Pakketinstallatie</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">Fout: %1$s</string>
+    <string name="failed_to_boot">Opstarten mislukt</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">Herstart RPCSX UI om wijzigingen toe te passen</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">Actieve gebruiker</string>
+    <string name="advanced_settings">Geavanceerde instellingen</string>
+    <string name="advanced_settings_description">Geavanceerde emulatorinstellingen configureren</string>
+    <string name="ask_if_reset_key">"Wilt u '%1$s' resetten naar de standaardwaarde?"</string>
+    <string name="automatic_mapping">Automatische toewijzing</string>
+    <string name="automatic_mapping_applied">Bekannte toewijzing toegepast voor %1$s</string>
+    <string name="automatic_mapping_defaults">Geen bekende toewijzing voor %1$s — standaardwaarden toegepast</string>
+    <string name="automatic_mapping_no_device">Sluit eerst een controller aan op deze poort</string>
+    <string name="connected_controllers">Verbonden controllers</string>
+    <string name="controller_not_connected">Niet verbonden</string>
+    <string name="controls">Besturing</string>
+    <string name="controls_description">Controller configureren</string>
+    <string name="custom_driver">Aangepast GPU-stuurprogramma</string>
+    <string name="custom_driver_description">Installeer alternatieve stuurprogramma\'s voor mogelijk betere prestaties of nauwkeurigheid</string>
+    <string name="custom_driver_not_supported">Aangepast stuurprogramma niet ondersteund</string>
+    <string name="custom_driver_not_supported_description">Het laden van aangepaste stuurprogramma\'s wordt momenteel niet ondersteund op dit apparaat.</string>
+    <string name="download_channels">Downloadkanalen</string>
+    <string name="enable_haptic_feedback">Haptische feedback inschakelen</string>
+    <string name="failed_to_assign_value">Toewijzen van waarde %1$s aan %2$s mislukt</string>
+    <string name="failed_to_reset_key">Resetten van %1$s mislukt</string>
+    <string name="failed_to_view_internal_dir">Interne map weergeven mislukt</string>
+    <string name="fsr_sharpening">FSR-scherpte</string>
+    <string name="fsr_sharpening_requires_fsr">Alleen van toepassing als de Uitvoerschaal is ingesteld op FSR</string>
+    <string name="gamepad_overlay">Gamepad-overlay</string>
+    <string name="graphics">Beeld</string>
+    <string name="graphics_description">Uitvoerschaal en FSR-scherpte</string>
+    <string name="install_custom_rpcsx_lib">Aangepaste RPCSX-bibliotheek installeren</string>
+    <string name="key_mappings">Kintoewijzingen</string>
+    <string name="log_not_found">Logbestand niet gevonden!</string>
+    <string name="manage_settings">Instellingen beheren</string>
+    <string name="no_activity_to_handle_action">Geen app gevonden om deze actie uit te voeren</string>
+    <string name="output_scaling">Uitvoerschaal</string>
+    <string name="perform_input">Invoer emuleren</string>
+    <string name="player_slot">Speler %1$d</string>
+    <string name="reset_setting">Instelling resetten</string>
+    <string name="search">Zoeken</string>
+    <string name="share_log">Log delen</string>
+    <string name="share_log_description">Deel het logbestand van RPCSX om te helpen bij het debuggen</string>
+    <string name="touchpad">Touchpad</string>
+    <string name="users">Gebruikers</string>
+    <string name="view_internal_dir">Interne map weergeven</string>
+    <string name="view_internal_dir_description">Open de interne RPCSX-map in bestandsbeheer</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">Waarde moet een veelvoud zijn van de stapgrootte %1$d tussen %2$.0f en %3$.0f</string>
+    <string name="value">Waarde</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">UI bijwerken mislukt</string>
+    <string name="permission_required">Machtiging vereist</string>
+    <string name="permission_required_description">Schakel installatiemachtiging van deze bron in om bij te werken.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">Repository-URL invoeren</string>
+    <string name="select_repo">Repository selecteren</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">Emulator stoppen?</string>
+    <string name="ask_if_stop_emu_description">Om van gebruiker te veranderen, moet u eerst de emulator stoppen.\n\nEmulator nu stoppen?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Taal</string>
+    <string name="language_auto">Systeemstandaard (Auto)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">Geen spellen gevonden</string>
+    <string name="no_games_description">Tik op de \'+\'-knop rechtsonder om een spelbestand te installeren of een map te selecteren.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">Geavanceerde grafische instellingen</string>
+    <string name="advanced_graphics_description">FSR-schaling, scherpte en andere geavanceerde grafische instellingen</string>
+    <string name="resolution_scale">Resolutieschaal</string>
+    <string name="directory_not_resolvable">Deze map kan niet op deze locatie worden gebruikt. Kies een map op de lokale apparaatopslag en verleen \"Toegang tot beheer van alle bestanden toestaan\" wanneer daarom wordt gevraagd.</string>
+    <string name="manage_directories">Mappen beheren</string>
+    <string name="game_settings">Spelinstellingen</string>
+    <string name="per_game_overrides_note">Wijzigingen hier zijn alleen van toepassing op dit spel. Druk lang op een waarde om deze terug te zetten naar de globale instelling.</string>
+    <string name="custom_mapping">Aangepaste toewijzing</string>
+    <string name="delete_cache">Caches verwijderen</string>
+    <string name="delete_cache_desc">Verwijdert de gecompileerde shader- en PPU-caches van dit spel</string>
+    <string name="cache_deleted">Caches verwijderd</string>
+    <string name="reset_game_settings">Spelinstellingen herstellen</string>
+    <string name="reset_game_settings_desc">Verwijdert de aangepaste configuratie en knoptoewijzingen van dit spel</string>
+    <string name="reset_game_settings_done">Spelinstellingen hersteld</string>
+    <string name="ask_if_reset_game">Alle aangepaste instellingen voor %1$s herstellen?</string>
+    <string name="no_directories">Nog geen mappen toegevoegd. Voeg een gamemap of ISO-map toe om deze hier te zien.</string>
+    <string name="rescan_directory">Opnieuw scannen</string>
+    <string name="remove_directory">Verwijderen</string>
+    <string name="directory_kind_games">Gamemap</string>
+    <string name="directory_kind_iso">ISO-map</string>
+    <string name="touchpad_port">Touchpad-poort</string>
+    <string name="touchpad_port_desc">Welke spelerspoort de touch-overlay bestuurt. Deze deelt de poort met eventuele controllers die eraan zijn toegewezen.</string>
+    <string name="touchpad_auto_hide">Touchpad automatisch verbergen</string>
+    <string name="touchpad_auto_hide_desc">Verberg het touchpad automatisch na een periode van inactiviteit.</string>
+    <string name="never">Nooit</string>
+    <string name="seconds_2">2 seconden</string>
+    <string name="seconds_5">5 seconden</string>
+    <string name="seconds_10">10 seconden</string>
+    <string name="seconds_15">15 seconden</string>
+    <string name="seconds_30">30 seconden</string>
+    <string name="controller_port">Poort</string>
+    <string name="select_iso_folder">ISO-map toevoegen</string>
+</resources>
