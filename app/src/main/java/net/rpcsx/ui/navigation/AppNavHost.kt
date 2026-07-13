@@ -95,6 +95,7 @@ import net.rpcsx.ui.drivers.GpuDriversScreen
 import net.rpcsx.ui.games.GamesScreen
 import net.rpcsx.ui.settings.AdvancedSettingsScreen
 import net.rpcsx.ui.settings.ControllerSettings
+import net.rpcsx.ui.settings.PlayerControllerSettings
 import net.rpcsx.ui.settings.SettingsScreen
 import net.rpcsx.ui.user.UsersScreen
 import net.rpcsx.utils.FileUtil
@@ -258,6 +259,46 @@ fun AppNavHost() {
             route = "controls"
         ) {
             ControllerSettings(
+                navigateBack = navController::navigateUp,
+                navigateToPlayer = { slot -> navController.navigate("controls_player_$slot") },
+                navigateToTouchpad = {
+                    context.startActivity(Intent(context, OverlayEditActivity::class.java))
+                }
+            )
+        }
+
+        composable(
+            route = "controls_player_0"
+        ) {
+            PlayerControllerSettings(
+                playerSlot = 0,
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
+            route = "controls_player_1"
+        ) {
+            PlayerControllerSettings(
+                playerSlot = 1,
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
+            route = "controls_player_2"
+        ) {
+            PlayerControllerSettings(
+                playerSlot = 2,
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
+            route = "controls_player_3"
+        ) {
+            PlayerControllerSettings(
+                playerSlot = 3,
                 navigateBack = navController::navigateUp
             )
         }

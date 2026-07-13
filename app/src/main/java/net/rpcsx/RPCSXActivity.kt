@@ -41,7 +41,11 @@ class RPCSXActivity : Activity() {
 
     private var overlayAutoHidden = false
     private var bootThread: Thread? = null
-    private val inputBindings by lazy { InputBindingPrefs.loadBindings() }
+    // Each player slot has its own independent button mapping; cache lazily
+    // since it's read on every key event but only changes via Settings.
+    private val inputBindingsBySlot = mutableMapOf<Int, Map<Int, Pair<Int, Int>>>()
+    private fun bindingsForSlot(slot: Int) =
+        inputBindingsBySlot.getOrPut(slot) { InputBindingPrefs.loadBindings(slot) }
     private val maxVirtualPads by lazy {
         RPCSX.instance.getMaxVirtualPads().coerceIn(1, MaxGamepadPlayers)
     }
@@ -198,8 +202,8 @@ class RPCSXActivity : Activity() {
         return slot
     }
 
-    private fun keyCodeToPadBit(keyCode: Int, deviceId: Int): Pair<Int, Int> {
-        val event = inputBindings[keyCode] ?: Pair(0, 0)
+    private fun keyCodeToPadBit(keyCode: Int, deviceId: Int, slot: Int): Pair<Int, Int> {
+        val event = bindingsForSlot(slot)[keyCode] ?: Pair(0, 0)
 
         if (keyCode == KeyEvent.KEYCODE_BUTTON_R2) {
             if (usesAxisR2[deviceId] == true) return Pair(0, 0) else return event
@@ -218,7 +222,7 @@ class RPCSXActivity : Activity() {
         }
 
         val slot = assignGamepadSlot(event.deviceId) ?: return super.onKeyDown(keyCode, event)
-        val padBit = keyCodeToPadBit(keyCode, event.deviceId)
+        val padBit = keyCodeToPadBit(keyCode, event.deviceId, slot)
         if (padBit.first == 0) {
             return super.onKeyDown(keyCode, event)
         }
@@ -235,7 +239,7 @@ class RPCSXActivity : Activity() {
         }
 
         val slot = GamepadRepository.slotFor(event.deviceId) ?: return super.onKeyUp(keyCode, event)
-        val padBit = keyCodeToPadBit(keyCode, event.deviceId)
+        val padBit = keyCodeToPadBit(keyCode, event.deviceId, slot)
         if (padBit.first == 0) {
             return super.onKeyUp(keyCode, event)
         }

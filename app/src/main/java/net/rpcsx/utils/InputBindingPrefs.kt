@@ -28,22 +28,24 @@ object InputBindingPrefs {
         666666 to Pair(Digital1Flags.CELL_PAD_CTRL_PS.bit, 0)
     )
 
-    fun saveBindings(bindings: Map<Int, Pair<Int, Int>>): Boolean {
+    private fun key(playerSlot: Int) = "input_bindings_$playerSlot"
+
+    fun saveBindings(playerSlot: Int, bindings: Map<Int, Pair<Int, Int>>): Boolean {
         try {
             val json = JSONObject()
             bindings.forEach { (keyCode, value) ->
                 json.put(keyCode.toString(), "${value.first},${value.second}")
             }
 
-            GeneralSettings.setValue("input_bindings", json.toString())
+            GeneralSettings.setValue(key(playerSlot), json.toString())
         } catch (_: Exception) {
             return false
         }
         return true
     }
 
-    fun loadBindings(): Map<Int, Pair<Int, Int>> {
-        val jsonString = GeneralSettings["input_bindings"] as String? ?: return defaultBindings
+    fun loadBindings(playerSlot: Int): Map<Int, Pair<Int, Int>> {
+        val jsonString = GeneralSettings[key(playerSlot)] as String? ?: return defaultBindings
 
         val json = JSONObject(jsonString)
         val map = mutableMapOf<Int, Pair<Int, Int>>()

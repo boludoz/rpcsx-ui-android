@@ -93,6 +93,10 @@
     <string name="advanced_settings">Advanced Settings</string>
     <string name="advanced_settings_description">Configure emulator advanced settings</string>
     <string name="ask_if_reset_key">"Do you want to reset '%1$s' to its default value?"</string>
+    <string name="automatic_mapping">Automatic Mapping</string>
+    <string name="automatic_mapping_applied">Applied known mapping for %1$s</string>
+    <string name="automatic_mapping_defaults">No known controller matched — defaults applied</string>
+    <string name="automatic_mapping_no_device">Connect a controller to this slot first</string>
     <string name="connected_controllers">Connected Controllers</string>
     <string name="controller_not_connected">Not connected</string>
     <string name="controls">Controls</string>
@@ -118,6 +122,7 @@
     <string name="search">Search</string>
     <string name="share_log">Share Log</string>
     <string name="share_log_description">Share RPCSX\'s log file to help debug issues</string>
+    <string name="touchpad">Touchpad</string>
     <string name="users">Users</string>
     <string name="view_internal_dir">View Internal Directory</string>
     <string name="view_internal_dir_description">Open internal directory of RPCSX in file manager</string>

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
+import android.view.InputDevice
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -95,7 +96,7 @@ import net.rpcsx.dialogs.AlertDialogQueue
 import net.rpcsx.provider.AppDataDocumentProvider
 import net.rpcsx.ui.common.ComposePreview
 import net.rpcsx.utils.FileUtil
-import net.rpcsx.utils.GeneralSettings
+import net.rpcsx.utils.GamepadAutoMapper
 import net.rpcsx.utils.InputBindingPrefs
 import net.rpcsx.utils.RpcsxUpdater
 import org.json.JSONObject
@@ -720,11 +721,16 @@ fun SettingsScreen(
     }
 }
 
+// Hub screen: one entry per player slot (independent button mapping each,
+// mirroring NetherSX2/AetherSX2's per-controller settings) plus a separate
+// Touchpad entry for repositioning the on-screen overlay buttons.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ControllerSettings(
     modifier: Modifier = Modifier,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    navigateToPlayer: (Int) -> Unit,
+    navigateToTouchpad: () -> Unit
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
@@ -745,18 +751,6 @@ fun ControllerSettings(
             )
         }
     ) { contentPadding ->
-        //val context = LocalContext.current
-        val inputBindings = remember {
-            mutableStateMapOf<Int, Pair<Int, Int>>().apply {
-                putAll(InputBindingPrefs.loadBindings())
-            }
-        }
-
-        var showDialog by remember { mutableStateOf(false) }
-        var currentInput by remember { mutableStateOf(-1) }
-        var currentInputName by remember { mutableStateOf("") }
-        val requester = remember { FocusRequester() }
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -778,7 +772,7 @@ fun ControllerSettings(
                     value = {
                         PreferenceValue(slot?.deviceName ?: stringResource(R.string.controller_not_connected))
                     },
-                    onClick = {}
+                    onClick = { navigateToPlayer(playerIndex) }
                 )
             }
 
@@ -787,23 +781,101 @@ fun ControllerSettings(
             }
 
             item {
-                PreferenceHeader(stringResource(R.string.gamepad_overlay))
+                PreferenceHeader(stringResource(R.string.touchpad))
             }
 
             item {
-                var itemValue by remember {
-                    mutableStateOf(
-                        GeneralSettings["haptic_feedback"] as Boolean? ?: true
-                    )
-                }
-                val def = true
-                SwitchPreference(
-                    checked = itemValue,
-                    title = stringResource(R.string.enable_haptic_feedback) + if (itemValue == def) "" else " *",
+                RegularPreference(
+                    title = stringResource(R.string.edit_overlay),
                     leadingIcon = null,
-                    onClick = { value ->
-                        GeneralSettings.setValue("haptic_feedback", value)
-                        itemValue = value
+                    onClick = navigateToTouchpad
+                )
+            }
+        }
+    }
+}
+
+// Per-player key mapping screen: same remap flow the old single global
+// screen had, but scoped to one of the independent per-slot bindings.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlayerControllerSettings(
+    playerSlot: Int,
+    modifier: Modifier = Modifier,
+    navigateBack: () -> Unit
+) {
+    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    Scaffold(
+        modifier = Modifier
+            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+            .then(modifier),
+        topBar = {
+            LargeTopAppBar(
+                title = { Text(text = stringResource(R.string.player_slot, playerSlot + 1), fontWeight = FontWeight.Medium) },
+                scrollBehavior = topBarScrollBehavior,
+                navigationIcon = {
+                    IconButton(
+                        onClick = navigateBack
+                    ) {
+                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
+                    }
+                }
+            )
+        }
+    ) { contentPadding ->
+        val context = LocalContext.current
+        val inputBindings = remember(playerSlot) {
+            mutableStateMapOf<Int, Pair<Int, Int>>().apply {
+                putAll(InputBindingPrefs.loadBindings(playerSlot))
+            }
+        }
+
+        var showDialog by remember { mutableStateOf(false) }
+        var currentInput by remember { mutableStateOf(-1) }
+        var currentInputName by remember { mutableStateOf("") }
+        val requester = remember { FocusRequester() }
+        val noDeviceMessage = stringResource(R.string.automatic_mapping_no_device)
+        val defaultsMessage = stringResource(R.string.automatic_mapping_defaults)
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                val slot = GamepadRepository.slots[playerSlot]
+                RegularPreference(
+                    title = stringResource(R.string.connected_controllers),
+                    leadingIcon = null,
+                    value = {
+                        PreferenceValue(slot?.deviceName ?: stringResource(R.string.controller_not_connected))
+                    },
+                    onClick = {}
+                )
+            }
+
+            item {
+                RegularPreference(
+                    title = stringResource(R.string.automatic_mapping),
+                    leadingIcon = null,
+                    onClick = {
+                        val deviceId = GamepadRepository.slots[playerSlot]?.deviceId
+                        val device = deviceId?.let { InputDevice.getDevice(it) }
+                        if (device == null) {
+                            Toast.makeText(context, noDeviceMessage, Toast.LENGTH_SHORT).show()
+                        } else {
+                            val matchedName = GamepadAutoMapper.applyAutomaticMapping(context, playerSlot, device)
+                            inputBindings.clear()
+                            inputBindings.putAll(InputBindingPrefs.loadBindings(playerSlot))
+                            val message = matchedName?.let {
+                                context.getString(R.string.automatic_mapping_applied, it)
+                            } ?: defaultsMessage
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 )
             }
@@ -865,7 +937,7 @@ fun ControllerSettings(
                                 inputBindings.remove(currentInput)
                                 inputBindings[it.key] = value
                             }
-                            InputBindingPrefs.saveBindings(inputBindings.toMap())
+                            InputBindingPrefs.saveBindings(playerSlot, inputBindings.toMap())
                         }
                     }
                 },
@@ -884,7 +956,7 @@ fun ControllerSettings(
                                     inputBindings.remove(currentInput)
                                     inputBindings[keyEvent.nativeKeyEvent.keyCode] = value
                                 }
-                                InputBindingPrefs.saveBindings(inputBindings.toMap())
+                                InputBindingPrefs.saveBindings(playerSlot, inputBindings.toMap())
                                 showDialog = false
                                 true
                             } else false
