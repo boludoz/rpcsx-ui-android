@@ -28,7 +28,10 @@ const val DefaultGpuDriverChannel = "https://github.com/K11MCH1/AdrenoToolsDrive
 const val ReleaseUiChannel = "https://github.com/RPCSX/rpcsx-ui-android"
 const val DevUiChannel = "https://github.com/RPCSX/rpcsx-ui-android-build"
 const val ReleaseRpcsxChannel = "https://github.com/RPCSX/rpcsx"
-const val DevRpcsxChannel = "https://github.com/RPCSX/rpcsx-build"
+// Points at this fork (boludoz/rpcsx) instead of the upstream RPCSX/rpcsx-build
+// repo, since RpcsxUpdater currently always fetches from this channel and this
+// fork's engine build carries the multi-controller support added on top of it.
+const val DevRpcsxChannel = "https://github.com/boludoz/rpcsx"
 
 fun channelToUiText(channel: String, releaseRepo: String, devRepo: String): String {
     if (channel == releaseRepo) return "Release"
