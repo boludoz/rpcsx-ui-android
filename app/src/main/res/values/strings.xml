@@ -18,11 +18,18 @@
     <string name="edit_overlay">Edit Overlay</string>
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">RPCSX Download Channel</string>
+    <string name="select_game_file">Install PKG, ISO or RAP</string>
+    <string name="select_game_folder">Add Game Folder</string>
+    <string name="select_iso_folder">Add ISO Directory</string>
     <string name="settings">Settings</string>
     <string name="ui_update_channel">RPCSX UI Android Update Channel</string>
 
     <!-- FileUtil -->
-    <string name="installing_dir">Installing directory</string>
+    <string name="installing_dir">Scanning directory</string>
+    <string name="directory_not_resolvable">This folder cannot be used in place. Pick a folder on local device storage, and grant \"Allow access to manage all files\" when prompted.</string>
+    <string name="all_files_access_title">All files access required</string>
+    <string name="all_files_access_message">To play ISOs directly from storage, enable \"Allow access to manage all files\" in the settings screen that just opened, then add the ISO again.</string>
+    <string name="iso_source_not_resolvable">The ISO for this game can no longer be accessed at its original location. Remove the game from the library and add the ISO again from local storage.</string>
 
     <!-- GamesScreen -->
     <string name="current_and_new_version">Current version: %1$s\nNew version: %2$s</string>
@@ -91,6 +98,12 @@
     <string name="advanced_settings">Advanced Settings</string>
     <string name="advanced_settings_description">Configure emulator advanced settings</string>
     <string name="ask_if_reset_key">"Do you want to reset '%1$s' to its default value?"</string>
+    <string name="automatic_mapping">Automatic Mapping</string>
+    <string name="automatic_mapping_applied">Applied known mapping for %1$s</string>
+    <string name="automatic_mapping_defaults">No known mapping for %1$s — defaults applied</string>
+    <string name="automatic_mapping_no_device">Connect a controller to this slot first</string>
+    <string name="connected_controllers">Connected Controllers</string>
+    <string name="controller_not_connected">Not connected</string>
     <string name="controls">Controls</string>
     <string name="controls_description">Configure controller</string>
     <string name="custom_driver">Custom GPU Driver</string>
@@ -102,17 +115,52 @@
     <string name="failed_to_assign_value">Failed to assign value %1$s to %2$s</string>
     <string name="failed_to_reset_key">Failed to reset %1$s</string>
     <string name="failed_to_view_internal_dir">Failed to view internal directory</string>
+    <string name="fsr_sharpening">FSR Sharpening</string>
+    <string name="fsr_sharpening_requires_fsr">Only applies when Output Scaling is set to FSR</string>
     <string name="gamepad_overlay">Gamepad Overlay</string>
+    <string name="graphics">Graphics</string>
+    <string name="graphics_description">Resolution scale, output scaling and FSR sharpening</string>
     <string name="install_custom_rpcsx_lib">Install Custom RPCSX Library</string>
     <string name="key_mappings">Key Mappings</string>
     <string name="log_not_found">Log file not found!</string>
     <string name="manage_settings">Manage Settings</string>
+    <string name="manage_directories">Manage Directories</string>
+    <string name="game_settings">Game Settings</string>
+    <string name="per_game_overrides_note">Changes here only apply to this game. Long-press a value to revert it to the global setting.</string>
+    <string name="custom_mapping">Custom mapping</string>
+    <string name="delete_cache">Delete caches</string>
+    <string name="delete_cache_desc">Deletes this game\'s compiled shader and PPU caches</string>
+    <string name="cache_deleted">Caches deleted</string>
+    <string name="reset_game_settings">Reset game settings</string>
+    <string name="reset_game_settings_desc">Removes this game\'s custom config and key mappings</string>
+    <string name="reset_game_settings_done">Game settings reset</string>
+    <string name="ask_if_reset_game">Reset all custom settings for %1$s?</string>
+    <string name="no_directories">No directories added yet. Add a game folder or an ISO directory to see it here.</string>
+    <string name="rescan_directory">Rescan</string>
+    <string name="remove_directory">Remove</string>
+    <string name="directory_kind_games">Game folder</string>
+    <string name="directory_kind_iso">ISO directory</string>
     <string name="no_activity_to_handle_action">No activity found to handle this action</string>
+    <string name="output_scaling">Output Scaling</string>
     <string name="perform_input">Perform Input</string>
+    <string name="player_slot">Player %1$d</string>
     <string name="reset_setting">Reset Setting</string>
+    <string name="resolution_scale">Resolution Scale</string>
     <string name="search">Search</string>
     <string name="share_log">Share Log</string>
     <string name="share_log_description">Share RPCSX\'s log file to help debug issues</string>
+    <string name="touchpad">Touchpad</string>
+    <string name="touchpad_port">Touchpad port</string>
+    <string name="touchpad_port_desc">Which player port the touch overlay controls. It shares the port with any controller assigned to it.</string>
+    <string name="touchpad_auto_hide">Auto-hide Touchpad</string>
+    <string name="touchpad_auto_hide_desc">Automatically hide the touchpad after a period of inactivity.</string>
+    <string name="never">Never</string>
+    <string name="seconds_2">2 seconds</string>
+    <string name="seconds_5">5 seconds</string>
+    <string name="seconds_10">10 seconds</string>
+    <string name="seconds_15">15 seconds</string>
+    <string name="seconds_30">30 seconds</string>
+    <string name="controller_port">Port</string>
     <string name="users">Users</string>
     <string name="view_internal_dir">View Internal Directory</string>
     <string name="view_internal_dir_description">Open internal directory of RPCSX in file manager</string>
@@ -133,4 +181,16 @@
     <!-- UsersScreen -->
     <string name="ask_if_stop_emu">Stop Emulator?</string>
     <string name="ask_if_stop_emu_description">In order to change the user, you have to stop the emulator first.\n\nStop the emulator now?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Language</string>
+    <string name="language_auto">System Default (Auto-detect)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">No Games Found</string>
+    <string name="no_games_description">Tap the \'+\' button in the bottom right to install a game file or select a directory.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">Advanced Graphics</string>
+    <string name="advanced_graphics_description">FSR scaling, sharpening, and other advanced settings</string>
 </resources>

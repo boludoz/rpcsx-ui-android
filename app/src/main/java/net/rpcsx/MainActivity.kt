@@ -4,8 +4,9 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -17,14 +18,19 @@ import net.rpcsx.utils.RpcsxUpdater
 import java.io.File
 import kotlin.concurrent.thread
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     private lateinit var unregisterUsbEventListener: () -> Unit
+    private lateinit var unregisterGamepadEventListener: () -> Unit
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        // GeneralSettings must be ready before the gamepad listener runs:
+        // GamepadRepository.attach reads persisted port preferences from it.
         GeneralSettings.init(this)
+        GameDirectoryRepository.load()
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        unregisterGamepadEventListener = listenGamepadEvents(this)
 
         if (!RPCSX.initialized) {
             Permission.PostNotifications.requestPermission(this)
@@ -49,10 +55,17 @@ class MainActivity : ComponentActivity() {
 
             lifecycleScope.launch {
                 GameRepository.load()
+                thread {
+                    // Drop stale registrations: directories whose SAF grant is
+                    // gone and games whose ISO/source no longer exists.
+                    GameDirectoryRepository.pruneInvalid(this@MainActivity)
+                    GameRepository.pruneInvalid(this@MainActivity)
+                }
             }
 
             FirmwareRepository.load()
             GitHub.initialize(this)
+            RpcsxUpdater.syncDownloadedVersionsJson(this)
 
             var rpcsxLibrary = GeneralSettings["rpcsx_library"] as? String
             val rpcsxUpdateStatus = GeneralSettings["rpcsx_update_status"]
@@ -109,6 +122,18 @@ class MainActivity : ComponentActivity() {
                     RPCSX.instance.processCompilationQueue()
                 }
 
+                thread {
+                    // Persisted game/ISO directories are registered in place
+                    // (no copy), so re-scanning them at every launch is cheap.
+                    GameDirectoryRepository.directories.forEach { dir ->
+                        val uri = android.net.Uri.parse(dir.uri)
+                        when (dir.kind) {
+                            GameDirectoryKind.Games -> GameDirectoryRepository.scanGameDirectory(this, uri)
+                            GameDirectoryKind.Iso -> GameDirectoryRepository.scanIsoDirectory(this, uri)
+                        }
+                    }
+                }
+
                 GeneralSettings["rpcsx_update_status"] = true
                 if (rpcsxPrevLibrary != null) {
                     if (rpcsxLibrary != rpcsxPrevLibrary) {
@@ -143,5 +168,6 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterUsbEventListener()
+        unregisterGamepadEventListener()
     }
 }

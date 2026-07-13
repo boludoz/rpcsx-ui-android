@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">追加</string>
+    <string name="close">閉じる</string>
+    <string name="error">エラー</string>
+    <string name="export">エクスポート</string>
+    <string name="import_">インポート</string>
+    <string name="none">なし</string>
+    <string name="reset">リセット</string>
+
+    <!-- AppNavHost -->
+    <string name="about">情報</string>
+    <string name="copied_to_clipboard">クリップボードにコピーしました！</string>
+    <string name="device_info">端末情報</string>
+    <string name="driver_download_channel">GPUドライバーのダウンロードチャンネル</string>
+    <string name="edit_overlay">画面コントローラーの編集</string>
+    <string name="firmware">ファームウェア</string>
+    <string name="rpcsx_download_channel">RPCSXのダウンロードチャンネル</string>
+    <string name="select_game_file">PKG、ISOまたはRAPをインストール</string>
+    <string name="select_game_folder">ゲームフォルダーを追加</string>
+    <string name="settings">設定</string>
+    <string name="ui_update_channel">RPCSX UI Androidのアップデートチャンネル</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">ディレクトリをインストール中</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">現在のバージョン: %1$s\n新しいバージョン: %2$s</string>
+    <string name="deleting_game">ゲームを削除中</string>
+    <string name="delete">削除</string>
+    <string name="downloading_latest_rpcsx">最新のRPCSXをダウンロード中</string>
+    <string name="downloading_rpcsx">RPCSX %1$sをダウンロード中</string>
+    <string name="downloading_ui">RPCSX UI Android %1$sをダウンロード中</string>
+    <string name="failed_to_delete_game_cache">ゲームキャッシュの削除に失敗しました</string>
+    <string name="failed_to_download_rpcsx">RPCSXのダウンロードに失敗しました</string>
+    <string name="game_compiling_not_finished">ゲームのコンパイルがまだ完了していません</string>
+    <string name="game_require_key">このゲームをプレイするにはライセンスキーが必要です</string>
+    <string name="install_custom_version">カスタムバージョンをインストール</string>
+    <string name="install_firmware_to_continue">続行するには必要なファームウェアをインストールしてください。</string>
+    <string name="install_rap_file">RAPファイルをインストール</string>
+    <string name="license_installation">ライセンスのインストール</string>
+    <string name="missing_firmware">ファームウェアが見つかりません</string>
+    <string name="missing_key">ライセンスキーが見つかりません</string>
+    <string name="missing_rpcsx_lib">RPCSXライブラリが見つかりません</string>
+    <string name="retry">再試行</string>
+    <string name="rpcsx_update_available">RPCSXのアップデートがあります</string>
+    <string name="ui_update_available">UIのアップデートがあります</string>
+    <string name="unexpected_error">予期しないエラー</string>
+    <string name="update">アップデート</string>
+    <string name="wait_until_firmware_install">続行するにはファームウェアのインストールが完了するまでお待ちください。</string>
+    <string name="wait_until_game_compile">続行するにはゲームのコンパイルが完了するまでお待ちください。</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">選択</string>
+    <string name="download">ダウンロード</string>
+    <string name="downloading">ダウンロード中…</string>
+    <string name="drivers">ドライバー</string>
+    <string name="failed_to_load_selected_driver">選択したドライバーの読み込みに失敗しました</string>
+    <string name="fetching">取得中…</string>
+    <string name="install">インストール</string>
+    <string name="installing">インストール中…</string>
+    <string name="please_wait">しばらくお待ちください</string>
+    <string name="select_driver">GPUドライバーを選択</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">新しいバージョンの読み込みに失敗したため、以前のバージョンが復元されました。</string>
+    <string name="failed_to_update_rpcsx">RPCSXのアップデートに失敗しました</string>
+    <string name="installation_progress">インストールの進行状況</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">%1$sをリセットしますか？</string>
+    <string name="ask_if_reset_button_description">本当に%1$sをリセットしますか？</string>
+    <string name="control_panel">コントロールパネル</string>
+    <string name="editing">編集</string>
+    <string name="opacity">不透明度</string>
+    <string name="scale">サイズ</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">ファームウェアのインストール</string>
+    <string name="package_installation">パッケージのインストール</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">エラー: %1$s</string>
+    <string name="failed_to_boot">起動に失敗しました</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">変更を適用するにはRPCSX UIを再起動してください</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">アクティブユーザー</string>
+    <string name="advanced_settings">高度な設定</string>
+    <string name="advanced_settings_description">エミュレーターの高度な設定を構成</string>
+    <string name="ask_if_reset_key">"「%1$s」をデフォルト値にリセットしますか？"</string>
+    <string name="automatic_mapping">自動マッピング</string>
+    <string name="automatic_mapping_applied">"%1$sの既知のマッピングを適用しました"</string>
+    <string name="automatic_mapping_defaults">"%1$sの既知のマッピングがありません。デフォルト値を適用しました"</string>
+    <string name="automatic_mapping_no_device">最初にコントローラーをこのスロットに接続してください</string>
+    <string name="connected_controllers">接続されているコントローラー</string>
+    <string name="controller_not_connected">未接続</string>
+    <string name="controls">コントローラー</string>
+    <string name="controls_description">コントローラーを設定</string>
+    <string name="custom_driver">カスタムGPUドライバー</string>
+    <string name="custom_driver_description">パフォーマンスや安定性の向上が期待できる代替ドライバーをインストール</string>
+    <string name="custom_driver_not_supported">カスタムドライバー非対応</string>
+    <string name="custom_driver_not_supported_description">この端末では現在カスタムドライバーの読み込みに対応していません。</string>
+    <string name="download_channels">ダウンロードチャンネル</string>
+    <string name="enable_haptic_feedback">バイブレーションを有効にする</string>
+    <string name="failed_to_assign_value">"%2$sに値%1$sを割り当てられませんでした"</string>
+    <string name="failed_to_reset_key">"%1$sのリセットに失敗しました"</string>
+    <string name="failed_to_view_internal_dir">内部ディレクトリの表示に失敗しました</string>
+    <string name="fsr_sharpening">FSRシャープネス強度</string>
+    <string name="fsr_sharpening_requires_fsr">出力スケーリングがFSRに設定されている場合のみ適用されます</string>
+    <string name="gamepad_overlay">画面のゲームパッド</string>
+    <string name="graphics">グラフィックス</string>
+    <string name="graphics_description">出力スケーリングとFSRシャープネスの設定</string>
+    <string name="install_custom_rpcsx_lib">カスタムRPCSXライブラリをインストール</string>
+    <string name="key_mappings">キー割り当て</string>
+    <string name="log_not_found">ログファイルが見つかりません！</string>
+    <string name="manage_settings">設定の管理</string>
+    <string name="no_activity_to_handle_action">この操作を処理できるアプリが見つかりません</string>
+    <string name="output_scaling">出力スケーリング</string>
+    <string name="perform_input">入力をエミュレート</string>
+    <string name="player_slot">プレイヤー %1$d</string>
+    <string name="reset_setting">設定をリセット</string>
+    <string name="search">検索</string>
+    <string name="share_log">ログを共有</string>
+    <string name="share_log_description">デバッグを支援するためRPCSXのログファイルを共有</string>
+    <string name="touchpad">タッチパッド</string>
+    <string name="users">ユーザー</string>
+    <string name="view_internal_dir">内部ディレクトリを表示</string>
+    <string name="view_internal_dir_description">ファイルマネージャーでRPCSXの内部ディレクトリを開く</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">値は%2$.0fから%3$.0fまでの範囲で、ステップ幅%1$dの倍数である必要があります</string>
+    <string name="value">値</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">UIのアップデートに失敗しました</string>
+    <string name="permission_required">権限が必要です</string>
+    <string name="permission_required_description">アップデートを行うには、このソースからのアプリインストール権限を許可してください。</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">リポジトリURLを入力</string>
+    <string name="select_repo">リポジトリを選択</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">エミュレーターを停止しますか？</string>
+    <string name="ask_if_stop_emu_description">ユーザーを変更するには、まずエミュレーターを停止する必要があります。\n\n今すぐエミュレーターを停止しますか？</string>
+
+    <!-- Settings language strings -->
+    <string name="language">言語</string>
+    <string name="language_auto">システムデフォルト (自動検出)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">ゲームが見つかりません</string>
+    <string name="no_games_description">右下の「+」ボタンをタップして、ゲームファイルをインストールするか、ディレクトリを選択してください。</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">高度なグラフィックス設定</string>
+    <string name="advanced_graphics_description">FSRスケーリング、シャープネス、およびその他の高度なグラフィックス設定</string>
+    <string name="resolution_scale">解像度スケール</string>
+    <string name="directory_not_resolvable">このフォルダーはそのまま使用することはできません。デバイスのローカルストレージ上のフォルダーを選択し、プロンプトが表示されたら「すべてのファイルを管理するアクセス権を許可する」を付与してください。</string>
+    <string name="manage_directories">ディレクトリの管理</string>
+    <string name="game_settings">ゲーム設定</string>
+    <string name="per_game_overrides_note">ここでの変更はこのゲームにのみ適用されます。値を長押しすると、グローバル設定に戻ります。</string>
+    <string name="custom_mapping">カスタムマッピング</string>
+    <string name="delete_cache">キャッシュを削除</string>
+    <string name="delete_cache_desc">このゲームのコンパイル済みシェーダーとPPUキャッシュを削除します</string>
+    <string name="cache_deleted">キャッシュが削除されました</string>
+    <string name="reset_game_settings">ゲーム設定をリセット</string>
+    <string name="reset_game_settings_desc">このゲームのカスタム設定とキーマッピングを削除します</string>
+    <string name="reset_game_settings_done">ゲーム設定がリセットされました</string>
+    <string name="ask_if_reset_game">%1$s のすべてのカスタム設定をリセットしますか？</string>
+    <string name="no_directories">ディレクトリがまだ追加されていません。ゲームフォルダーまたはISOディレクトリを追加すると、ここに表示されます。</string>
+    <string name="rescan_directory">再スキャン</string>
+    <string name="remove_directory">削除</string>
+    <string name="directory_kind_games">ゲームフォルダー</string>
+    <string name="directory_kind_iso">ISOディレクトリ</string>
+    <string name="touchpad_port">タッチパッドポート</string>
+    <string name="touchpad_port_desc">タッチオーバーレイが制御するプレイヤーポート。割り当てられたコントローラーとポートを共有します。</string>
+    <string name="touchpad_auto_hide">タッチパッドを自動非表示</string>
+    <string name="touchpad_auto_hide_desc">一定時間操作がない場合、自動的にタッチパッドを非表示にします。</string>
+    <string name="never">しない</string>
+    <string name="seconds_2">2秒</string>
+    <string name="seconds_5">5秒</string>
+    <string name="seconds_10">10秒</string>
+    <string name="seconds_15">15秒</string>
+    <string name="seconds_30">30秒</string>
+    <string name="controller_port">ポート</string>
+    <string name="select_iso_folder">ISOディレクトリを追加</string>
+</resources>
