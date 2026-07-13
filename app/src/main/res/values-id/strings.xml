@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">Tambah</string>
+    <string name="close">Tutup</string>
+    <string name="error">Kesalahan</string>
+    <string name="export">Ekspor</string>
+    <string name="import_">Impor</string>
+    <string name="none">Tidak ada</string>
+    <string name="reset">Setel Ulang</string>
+
+    <!-- AppNavHost -->
+    <string name="about">Tentang</string>
+    <string name="copied_to_clipboard">Disalin ke papan klip!</string>
+    <string name="device_info">Info Perangkat</string>
+    <string name="driver_download_channel">Saluran Unduhan Driver GPU</string>
+    <string name="edit_overlay">Edit Tombol Layar</string>
+    <string name="firmware">Firmware</string>
+    <string name="rpcsx_download_channel">Saluran Unduhan RPCSX</string>
+    <string name="select_game_file">Instal PKG, ISO, atau RAP</string>
+    <string name="select_game_folder">Tambahkan Folder Game</string>
+    <string name="settings">Pengaturan</string>
+    <string name="ui_update_channel">Saluran Pembaruan RPCSX UI Android</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">Menginstal direktori</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">Versi saat ini: %1$s\nVersi baru: %2$s</string>
+    <string name="deleting_game">Menghapus Game</string>
+    <string name="delete">Hapus</string>
+    <string name="downloading_latest_rpcsx">Mengunduh RPCSX terbaru</string>
+    <string name="downloading_rpcsx">Mengunduh RPCSX %1$s</string>
+    <string name="downloading_ui">Mengunduh RPCSX UI Android %1$s</string>
+    <string name="failed_to_delete_game_cache">Gagal menghapus cache game</string>
+    <string name="failed_to_download_rpcsx">Gagal mengunduh RPCSX</string>
+    <string name="game_compiling_not_finished">Kompilasi game belum selesai</string>
+    <string name="game_require_key">Game ini membutuhkan kunci lisensi untuk dimainkan</string>
+    <string name="install_custom_version">Instal versi kustom</string>
+    <string name="install_firmware_to_continue">Silakan instal firmware yang diperlukan untuk melanjutkan.</string>
+    <string name="install_rap_file">Instal file RAP</string>
+    <string name="license_installation">Instalasi Lisensi</string>
+    <string name="missing_firmware">Firmware Hilang</string>
+    <string name="missing_key">Kunci Lisensi Hilang</string>
+    <string name="missing_rpcsx_lib">Pustaka RPCSX Hilang</string>
+    <string name="retry">Coba Lagi</string>
+    <string name="rpcsx_update_available">Pembaruan RPCSX Tersedia</string>
+    <string name="ui_update_available">Pembaruan UI Tersedia</string>
+    <string name="unexpected_error">Kesalahan Tidak Terduga</string>
+    <string name="update">Perbarui</string>
+    <string name="wait_until_firmware_install">Silakan tunggu hingga firmware berhasil diinstal untuk melanjutkan.</string>
+    <string name="wait_until_game_compile">Silakan tunggu hingga game selesai dikompilasi untuk melanjutkan.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">Pilih</string>
+    <string name="download">Unduh</string>
+    <string name="downloading">Mengunduh…</string>
+    <string name="drivers">Driver</string>
+    <string name="failed_to_load_selected_driver">Gagal memuat driver yang dipilih</string>
+    <string name="fetching">Mengambil…</string>
+    <string name="install">Instal</string>
+    <string name="installing">Menginstal…</string>
+    <string name="please_wait">Silakan tunggu</string>
+    <string name="select_driver">Pilih Driver GPU</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">Gagal memuat versi baru, versi sebelumnya dipulihkan.</string>
+    <string name="failed_to_update_rpcsx">Gagal memperbarui RPCSX</string>
+    <string name="installation_progress">Kemajuan instalasi</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">Setel ulang %1$s?</string>
+    <string name="ask_if_reset_button_description">Apakah Anda yakin ingin menyetel ulang %1$s?</string>
+    <string name="control_panel">Panel Kontrol</string>
+    <string name="editing">Mengedit</string>
+    <string name="opacity">Opasitas</string>
+    <string name="scale">Skala</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">Instalasi Firmware</string>
+    <string name="package_installation">Instalasi Paket</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">Kesalahan: %1$s</string>
+    <string name="failed_to_boot">Gagal booting</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">Mulai ulang RPCSX UI untuk menerapkan perubahan</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">Pengguna Aktif</string>
+    <string name="advanced_settings">Pengaturan Lanjutan</string>
+    <string name="advanced_settings_description">Konfigurasikan pengaturan lanjutan emulator</string>
+    <string name="ask_if_reset_key">"Apakah Anda ingin menyetel ulang '%1$s' ke nilai defaultnya?"</string>
+    <string name="automatic_mapping">Pemetaan Otomatis</string>
+    <string name="automatic_mapping_applied">Menerapkan pemetaan yang dikenal untuk %1$s</string>
+    <string name="automatic_mapping_defaults">Tidak ada pemetaan yang dikenal untuk %1$s — default diterapkan</string>
+    <string name="automatic_mapping_no_device">Hubungkan pengontrol ke slot ini terlebih dahulu</string>
+    <string name="connected_controllers">Pengontrol Terhubung</string>
+    <string name="controller_not_connected">Tidak terhubung</string>
+    <string name="controls">Kontrol</string>
+    <string name="controls_description">Konfigurasikan pengontrol</string>
+    <string name="custom_driver">Driver GPU Kustom</string>
+    <string name="custom_driver_description">Instal driver alternatif untuk kinerja atau akurasi yang berpotensi lebih baik</string>
+    <string name="custom_driver_not_supported">Driver Kustom Tidak Didukung</string>
+    <string name="custom_driver_not_supported_description">Pemuatan driver kustom saat ini tidak didukung untuk perangkat ini.</string>
+    <string name="download_channels">Saluran Unduhan</string>
+    <string name="enable_haptic_feedback">Aktifkan Umpan Balik Haptik</string>
+    <string name="failed_to_assign_value">Gagal menetapkan nilai %1$s ke %2$s</string>
+    <string name="failed_to_reset_key">Gagal menyetel ulang %1$s</string>
+    <string name="failed_to_view_internal_dir">Gagal melihat direktori internal</string>
+    <string name="fsr_sharpening">Penajaman FSR</string>
+    <string name="fsr_sharpening_requires_fsr">Hanya berlaku ketika Output Scaling disetel ke FSR</string>
+    <string name="gamepad_overlay">Overlay Gamepad</string>
+    <string name="graphics">Grafis</string>
+    <string name="graphics_description">Penskalaan output dan penajaman FSR</string>
+    <string name="install_custom_rpcsx_lib">Instal Pustaka RPCSX Kustom</string>
+    <string name="key_mappings">Pemetaan Tombol</string>
+    <string name="log_not_found">File log tidak ditemukan!</string>
+    <string name="manage_settings">Kelola Pengaturan</string>
+    <string name="no_activity_to_handle_action">Tidak ada aktivitas yang ditemukan untuk menangani tindakan ini</string>
+    <string name="output_scaling">Penskalaan Output</string>
+    <string name="perform_input">Lakukan Input</string>
+    <string name="player_slot">Pemain %1$d</string>
+    <string name="reset_setting">Setel Ulang Pengaturan</string>
+    <string name="search">Cari</string>
+    <string name="share_log">Bagikan Log</string>
+    <string name="share_log_description">Bagikan file log RPCSX untuk membantu mendiagnosis masalah</string>
+    <string name="touchpad">Panel Sentuh</string>
+    <string name="users">Pengguna</string>
+    <string name="view_internal_dir">Lihat Direktori Internal</string>
+    <string name="view_internal_dir_description">Buka direktori internal RPCSX di pengelola file</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">Nilai harus berupa kelipatan ukuran langkah %1$d dalam kisaran %2$.0f hingga %3$.0f</string>
+    <string name="value">Nilai</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">Gagal memperbarui UI</string>
+    <string name="permission_required">Izin Diperlukan</string>
+    <string name="permission_required_description">Aktifkan izin instalasi dari sumber ini untuk memperbarui.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">Masukkan URL Repositori</string>
+    <string name="select_repo">Pilih Repositori</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">Hentikan Emulator?</string>
+    <string name="ask_if_stop_emu_description">Untuk mengubah pengguna, Anda harus menghentikan emulator terlebih dahulu.\n\nHentikan emulator sekarang?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Bahasa</string>
+    <string name="language_auto">Default Sistem (Deteksi otomatis)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">Tidak Ada Game Ditemukan</string>
+    <string name="no_games_description">Ketuk tombol \'+\' di kanan bawah untuk menginstal file game atau memilih direktori.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">Grafis Lanjutan</string>
+    <string name="advanced_graphics_description">Penskalaan FSR, penajaman, dan pengaturan lanjutan lainnya</string>
+    <string name="resolution_scale">Skala Resolusi</string>
+    <string name="directory_not_resolvable">Folder ini tidak dapat digunakan di tempat. Pilih folder di penyimpanan perangkat lokal, dan berikan \"Izinkan akses untuk mengelola semua file\" saat diminta.</string>
+    <string name="manage_directories">Kelola Direktori</string>
+    <string name="game_settings">Pengaturan Game</string>
+    <string name="per_game_overrides_note">Perubahan di sini hanya berlaku untuk game ini. Tekan lama pada nilai untuk mengembalikannya ke pengaturan global.</string>
+    <string name="custom_mapping">Pemetaan kustom</string>
+    <string name="delete_cache">Hapus cache</string>
+    <string name="delete_cache_desc">Menghapus shader terkompilasi dan cache PPU game ini</string>
+    <string name="cache_deleted">Cache dihapus</string>
+    <string name="reset_game_settings">Atur ulang pengaturan game</string>
+    <string name="reset_game_settings_desc">Menghapus konfigurasi kustom dan pemetaan tombol game ini</string>
+    <string name="reset_game_settings_done">Pengaturan game diatur ulang</string>
+    <string name="ask_if_reset_game">Atur ulang semua pengaturan kustom untuk %1$s?</string>
+    <string name="no_directories">Belum ada direktori yang ditambahkan. Tambahkan folder game atau direktori ISO untuk melihatnya di sini.</string>
+    <string name="rescan_directory">Pindai ulang</string>
+    <string name="remove_directory">Hapus</string>
+    <string name="directory_kind_games">Folder game</string>
+    <string name="directory_kind_iso">Direktori ISO</string>
+    <string name="touchpad_port">Port touchpad</string>
+    <string name="touchpad_port_desc">Port pemain mana yang dikendalikan oleh overlay sentuh. Ini berbagi port dengan pengontrol apa pun yang ditetapkan untuknya.</string>
+    <string name="touchpad_auto_hide">Sembunyikan Touchpad otomatis</string>
+    <string name="touchpad_auto_hide_desc">Sembunyikan touchpad secara otomatis setelah beberapa saat tidak ada aktivitas.</string>
+    <string name="never">Jangan pernah</string>
+    <string name="seconds_2">2 detik</string>
+    <string name="seconds_5">5 detik</string>
+    <string name="seconds_10">10 detik</string>
+    <string name="seconds_15">15 detik</string>
+    <string name="seconds_30">30 detik</string>
+    <string name="controller_port">Port</string>
+    <string name="select_iso_folder">Tambah Direktori ISO</string>
+</resources>

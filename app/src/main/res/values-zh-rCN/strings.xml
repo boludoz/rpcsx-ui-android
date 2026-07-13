@@ -130,4 +130,65 @@
     <!-- UsersScreen -->
     <string name="ask_if_stop_emu">停止模拟器？</string>
     <string name="ask_if_stop_emu_description">为了更换用户，您必须先停止模拟器。\n\n要停止模拟器吗？</string>
+
+    <!-- SettingsScreen - controller/gamepad (new) -->
+    <string name="app_name">RPCSX</string>
+    <string name="automatic_mapping">自动映射</string>
+    <string name="automatic_mapping_applied">已为 %1$s 应用已知映射</string>
+    <string name="automatic_mapping_defaults">未找到 %1$s 的映射 — 已应用默认设置</string>
+    <string name="automatic_mapping_no_device">请先将手柄连接到此槽位</string>
+    <string name="connected_controllers">已连接的控制器</string>
+    <string name="controller_not_connected">未连接</string>
+    <string name="player_slot">玩家 %1$d</string>
+    <string name="resolution_scale">分辨率缩放</string>
+    <string name="search">搜索</string>
+    <string name="select_game_file">安装 PKG、ISO 或 RAP</string>
+    <string name="select_game_folder">添加游戏文件夹</string>
+    <string name="touchpad">虚拟按键</string>
+
+    <!-- Graphics and Language settings -->
+    <string name="graphics">图形</string>
+    <string name="graphics_description">输出缩放与 FSR 锐化</string>
+    <string name="output_scaling">输出缩放</string>
+    <string name="fsr_sharpening">FSR 锐化</string>
+    <string name="fsr_sharpening_requires_fsr">仅在输出缩放设置为 FSR 时适用</string>
+    <string name="language">语言</string>
+    <string name="language_auto">系统默认 (自动检测)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">未找到游戏</string>
+    <string name="no_games_description">点击右下角的 \'+\' 按钮安装游戏文件或选择目录。</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">高级图形设置</string>
+    <string name="advanced_graphics_description">配置 FSR 输出缩放、锐化及其他高级设置</string>
+    <string name="directory_not_resolvable">此文件夹不能在原位置使用。请在本地设备存储上选择一个文件夹，并在出现提示时授予“允许访问以管理所有文件”权限。</string>
+    <string name="manage_directories">管理目录</string>
+    <string name="game_settings">游戏设置</string>
+    <string name="per_game_overrides_note">此处的更改仅适用于此游戏。长按某个值可将其恢复为全局设置。</string>
+    <string name="custom_mapping">自定义映射</string>
+    <string name="delete_cache">清除缓存</string>
+    <string name="delete_cache_desc">清除此游戏的已编译着色器和 PPU 缓存</string>
+    <string name="cache_deleted">缓存已清除</string>
+    <string name="reset_game_settings">重置游戏设置</string>
+    <string name="reset_game_settings_desc">移除此游戏的自定义配置和按键映射</string>
+    <string name="reset_game_settings_done">游戏设置已重置</string>
+    <string name="ask_if_reset_game">是否重置 %1$s 的所有自定义设置？</string>
+    <string name="no_directories">尚未添加任何目录。添加游戏文件夹或 ISO 目录以在此处查看。</string>
+    <string name="rescan_directory">重新扫描</string>
+    <string name="remove_directory">移除</string>
+    <string name="directory_kind_games">游戏文件夹</string>
+    <string name="directory_kind_iso">ISO 目录</string>
+    <string name="touchpad_port">触摸板端口</string>
+    <string name="touchpad_port_desc">屏幕触摸板控制哪个玩家端口。它与分配给该端口的任何控制器共享端口。</string>
+    <string name="touchpad_auto_hide">自动隐藏触摸板</string>
+    <string name="touchpad_auto_hide_desc">在一段时间不活动后自动隐藏触摸板。</string>
+    <string name="never">从不</string>
+    <string name="seconds_2">2 秒</string>
+    <string name="seconds_5">5 秒</string>
+    <string name="seconds_10">10 秒</string>
+    <string name="seconds_15">15 秒</string>
+    <string name="seconds_30">30 秒</string>
+    <string name="controller_port">端口</string>
+    <string name="select_iso_folder">添加 ISO 目录</string>
 </resources>

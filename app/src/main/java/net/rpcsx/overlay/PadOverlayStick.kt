@@ -3,12 +3,15 @@ package net.rpcsx.overlay
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.view.MotionEvent
 import androidx.core.graphics.drawable.toDrawable
+import net.rpcsx.utils.GeneralSettings
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 class PadOverlayStick(
@@ -19,14 +22,23 @@ class PadOverlayStick(
     private val pressDigitalIndex: Int = 0,
     private val pressBit: Int = 0
 ) :
-    BitmapDrawable(resources, stick) {
+    PadOverlayItem, BitmapDrawable(resources, stick) {
     private var bg = bg.toDrawable(resources)
     private var locked = -1
     private var pressX = -1
     private var pressY = -1
     private var bgOffsetX = 0
     private var bgOffsetY = 0
-    fun contains(x: Int, y: Int) = bounds.contains(x, y)
+
+    override var dragging = false
+    private var dragOffsetX = 0
+    private var dragOffsetY = 0
+    override var enabled: Boolean = true
+
+    private val settingsKey = "stick_${if (isLeft) "l" else "r"}_${pressBit}"
+
+    override fun contains(x: Int, y: Int) = bounds.contains(x, y)
+    override fun bounds(): Rect = bounds
 
     fun isActive(): Boolean {
         return locked != -1
@@ -48,7 +60,11 @@ class PadOverlayStick(
         )
     }
 
-    fun onTouch(event: MotionEvent, pointerIndex: Int, padState: State): Int {
+    override fun onTouch(event: MotionEvent, pointerIndex: Int, padState: State): Boolean {
+        return onTouchResult(event, pointerIndex, padState) != 0
+    }
+
+    fun onTouchResult(event: MotionEvent, pointerIndex: Int, padState: State): Int {
         val action = event.actionMasked
 
         if ((pressBit != 0 && (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)) || (locked != -1 && action == MotionEvent.ACTION_MOVE)) {
@@ -153,6 +169,68 @@ class PadOverlayStick(
         }
 
         return 0
+    }
+
+    // --- PadOverlayItem editing support ---
+
+    lateinit var defaultPosition: Pair<Int, Int>
+    var defaultSize: Pair<Int, Int> = Pair(-1, -1)
+
+    override fun startDragging(startX: Int, startY: Int) {
+        dragging = true
+        dragOffsetX = startX - bounds.left
+        dragOffsetY = startY - bounds.top
+    }
+
+    override fun updatePosition(x: Int, y: Int, force: Boolean) {
+        if (dragging) {
+            setBounds(x - dragOffsetX, y - dragOffsetY, x - dragOffsetX + bounds.width(), y - dragOffsetY + bounds.height())
+            GeneralSettings.setValue("${settingsKey}_x", x - dragOffsetX)
+            GeneralSettings.setValue("${settingsKey}_y", y - dragOffsetY)
+        } else if (force) {
+            setBounds(x, y, x + bounds.width(), y + bounds.height())
+            GeneralSettings.setValue("${settingsKey}_x", x)
+            GeneralSettings.setValue("${settingsKey}_y", y)
+        }
+    }
+
+    override fun stopDragging() {
+        dragging = false
+    }
+
+    override fun setScale(percent: Int) {
+        val newSize = (1024 * percent / 100f).roundToInt()
+        setBounds(bounds.left, bounds.top, bounds.left + newSize, bounds.top + newSize)
+        GeneralSettings.setValue("${settingsKey}_scale", percent)
+    }
+
+    override fun setOpacity(percent: Int) {
+        val a = (255 * (percent / 100f)).roundToInt()
+        alpha = a
+        GeneralSettings.setValue("${settingsKey}_opacity", percent)
+    }
+
+    override fun resetConfigs() {
+        if (::defaultPosition.isInitialized) {
+            setBounds(defaultPosition.first, defaultPosition.second,
+                defaultPosition.first + (if (defaultSize.second > 0) defaultSize.second else bounds.width()),
+                defaultPosition.second + (if (defaultSize.first > 0) defaultSize.first else bounds.height()))
+        }
+        alpha = (0.3 * 255).toInt()
+        GeneralSettings.setValue("${settingsKey}_x", null)
+        GeneralSettings.setValue("${settingsKey}_y", null)
+        GeneralSettings.setValue("${settingsKey}_scale", null)
+        GeneralSettings.setValue("${settingsKey}_opacity", null)
+    }
+
+    fun getInfo(): Triple<String, Int, Int> {
+        val name = if (isLeft) "L3" else "R3"
+        val defaultScale = if (defaultSize.second > 0) (defaultSize.second.toFloat() / 1024 * 100).roundToInt() else 50
+        return Triple(
+            name,
+            GeneralSettings["${settingsKey}_scale"] as Int? ?: defaultScale,
+            GeneralSettings["${settingsKey}_opacity"] as Int? ?: 30
+        )
     }
 
     override fun setBounds(left: Int, top: Int, right: Int, bottom: Int) {

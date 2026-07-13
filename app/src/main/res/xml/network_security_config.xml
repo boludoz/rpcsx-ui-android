@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Cleartext HTTP permitido solo para los servidores de descarga de Sony PSN.
+         Los PKGs se sirven desde http:// (sin TLS).
+         El resto de la app sigue bloqueando cleartext por defecto (Android 9+). -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">dl.playstation.net</domain>
+    </domain-config>
+</network-security-config>

@@ -10,11 +10,77 @@ import net.rpcsx.R
 import net.rpcsx.RPCSX
 import net.rpcsx.dialogs.AlertDialogQueue
 import net.rpcsx.ui.channels.DevRpcsxChannel
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 import java.io.File
 import kotlin.system.exitProcess
 
-
 object RpcsxUpdater {
+    @Serializable
+    data class DownloadedVersion(
+        val version: String,
+        val arch: String,
+        val fileName: String,
+        val filePath: String
+    )
+
+    /** Any "<name>_<arch>_<version>.so" in the data dir, whatever the library is called. */
+    private fun isCoreFile(file: File) = file.name.endsWith(".so") && getFileVersion(file) != null
+
+    fun getDownloadedVersions(context: Context): List<DownloadedVersion> {
+        val files = context.filesDir.listFiles() ?: return emptyList()
+        return files.filter { isCoreFile(it) }
+            .mapNotNull { file ->
+                val version = getFileVersion(file) ?: return@mapNotNull null
+                val arch = getFileArch(file) ?: return@mapNotNull null
+                DownloadedVersion(
+                    version = version,
+                    arch = arch,
+                    fileName = file.name,
+                    filePath = file.absolutePath
+                )
+            }
+    }
+
+    fun syncDownloadedVersionsJson(context: Context) {
+        val versions = getDownloadedVersions(context)
+        val jsonString = Json.encodeToString(versions)
+        try {
+            val file = File(context.filesDir, "downloaded_versions.json")
+            file.writeText(jsonString)
+        } catch (e: Exception) {
+            Log.e("RpcsxUpdater", "Failed to write downloaded_versions.json", e)
+        }
+    }
+
+    fun deleteVersion(context: Context, version: DownloadedVersion) {
+        val file = File(version.filePath)
+        if (file.exists()) {
+            file.delete()
+        }
+        val currentLib = GeneralSettings["rpcsx_library"] as? String
+        if (currentLib == version.filePath) {
+            GeneralSettings["rpcsx_library"] = null
+            GeneralSettings["rpcsx_installed_arch"] = null
+            RPCSX.activeLibrary.value = null
+        }
+        syncDownloadedVersionsJson(context)
+    }
+
+    fun wipeDownloads(context: Context) {
+        val files = context.filesDir.listFiles() ?: return
+        files.forEach { file ->
+            if (isCoreFile(file)) {
+                file.delete()
+            }
+        }
+        GeneralSettings["rpcsx_library"] = null
+        GeneralSettings["rpcsx_installed_arch"] = null
+        RPCSX.activeLibrary.value = null
+        syncDownloadedVersionsJson(context)
+    }
+
     fun getCurrentVersion(): String? {
         if (RPCSX.activeLibrary.value == null) {
             return null
@@ -31,6 +97,7 @@ object RpcsxUpdater {
 
         return parts[1]
     }
+
     fun getFileVersion(file: File): String? {
         val parts = file.name.removeSuffix(".so").split("_")
         if (parts.size != 3) {
@@ -54,83 +121,91 @@ object RpcsxUpdater {
         GeneralSettings["rpcsx_arch"] = arch
     }
 
-    suspend fun checkForUpdate(): String? {
-        val url = DevRpcsxChannel // TODO: update once RPCSX has release with android support
+    /**
+     * Core built for this device inside [release]. Only the library name varies
+     * between build repos (librpcsx-android-..., librpcs3-android-...), so that
+     * is the sole wildcard: ABI and architecture still have to match exactly.
+     */
+    private fun findAsset(release: GitHub.Release): GitHub.Asset? {
+        val suffix = "-android-${getAbi()}-${getArch()}.so"
+        return release.assets.find {
+            it.browser_download_url != null && it.name.startsWith("lib") && it.name.endsWith(suffix)
+        }
+    }
 
-        val arch = getArch()
-        when (val fetchResult = GitHub.fetchLatestRelease(url)) {
-            is GitHub.FetchResult.Success<*> -> {
-                val release = fetchResult.content as GitHub.Release
-                val releaseVersion = "${release.name}-${arch}"
+    private suspend fun fetchRelease(onError: (String) -> Unit): GitHub.Release? {
+        val url = GeneralSettings["rpcsx_channel"] as? String ?: DevRpcsxChannel
 
-                if (release.assets.find { it.name == "librpcsx-android-${getAbi()}-${arch}.so" }?.browser_download_url == null) {
-                    return null
-                }
-
-                if (RPCSX.activeLibrary.value == null) {
-                    return releaseVersion
-                }
-
-                if (getCurrentVersion() != releaseVersion && releaseVersion != GeneralSettings["rpcsx_bad_version"]) {
-                    return releaseVersion
-                }
-            }
+        return when (val fetchResult = GitHub.fetchLatestRelease(url)) {
+            is GitHub.FetchResult.Success<*> -> fetchResult.content as GitHub.Release
             is GitHub.FetchResult.Error -> {
-//                AlertDialogQueue.showDialog("Check For RPCSX Updates Error", fetchResult.message)
+                onError(fetchResult.message)
+                null
             }
         }
+    }
 
-        return null
+    suspend fun checkForUpdate(): String? {
+        // Update checks run unattended, so an unreachable channel stays silent.
+        val release = fetchRelease { } ?: return null
+        if (findAsset(release) == null) {
+            return null
+        }
+
+        val releaseVersion = "${release.name}-${getArch()}"
+
+        if (RPCSX.activeLibrary.value == null) {
+            return releaseVersion
+        }
+
+        if (getCurrentVersion() == releaseVersion || releaseVersion == GeneralSettings["rpcsx_bad_version"]) {
+            return null
+        }
+
+        return releaseVersion
     }
 
     suspend fun downloadUpdate(destinationDir: File, progressCallback: (Long, Long) -> Unit): File? {
-        val url = DevRpcsxChannel // TODO: GeneralSettings["rpcsx_channel"] as String
+        val release = fetchRelease {
+            AlertDialogQueue.showDialog("RPCSX Download Error", it)
+        } ?: return null
+
         val arch = getArch()
-
-        when (val fetchResult = GitHub.fetchLatestRelease(url)) {
-            is GitHub.FetchResult.Success<*> -> {
-                val release = fetchResult.content as GitHub.Release
-                val releaseVersion = "${release.name}-${arch}"
-                val releaseAsset = release.assets.find { it.name == "librpcsx-android-${getAbi()}-$arch.so" }
-
-                if (releaseVersion != getCurrentVersion() && releaseAsset?.browser_download_url != null) {
-                    val target = File(destinationDir, "librpcsx-android_${arch}_${release.name}.so")
-
-                    if (target.exists()) {
-                        return target
-                    }
-
-                    val tmp = File(destinationDir, "librpcsx.so.tmp")
-                    if (tmp.exists()) {
-                        withContext(Dispatchers.IO) {
-                            tmp.delete()
-                        }
-                    }
-
-                    withContext(Dispatchers.IO) {
-                        tmp.createNewFile()
-                    }
-
-                    tmp.deleteOnExit()
-
-                    when (val downloadStatus = GitHub.downloadAsset(releaseAsset.browser_download_url, tmp, progressCallback)) {
-                        is GitHub.DownloadStatus.Success -> {
-                            withContext(Dispatchers.IO) {
-                                tmp.renameTo(target)
-                            }
-                            return target
-                        }
-                        is GitHub.DownloadStatus.Error ->
-                            AlertDialogQueue.showDialog("RPCSX Download Error", downloadStatus.message ?: "Unexpected error")
-                    }
-                }
-            }
-            is GitHub.FetchResult.Error -> {
-                AlertDialogQueue.showDialog("RPCSX Download Error", fetchResult.message)
-            }
+        val releaseVersion = "${release.name}-$arch"
+        if (releaseVersion == getCurrentVersion()) {
+            return null
         }
 
-        return null
+        val downloadUrl = findAsset(release)?.browser_download_url ?: return null
+        val target = File(destinationDir, "librpcsx-android_${arch}_${release.name}.so")
+
+        if (target.exists()) {
+            return target
+        }
+
+        val tmp = File(destinationDir, "librpcsx.so.tmp")
+        withContext(Dispatchers.IO) {
+            if (tmp.exists()) {
+                tmp.delete()
+            }
+            tmp.createNewFile()
+        }
+
+        tmp.deleteOnExit()
+
+        return when (val downloadStatus = GitHub.downloadAsset(downloadUrl, tmp, progressCallback)) {
+            is GitHub.DownloadStatus.Success -> {
+                withContext(Dispatchers.IO) {
+                    tmp.renameTo(target)
+                }
+                target
+            }
+
+            is GitHub.DownloadStatus.Error -> {
+                AlertDialogQueue.showDialog("RPCSX Download Error", downloadStatus.message ?: "Unexpected error")
+                null
+            }
+        }
     }
 
     fun installUpdate(context: Context, updateFile: File): Boolean {
@@ -151,6 +226,7 @@ object RpcsxUpdater {
         GeneralSettings["rpcsx_installed_arch"] = getFileArch(updateFile)
 
         Log.e("RPCSX-UI", "registered update file ${GeneralSettings["rpcsx_library"]}")
+        syncDownloadedVersionsJson(context)
 
         if (prevLibrary == null) {
             restart()

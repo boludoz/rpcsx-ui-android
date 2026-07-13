@@ -344,7 +344,13 @@ fun FetchAndShowDrivers(
         isLoading = false
 
         if (fetchOutput is GitHub.FetchResult.Success<*>) {
-            fetchedDrivers = fetchOutput.content as List<Pair<String, String?>>
+            val content = fetchOutput.content
+            
+            fetchedDrivers = if (content is List<*>) {
+                content.filterIsInstance<Pair<String, String?>>()
+            } else {
+                emptyList()
+            }
             fetchResult = null
         } else {
             fetchResult = fetchOutput
@@ -382,7 +388,7 @@ fun FetchAndShowDrivers(
         }, confirmButton = {})
         return
     }
-
+    
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val maxHeight = if (isLandscape) 168.dp else 300.dp
 

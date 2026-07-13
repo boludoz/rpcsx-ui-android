@@ -28,22 +28,46 @@ object InputBindingPrefs {
         666666 to Pair(Digital1Flags.CELL_PAD_CTRL_PS.bit, 0)
     )
 
-    fun saveBindings(bindings: Map<Int, Pair<Int, Int>>): Boolean {
+    // Global bindings use "input_bindings_<slot>"; per-game overrides use
+    // "input_bindings_<titleId>_<slot>" and fall back to the global map (and
+    // then defaults) when a title has no custom mapping saved.
+    private fun key(playerSlot: Int, titleId: String? = null) =
+        if (titleId.isNullOrEmpty()) "input_bindings_$playerSlot"
+        else "input_bindings_${titleId}_$playerSlot"
+
+    fun saveBindings(
+        playerSlot: Int,
+        bindings: Map<Int, Pair<Int, Int>>,
+        titleId: String? = null
+    ): Boolean {
         try {
             val json = JSONObject()
             bindings.forEach { (keyCode, value) ->
                 json.put(keyCode.toString(), "${value.first},${value.second}")
             }
 
-            GeneralSettings.setValue("input_bindings", json.toString())
+            GeneralSettings.setValue(key(playerSlot, titleId), json.toString())
         } catch (_: Exception) {
             return false
         }
         return true
     }
 
-    fun loadBindings(): Map<Int, Pair<Int, Int>> {
-        val jsonString = GeneralSettings["input_bindings"] as String? ?: return defaultBindings
+    fun hasTitleBindings(titleId: String, playerSlot: Int): Boolean =
+        GeneralSettings[key(playerSlot, titleId)] != null
+
+    fun clearTitleBindings(titleId: String) {
+        for (slot in 0 until net.rpcsx.MaxGamepadPlayers) {
+            GeneralSettings.setValue(key(slot, titleId), null)
+        }
+    }
+
+    fun loadBindings(playerSlot: Int, titleId: String? = null): Map<Int, Pair<Int, Int>> {
+        val jsonString = (if (!titleId.isNullOrEmpty()) {
+            GeneralSettings[key(playerSlot, titleId)] as String?
+        } else null)
+            ?: GeneralSettings[key(playerSlot)] as String?
+            ?: return defaultBindings
 
         val json = JSONObject(jsonString)
         val map = mutableMapOf<Int, Pair<Int, Int>>()

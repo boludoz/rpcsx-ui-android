@@ -5,6 +5,14 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,15 +20,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import net.rpcsx.PrecompilerService
+import net.rpcsx.PrecompilerServiceAction
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,6 +67,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -86,7 +101,12 @@ private fun withAlpha(color: Color, alpha: Float): Color {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun GameItem(game: Game) {
+fun GameItem(
+    game: Game,
+    isCardFocused: Boolean = false,
+    onOpenSettings: () -> Unit = {},
+    onCheckSonyUpdates: () -> Unit = {}
+) {
     val context = LocalContext.current
     val menuExpanded = remember { mutableStateOf(false) }
     val iconExists = remember { mutableStateOf(false) }
@@ -134,6 +154,22 @@ fun GameItem(game: Game) {
             expanded = menuExpanded.value, onDismissRequest = { menuExpanded.value = false }) {
             if (game.progressList.isEmpty()) {
                 DropdownMenuItem(
+                    text = { Text(stringResource(R.string.game_settings)) },
+                    leadingIcon = { Icon(painter = painterResource(id = R.drawable.ic_settings), contentDescription = null) },
+                    onClick = {
+                        menuExpanded.value = false
+                        onOpenSettings()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Buscar Actualizaciones de Sony (PSN)") },
+                    leadingIcon = { Icon(painter = painterResource(id = R.drawable.ic_cloud_download), contentDescription = null) },
+                    onClick = {
+                        menuExpanded.value = false
+                        onCheckSonyUpdates()
+                    }
+                )
+                DropdownMenuItem(
                     text = { Text(stringResource(R.string.delete)) },
                     leadingIcon = { Icon(painter = painterResource(id = R.drawable.ic_delete), contentDescription = null) },
                     onClick = {
@@ -141,24 +177,20 @@ fun GameItem(game: Game) {
                         val deleteProgress = ProgressRepository.create(context, context.getString(R.string.deleting_game))
                         game.addProgress(GameProgress(deleteProgress, GameProgressType.Compile))
                         ProgressRepository.onProgressEvent(deleteProgress, 1, 0L)
-                        val path = File(game.info.path)
-                        if (path.exists()) {
-                            path.deleteRecursively()
-                            FileUtil.deleteCache(
-                                context,
-                                game.info.path.substringAfterLast("/")
-                            ) { success ->
-                                if (!success) {
-                                    AlertDialogQueue.showDialog(
-                                        title = context.getString(R.string.unexpected_error),
-                                        message = context.getString(R.string.failed_to_delete_game_cache),
-                                        confirmText = context.getString(R.string.close),
-                                        dismissText = ""
-                                    )
-                                }
-                                ProgressRepository.onProgressEvent(deleteProgress, 100, 100)
-                                GameRepository.remove(game)
+                        FileUtil.deleteCache(
+                            context,
+                            game.info.path.substringAfterLast("/")
+                        ) { success ->
+                            if (!success) {
+                                AlertDialogQueue.showDialog(
+                                    title = context.getString(R.string.unexpected_error),
+                                    message = context.getString(R.string.failed_to_delete_game_cache),
+                                    confirmText = context.getString(R.string.close),
+                                    dismissText = ""
+                                )
                             }
+                            ProgressRepository.onProgressEvent(deleteProgress, 100, 100)
+                            GameRepository.remove(game)
                         }
                     }
                 )
@@ -166,9 +198,15 @@ fun GameItem(game: Game) {
         }
 
         Card(
-            shape = RectangleShape,
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(160.dp)
+                .then(
+                    if (isCardFocused) Modifier.border(
+                        3.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp)
+                    ) else Modifier
+                )
                 .combinedClickable(onClick = click@{
                     if (game.hasFlag(GameFlag.Locked)) {
                         AlertDialogQueue.showDialog(
@@ -216,7 +254,10 @@ fun GameItem(game: Game) {
                     if (game.info.name.value != "VSH") {
                         menuExpanded.value = true
                     }
-                })
+                }),
+            colors = androidx.compose.material3.CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
         ) {
             if (game.info.iconPath.value != null && !iconExists.value) {
                 if (game.progressList.isNotEmpty()) {
@@ -235,110 +276,161 @@ fun GameItem(game: Game) {
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .height(110.dp)
-                    .align(alignment = Alignment.CenterHorizontally)
-                    .fillMaxSize()
-            ) {
-                if (game.info.iconPath.value != null && iconExists.value) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    if (game.info.iconPath.value != null && iconExists.value) {
                         AsyncImage(
                             model = game.info.iconPath.value,
                             contentScale = if (game.info.name.value == "VSH") ContentScale.Fit else ContentScale.Crop,
                             contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                        )
-                    }
-                }
-
-                if (game.progressList.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(withAlpha(Color.DarkGray, 0.6f))
-                    ) {}
-
-                    val progressChannel = game.progressList.first().id
-                    val progress = ProgressRepository.getItem(progressChannel)
-                    val progressValue = progress?.value?.value
-                    val maxValue = progress?.value?.max
-
-                    if (progressValue != null && maxValue != null) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    androidx.compose.ui.graphics.Brush.linearGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primaryContainer,
+                                            MaterialTheme.colorScheme.secondaryContainer
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
-                            if (maxValue.longValue != 0L) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .width(64.dp)
-                                        .height(64.dp),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    progress = {
-                                        progressValue.longValue.toFloat() / maxValue.longValue.toFloat()
-                                    },
-                                )
-                            } else {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .width(64.dp)
-                                        .height(64.dp),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                )
-                            }
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.gamepad),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(36.dp)
+                            )
                         }
                     }
-                } else if (emulatorState == EmulatorState.Paused && emulatorActiveGame == game.info.path) {
-                    Card(modifier = Modifier.padding(5.dp)) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_play),
-                            contentDescription = null
-                        )
-                    }
-                }
 
-                if (game.hasFlag(GameFlag.Locked) || game.hasFlag(GameFlag.Trial)) {
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+                    if (game.progressList.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(withAlpha(Color.DarkGray, 0.6f))
+                        ) {}
+
+                        val progressChannel = game.progressList.first().id
+                        val progress = ProgressRepository.getItem(progressChannel)
+                        val progressValue = progress?.value?.value
+                        val maxValue = progress?.value?.max
+
+                        if (progressValue != null && maxValue != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxSize()
+                              ) {
+                                if (maxValue.longValue != 0L) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .width(48.dp)
+                                            .height(48.dp),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        progress = {
+                                            progressValue.longValue.toFloat() / maxValue.longValue.toFloat()
+                                        },
+                                    )
+                                } else {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .width(48.dp)
+                                            .height(48.dp),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    } else if (emulatorState == EmulatorState.Paused && emulatorActiveGame == game.info.path) {
                         Card(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.TopStart),
+                            colors = androidx.compose.material3.CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_play),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(18.dp)
+                            )
+                        }
+                    }
+
+                    if (game.hasFlag(GameFlag.Locked) || game.hasFlag(GameFlag.Trial)) {
+                        Card(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.TopEnd),
                             onClick = {
                                 installKeyLauncher.launch("*/*")
-                            }) {
-
+                            },
+                            colors = androidx.compose.material3.CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_lock),
                                 contentDescription = "Game is locked",
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
                                 modifier = Modifier
-                                    .size(30.dp)
-                                    .padding(7.dp)
+                                    .size(24.dp)
+                                    .padding(4.dp)
                             )
                         }
                     }
                 }
 
-//                val name = game.info.name.value
-//                if (name != null) {
-//                    Row(
-//                        verticalAlignment = Alignment.Bottom,
-//                        horizontalArrangement = Arrangement.Center,
-//                        modifier = Modifier.fillMaxSize()
-//                    ) {
-//                        Text(name, textAlign = TextAlign.Center)
-//                    }
-//                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = game.info.name.value ?: "Unknown Game",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = game.info.path.substringAfterLast("/").substringBeforeLast("."),
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "v${game.info.version.value ?: "1.00"}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
+                }
             }
         }
     }
@@ -346,11 +438,12 @@ fun GameItem(game: Game) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GamesScreen() {
+fun GamesScreen(navigateToGameSettings: (String) -> Unit = {}) {
     val context = LocalContext.current
     val games = remember { GameRepository.list() }
     val isRefreshing by remember { GameRepository.isRefreshing }
     val state = rememberPullToRefreshState()
+    var selectedGameForSonyUpdates by remember { mutableStateOf<Game?>(null) }
     var uiUpdateVersion by remember { mutableStateOf<String?>(null) }
     var uiUpdate by remember { mutableStateOf(false) }
     var uiUpdateProgressValue by remember { mutableLongStateOf(0) }
@@ -589,16 +682,259 @@ fun GamesScreen() {
             }
         },
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 320.dp * 0.6f),
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(count = games.size, key = { index -> games[index].info.path }) { index ->
-                GameItem(games[index])
+        if (games.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.gamepad),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                        modifier = Modifier.size(96.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.no_games_found),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.no_games_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            val lazyGridState = rememberLazyGridState()
+
+            LaunchedEffect(games.size) {
+                net.rpcsx.ui.navigation.FrameNavigationManager.totalGamesCount = games.size
+                net.rpcsx.ui.navigation.FrameNavigationManager.onPerformGameBoot = { gameIndex ->
+                    if (gameIndex in games.indices) {
+                        val targetGame = games[gameIndex]
+                        if (!targetGame.hasFlag(GameFlag.Locked) && targetGame.findProgress(GameProgressType.Compile) == null) {
+                            GameRepository.onBoot(targetGame)
+                            val emulatorWindow = Intent(context, RPCSXActivity::class.java)
+                            emulatorWindow.putExtra("path", targetGame.info.path)
+                            context.startActivity(emulatorWindow)
+                        }
+                    }
+                }
+            }
+
+            val isGamepadConnected = net.rpcsx.GamepadRepository.slots.isNotEmpty() && net.rpcsx.ui.navigation.FrameNavigationManager.isGamepadInputActive
+            val isGridActive = isGamepadConnected && net.rpcsx.ui.navigation.FrameNavigationManager.activeFrame == net.rpcsx.ui.navigation.NavigationFrame.GAMES_GRID
+            val isGridFrameFocused = isGridActive && net.rpcsx.ui.navigation.FrameNavigationManager.focusLevel == net.rpcsx.ui.navigation.FocusLevel.FRAME_LEVEL
+            val isGridItemFocused = isGridActive && net.rpcsx.ui.navigation.FrameNavigationManager.focusLevel == net.rpcsx.ui.navigation.FocusLevel.ITEM_LEVEL
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+                    .then(
+                        if (isGridFrameFocused) Modifier.border(3.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(24.dp))
+                        else Modifier
+                    )
+            ) {
+                LazyVerticalGrid(
+                    state = lazyGridState,
+                    columns = GridCells.Adaptive(minSize = 160.dp),
+                    contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = net.rpcsx.ui.navigation.LocalDockPadding.current),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    if (event.type == PointerEventType.Scroll) {
+                                        val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+                                        if (delta != 0f) {
+                                            coroutineScope.launch {
+                                                lazyGridState.scrollBy(delta * 120f)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                ) {
+                    items(count = games.size, key = { index -> games[index].info.path }) { index ->
+                        val game = games[index]
+                        val isFocused = isGridItemFocused && index == net.rpcsx.ui.navigation.FrameNavigationManager.activeGameIndex
+                        GameItem(
+                            game = game,
+                            isCardFocused = isFocused,
+                            onOpenSettings = { navigateToGameSettings(game.info.path) },
+                            onCheckSonyUpdates = { selectedGameForSonyUpdates = game }
+                        )
+                    }
+                }
             }
         }
+
+        if (selectedGameForSonyUpdates != null) {
+            SonyUpdateDialog(
+                game = selectedGameForSonyUpdates!!,
+                onDismiss = { selectedGameForSonyUpdates = null }
+            )
+        }
     }
+}
+
+@Composable
+fun SonyUpdateDialog(
+    game: Game,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(true) }
+    var updates by remember { mutableStateOf<List<net.rpcsx.utils.SonyGameUpdatePkg>>(emptyList()) }
+    var downloadingPkg by remember { mutableStateOf<net.rpcsx.utils.SonyGameUpdatePkg?>(null) }
+    var downloadProgressValue by remember { mutableLongStateOf(0L) }
+    var downloadProgressMax by remember { mutableLongStateOf(0L) }
+    var statusText by remember { mutableStateOf("Conectando con el servidor de Sony...") }
+
+    val serial = remember(game) {
+        val pathSegment = game.info.path.substringAfterLast("/").substringBeforeLast(".")
+        net.rpcsx.utils.SonyGameUpdateDownloader.cleanTitleId(pathSegment)
+    }
+
+    LaunchedEffect(serial) {
+        isLoading = true
+        statusText = "Buscando actualizaciones para $serial..."
+        val list = net.rpcsx.utils.SonyGameUpdateDownloader.fetchGameUpdates(serial)
+        updates = list
+        isLoading = false
+        if (list.isEmpty()) {
+            statusText = "No se encontraron actualizaciones oficiales para $serial en los servidores de Sony."
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = { if (downloadingPkg == null) onDismiss() },
+        title = { Text("Actualizaciones de Sony (PSN) - $serial") },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                if (isLoading) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(statusText, style = MaterialTheme.typography.bodySmall)
+                    }
+                } else if (downloadingPkg != null) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    ) {
+                        Text("Descargando actualización v${downloadingPkg!!.version}...", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (downloadProgressMax > 0) {
+                            LinearProgressIndicator(
+                                progress = { downloadProgressValue / downloadProgressMax.toFloat() },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            val mbDone = downloadProgressValue / (1024.0 * 1024.0)
+                            val mbTotal = downloadProgressMax / (1024.0 * 1024.0)
+                            Text(String.format("%.1f MB / %.1f MB", mbDone, mbTotal), style = MaterialTheme.typography.bodySmall)
+                        } else {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                } else if (updates.isEmpty()) {
+                    Text(statusText, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    Text("Actualizaciones oficiales disponibles (${updates.size}):", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    androidx.compose.foundation.lazy.LazyColumn(modifier = Modifier.heightIn(max = 240.dp)) {
+                        items(updates.size) { index ->
+                            val pkg = updates[index]
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Versión ${pkg.version}", fontWeight = FontWeight.Bold)
+                                    Text("Tamaño: ${pkg.sizeFormatted}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                androidx.compose.material3.Button(
+                                    onClick = {
+                                        downloadingPkg = pkg
+                                        scope.launch {
+                                            val file = net.rpcsx.utils.SonyGameUpdateDownloader.downloadUpdatePkg(context, pkg) { done, max ->
+                                                downloadProgressValue = done
+                                                downloadProgressMax = max
+                                            }
+                                            downloadingPkg = null
+                                            if (file != null) {
+                                                // Uri.fromFile() produce un file:// URI que ContentResolver
+                                                // rechaza en Android 7+ (FileUriExposedException / fd null).
+                                                // Usamos ParcelFileDescriptor.open() para obtener el fd
+                                                // nativo directamente del File, sin pasar por ContentResolver.
+                                                val installProgress = ProgressRepository.create(
+                                                    context,
+                                                    context.getString(R.string.package_installation)
+                                                )
+                                                GameRepository.createGameInstallEntry(installProgress)
+                                                kotlin.concurrent.thread(isDaemon = true) {
+                                                    val pfd = try {
+                                                        android.os.ParcelFileDescriptor.open(
+                                                            file,
+                                                            android.os.ParcelFileDescriptor.MODE_READ_ONLY
+                                                        )
+                                                    } catch (e: Exception) {
+                                                        e.printStackTrace()
+                                                        try { ProgressRepository.onProgressEvent(installProgress, -1, 0) } catch (_: Exception) {}
+                                                        return@thread
+                                                    }
+                                                    pfd.use {
+                                                        if (!RPCSX.instance.install(it.fd, installProgress, file.absolutePath)) {
+                                                            try { ProgressRepository.onProgressEvent(installProgress, -1, 0) } catch (_: Exception) {}
+                                                        }
+                                                    }
+                                                }
+                                                android.widget.Toast.makeText(context, "Instalando actualización v${pkg.version}...", android.widget.Toast.LENGTH_LONG).show()
+                                                onDismiss()
+                                            } else {
+                                                android.widget.Toast.makeText(context, "Error al descargar la actualización", android.widget.Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    Text("Descargar")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (downloadingPkg == null) {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    Text("Cerrar")
+                }
+            }
+        }
+    )
 }
 
 @Preview

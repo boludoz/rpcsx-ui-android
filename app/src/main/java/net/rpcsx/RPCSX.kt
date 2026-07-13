@@ -45,6 +45,8 @@ enum class EmulatorState {
     }
 }
 
+// Mirror of the core's game_boot_result (Emu/System.h) - the ordinals MUST
+// match, entries here are mapped by position.
 enum class BootResult
 {
     NoErrors,
@@ -57,12 +59,14 @@ enum class BootResult
     DecryptionError,
     FileCreationError,
     FirmwareMissing,
+    FirmwareVersion,
     UnsupportedDiscType,
     SavestateCorrupted,
     SavestateVersionUnsupported,
     StillRunning,
     AlreadyAdded,
-    CurrentlyRestricted;
+    CurrentlyRestricted,
+    DatabaseConfigMissing;
 
     companion object {
         fun fromInt(value: Int) = entries.first { it.ordinal == value }
@@ -74,18 +78,44 @@ class RPCSX {
     external fun getLibraryVersion(path: String): String?
     external fun initialize(rootDir: String, user: String): Boolean
     external fun installFw(fd: Int, progressId: Long): Boolean
-    external fun install(fd: Int, progressId: Long): Boolean
+    external fun install(fd: Int, progressId: Long, gamePath: String): Boolean
     external fun installKey(fd: Int, requestId: Long, gamePath: String): Boolean
-    external fun boot(path: String): Int
+    external fun boot(path: String, configPath: String): Int
+    // Boots an ISO from a detached SAF file descriptor (works for any
+    // DocumentsProvider, including Downloads). Ownership of fd transfers to
+    // native.
+    external fun bootIsoFd(fd: Int, configPath: String): Int
     external fun surfaceEvent(surface: Surface, event: Int): Boolean
     external fun usbDeviceEvent(fd: Int, vendorId: Int, productId: Int, event: Int): Boolean
     external fun processCompilationQueue(): Boolean
     external fun startMainThreadProcessor(): Boolean
     external fun overlayPadData(digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
+    external fun multiPadData(playerIndex: Int, digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
+    external fun getMaxVirtualPads(): Int
+    // Backend rumble strength for a virtual pad: (large << 8) | small, each
+    // 0-255. 0 when idle. Polled by RPCSXActivity to drive the vibrator.
+    external fun getPadVibration(playerIndex: Int): Int
     external fun collectGameInfo(rootDir: String, progressId: Long): Boolean
+    // Resolves a SAF tree URI to a real filesystem path natively and scans it
+    // in place (no copy). Returns false if the URI cannot be resolved to a
+    // real, readable path (e.g. cloud storage) so the caller can show an
+    // explicit error instead of silently copying.
+    external fun collectGameInfoFromUri(treeUri: String, progressId: Long): Boolean
+    external fun collectIsoInfoFromUri(treeUri: String, progressId: Long): Boolean
+    external fun resolveTreeUriToPath(treeUri: String): String?
     external fun systemInfo(): String
-    external fun settingsGet(path: String): String
-    external fun settingsSet(path: String, value: String): Boolean
+    // Settings bridge for the GLOBAL config.json (JSON content, edited by
+    // the core itself). titleId is ignored (kept for JNI compatibility);
+    // per-game overrides are handled entirely by GameConfig.kt.
+    external fun settingsGet(titleId: String, path: String): String
+    external fun settingsSet(titleId: String, path: String, value: String): Boolean
+    external fun settingsRemove(titleId: String, path: String): Boolean
+    // Pushes one per-game override into the running game's live config (no
+    // file is touched; dynamic settings only). Empty value = revert to the
+    // effective global value.
+    external fun settingsLiveApply(path: String, value: String): Boolean
+    
+    external fun shutdown()
     external fun getState() : Int
     external fun kill()
     external fun resume()
@@ -110,8 +140,8 @@ class RPCSX {
         var state = mutableStateOf(EmulatorState.Stopped)
         var activeLibrary = mutableStateOf<String?>(null)
 
-        fun boot(path: String): BootResult {
-            return BootResult.fromInt(instance.boot(path))
+        fun boot(path: String, configPath: String = ""): BootResult {
+            return BootResult.fromInt(instance.boot(path, configPath))
         }
 
         fun updateState() {

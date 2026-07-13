@@ -45,6 +45,12 @@ class ProgressRepository {
     companion object {
         private val instance = ProgressRepository()
 
+        // Native code (and background service threads) call onProgressEvent
+        // from arbitrary threads. Compose state must only be written from the
+        // main thread, so the actual mutation is marshaled here instead of
+        // happening inline.
+        private val mainHandler = Handler(Looper.getMainLooper())
+
         fun getItem(id: Long?) =
             if (id != null) instance.progressHandlers[id]?.progressEntry else null
 
@@ -53,16 +59,18 @@ class ProgressRepository {
         fun onProgressEvent(id: Long, value: Long, max: Long, message: String? = null): Boolean {
             val item = instance.progressHandlers[id] ?: return false
 
-            item.progressEntry.value.apply {
-                this.value.longValue = value
-                this.max.longValue = max
-                this.message.value = message ?: this.message.value
-            }
+            mainHandler.post {
+                item.progressEntry.value.apply {
+                    this.value.longValue = value
+                    this.max.longValue = max
+                    this.message.value = message ?: this.message.value
+                }
 
-            item.handler(ProgressUpdateEntry(value, max, item.progressEntry.value.message.value))
+                item.handler(ProgressUpdateEntry(value, max, item.progressEntry.value.message.value))
 
-            if (item.progressEntry.value.isFinished()) {
-                cancel(id)
+                if (item.progressEntry.value.isFinished()) {
+                    cancel(id)
+                }
             }
 
             return true

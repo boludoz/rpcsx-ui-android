@@ -25,7 +25,6 @@ import androidx.core.graphics.scale
 import net.rpcsx.Digital1Flags
 import net.rpcsx.Digital2Flags
 import net.rpcsx.R
-import net.rpcsx.RPCSX
 import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.GeneralSettings.int
 import kotlin.math.min
@@ -66,9 +65,30 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
     private val sticks = mutableListOf<PadOverlayStick>()
     private val prefs by lazy { context!!.getSharedPreferences("PadOverlayPrefs", Context.MODE_PRIVATE) }
     private val vibrator by lazy { 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-            (context?.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager)?.defaultVibrator 
-        else context?.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            context?.getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            context?.getSystemService(Vibrator::class.java)
+        }
+    }
+
+    private val vibrationExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
+
+    private fun performHapticFeedback() {
+        vibrationExecutor.execute {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try {
+                        vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+                    } catch (_: Exception) {
+                        vibrator?.vibrate(VibrationEffect.createOneShot(15L, VibrationEffect.DEFAULT_AMPLITUDE))
+                    }
+                } else {
+                    @Suppress("DEPRECATION")
+                    vibrator?.vibrate(15L)
+                }
+            } catch (_: Exception) {}
+        }
     }
     private var selectedInput: PadOverlayItem? = null
         set(value) {
@@ -77,6 +97,12 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
         }
         
     var onSelectedInputChange: ((Any?) -> Unit)? = null
+    // Fired whenever a touch changes `state`. The activity owns actually
+    // sending pad data to native, so it can merge this overlay's state with
+    // slot 0's physical controller instead of one silently overwriting the
+    // other's currently-held buttons.
+    var onPadStateChanged: (() -> Unit)? = null
+    val currentState: State get() = state
     var isEditing = false
 
     private var fadeHandler: Handler? = null
@@ -200,12 +226,16 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
             pressDigitalIndex = 0,
             pressBit = Digital1Flags.CELL_PAD_CTRL_L3.bit
         )
+        val l3DefX = totalWidth / 2 - buttonSize * 2 - l3r3Size
+        val l3DefY = (totalHeight - buttonSize * 2.3).toInt()
         l3.alpha = idleAlpha
+        l3.defaultPosition = Pair(l3DefX, l3DefY)
+        l3.defaultSize = Pair(l3r3Size, l3r3Size)
         l3.setBounds(
-            totalWidth / 2 - buttonSize * 2 - l3r3Size,
-            (totalHeight - buttonSize * 2.3).toInt(),
-            totalWidth / 2 - buttonSize * 2,
-            totalHeight - (buttonSize * 2.3).toInt() + l3r3Size
+            GeneralSettings["stick_l_${Digital1Flags.CELL_PAD_CTRL_L3.bit}_x"] as Int? ?: l3DefX,
+            GeneralSettings["stick_l_${Digital1Flags.CELL_PAD_CTRL_L3.bit}_y"] as Int? ?: l3DefY,
+            (GeneralSettings["stick_l_${Digital1Flags.CELL_PAD_CTRL_L3.bit}_x"] as Int? ?: l3DefX) + l3r3Size,
+            (GeneralSettings["stick_l_${Digital1Flags.CELL_PAD_CTRL_L3.bit}_y"] as Int? ?: l3DefY) + l3r3Size
         )
 
         val r3 = PadOverlayStick(
@@ -216,12 +246,16 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
             pressDigitalIndex = 0,
             pressBit = Digital1Flags.CELL_PAD_CTRL_R3.bit
         )
+        val r3DefX = totalWidth / 2 + buttonSize * 2
+        val r3DefY = totalHeight - (buttonSize * 2.3).toInt()
         r3.alpha = idleAlpha
+        r3.defaultPosition = Pair(r3DefX, r3DefY)
+        r3.defaultSize = Pair(l3r3Size, l3r3Size)
         r3.setBounds(
-            totalWidth / 2 + buttonSize * 2,
-            totalHeight - (buttonSize * 2.3).toInt(),
-            totalWidth / 2 + buttonSize * 2 + l3r3Size,
-            totalHeight - (buttonSize * 2.3).toInt() + l3r3Size
+            GeneralSettings["stick_r_${Digital1Flags.CELL_PAD_CTRL_R3.bit}_x"] as Int? ?: r3DefX,
+            GeneralSettings["stick_r_${Digital1Flags.CELL_PAD_CTRL_R3.bit}_y"] as Int? ?: r3DefY,
+            (GeneralSettings["stick_r_${Digital1Flags.CELL_PAD_CTRL_R3.bit}_x"] as Int? ?: r3DefX) + l3r3Size,
+            (GeneralSettings["stick_r_${Digital1Flags.CELL_PAD_CTRL_R3.bit}_y"] as Int? ?: r3DefY) + l3r3Size
         )
 
         sticks += l3
@@ -293,7 +327,7 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                 Digital2Flags.CELL_PAD_CTRL_R2
             ),
         )
-        editables = arrayOf(*buttons, dpad, triangleSquareCircleCross)
+        editables = arrayOf(*buttons, dpad, triangleSquareCircleCross, l3, r3)
         setWillNotDraw(false)
         requestFocus()
 
@@ -347,17 +381,20 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                 return@setOnTouchListener true
             }
             
+            val isDown = action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN
+            var newlyPressed = false
+
             val force =
                 action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP || action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_MOVE
 
             editables.forEach { editable ->
                 if (force || (!hit && editable.contains(x, y) && editable.enabled)) {
-                    hit = editable.onTouch(motionEvent, pointerIndex, state)
+                    val onTouchHit = editable.onTouch(motionEvent, pointerIndex, state)
+                    if (onTouchHit) {
+                        if (isDown) newlyPressed = true
+                        hit = true
+                    }
                 }
-            }
-        
-            if (hit && GeneralSettings["haptic_feedback"] as Boolean? ?: true) {
-                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
             }
 
             if (force || !hit) {
@@ -366,11 +403,10 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                         continue
                     }
 
-                    val touchResult = sticks[i].onTouch(motionEvent, pointerIndex, state)
-                    hit = if (touchResult < 0) {
-                        true
-                    } else {
-                        touchResult == 1
+                    val touchResult = sticks[i].onTouchResult(motionEvent, pointerIndex, state)
+                    if (touchResult != 0) {
+                        if (isDown && touchResult == 1) newlyPressed = true
+                        hit = touchResult < 0 || touchResult == 1
                     }
                 }
             }
@@ -378,24 +414,22 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
             if (force || !hit) {
                 for (i in floatingSticks.indices) {
                     val stick = floatingSticks[i] ?: continue
-                    val touchResult = stick.onTouch(motionEvent, pointerIndex, state)
+                    val touchResult = stick.onTouchResult(motionEvent, pointerIndex, state)
                     if (touchResult < 0) {
                         floatingSticks[i] = null
                         hit = true
-                    } else {
-                        hit = touchResult == 1
+                    } else if (touchResult == 1) {
+                        if (isDown) newlyPressed = true
+                        hit = true
                     }
                 }
             }
 
-            RPCSX.instance.overlayPadData(
-                state.digital[0],
-                state.digital[1],
-                state.leftStickX,
-                state.leftStickY,
-                state.rightStickX,
-                state.rightStickY
-            )
+            if (newlyPressed && (GeneralSettings["haptic_feedback"] as Boolean? ?: true)) {
+                performHapticFeedback()
+            }
+
+            onPadStateChanged?.invoke()
 
             if (!hit && (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)) {
                 val xInFloatingArea = x > buttonSize * 2 && x < totalWidth - buttonSize * 2
@@ -562,12 +596,12 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
     }
 
     fun setButtonScale(value: Int) {
-        selectedInput!!.setScale(value)
+        selectedInput?.setScale(value) ?: return
         invalidate()
     }
 
     fun setButtonOpacity(value: Int) {
-        selectedInput!!.setOpacity(value)
+        selectedInput?.setOpacity(value) ?: return
         invalidate()
     }
 
