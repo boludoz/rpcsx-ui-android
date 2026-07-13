@@ -26,7 +26,11 @@ import net.rpcsx.R
 
 const val DefaultGpuDriverChannel = "https://github.com/K11MCH1/AdrenoToolsDrivers"
 const val ReleaseUiChannel = "https://github.com/RPCSX/rpcsx-ui-android"
-const val DevUiChannel = "https://github.com/RPCSX/rpcsx-ui-android-build"
+// Points at this fork (boludoz/rpcsx-ui-android) instead of the upstream
+// RPCSX/rpcsx-ui-android-build repo: the upstream UI build doesn't have the
+// multi-controller/channel changes made on top of it here, so self-updating
+// from upstream would silently replace this fork's UI with an incompatible one.
+const val DevUiChannel = "https://github.com/boludoz/rpcsx-ui-android"
 const val ReleaseRpcsxChannel = "https://github.com/RPCSX/rpcsx"
 // Points at this fork (boludoz/rpcsx) instead of the upstream RPCSX/rpcsx-build
 // repo, since RpcsxUpdater currently always fetches from this channel and this
@@ -87,7 +91,7 @@ fun UpdateChannelsScreen(
             RegularPreference(
                 title = stringResource(R.string.ui_update_channel),
                 leadingIcon = null,
-                subtitle = { PreferenceSubtitle(text = prefs.getString("ui_channel", ReleaseUiChannel)!!) },
+                subtitle = { PreferenceSubtitle(text = prefs.getString("ui_channel", DevUiChannel)!!) },
                 onClick = {
                     navigateTo("ui_channels")
                 })

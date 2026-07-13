@@ -152,7 +152,7 @@ fun AppNavHost() {
 
     if (prefs.getString("ui_channel", "") == "") {
         prefs.edit {
-            putString("ui_channel", ReleaseUiChannel)
+            putString("ui_channel", DevUiChannel)
         }
     }
 
