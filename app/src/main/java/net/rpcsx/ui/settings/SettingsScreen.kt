@@ -53,6 +53,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -688,7 +689,16 @@ fun SettingsScreen(
                     icon = { Icon(painterResource(R.drawable.gamepad), null) },
                     description = stringResource(R.string.controls_description),
                     onClick = { navigateTo("controls") }
-                )       
+                )
+            }
+
+            item(key = "graphics") {
+                HomePreference(
+                    title = stringResource(R.string.graphics),
+                    icon = { Icon(painterResource(R.drawable.ic_palette), null) },
+                    description = stringResource(R.string.graphics_description),
+                    onClick = { navigateTo("graphics") }
+                )
             }
 
             item(key = "share_logs") {
@@ -795,6 +805,113 @@ fun ControllerSettings(
     }
 }
 
+private const val OutputScalingPath = "Video@@Output Scaling Mode"
+private const val FsrSharpeningPath = "Video@@Vulkan@@FidelityFX CAS Sharpening Intensity"
+private const val FsrScalingValue = "FidelityFX Super Resolution"
+
+// Dedicated, discoverable controls for the backend's output scaling
+// (nearest/bilinear/FSR) and FSR's RCAS sharpening strength, both already
+// exposed generically by settingsGet/settingsSet under Video@@... — this
+// just surfaces them directly instead of requiring users to dig through
+// the generic Advanced Settings tree (Video -> Vulkan -> ...) to find them.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GraphicsSettings(
+    modifier: Modifier = Modifier,
+    navigateBack: () -> Unit
+) {
+    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val context = LocalContext.current
+
+    val scalingNode = remember { JSONObject(RPCSX.instance.settingsGet(OutputScalingPath)) }
+    var scalingValue by remember { mutableStateOf(scalingNode.getString("value")) }
+    val scalingVariants = remember {
+        val variantsJson = scalingNode.getJSONArray("variants")
+        (0 until variantsJson.length()).map { variantsJson.getString(it) }
+    }
+
+    val sharpeningNode = remember { JSONObject(RPCSX.instance.settingsGet(FsrSharpeningPath)) }
+    var sharpeningValue by remember { mutableFloatStateOf(sharpeningNode.getString("value").toFloat()) }
+    val sharpeningMin = remember { sharpeningNode.getString("min").toFloat() }
+    val sharpeningMax = remember { sharpeningNode.getString("max").toFloat() }
+
+    Scaffold(
+        modifier = Modifier
+            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+            .then(modifier),
+        topBar = {
+            LargeTopAppBar(
+                title = { Text(text = stringResource(R.string.graphics), fontWeight = FontWeight.Medium) },
+                scrollBehavior = topBarScrollBehavior,
+                navigationIcon = {
+                    IconButton(onClick = navigateBack) {
+                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
+                    }
+                }
+            )
+        }
+    ) { contentPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                SingleSelectionDialog(
+                    currentValue = if (scalingValue in scalingVariants) scalingValue else scalingVariants[0],
+                    values = scalingVariants,
+                    title = stringResource(R.string.output_scaling),
+                    icon = null,
+                    onValueChange = { value ->
+                        if (RPCSX.instance.settingsSet(OutputScalingPath, "\"$value\"")) {
+                            scalingValue = value
+                        } else {
+                            AlertDialogQueue.showDialog(
+                                context.getString(R.string.error),
+                                context.getString(
+                                    R.string.failed_to_assign_value,
+                                    value,
+                                    OutputScalingPath
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+
+            item {
+                SliderPreference(
+                    value = sharpeningValue,
+                    valueRange = sharpeningMin..sharpeningMax,
+                    title = stringResource(R.string.fsr_sharpening),
+                    subtitle = if (scalingValue == FsrScalingValue) null else stringResource(R.string.fsr_sharpening_requires_fsr),
+                    enabled = scalingValue == FsrScalingValue,
+                    steps = (sharpeningMax - sharpeningMin).toInt() - 1,
+                    valueContent = { PreferenceValue(text = "${sharpeningValue.toInt()}%") },
+                    onValueChange = { value ->
+                        if (RPCSX.instance.settingsSet(FsrSharpeningPath, value.toLong().toString())) {
+                            sharpeningValue = value
+                        } else {
+                            AlertDialogQueue.showDialog(
+                                context.getString(R.string.error),
+                                context.getString(
+                                    R.string.failed_to_assign_value,
+                                    value.toString(),
+                                    FsrSharpeningPath
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
 // Per-player key mapping screen: same remap flow the old single global
 // screen had, but scoped to one of the independent per-slot bindings.
 @OptIn(ExperimentalMaterial3Api::class)
@@ -835,7 +952,6 @@ fun PlayerControllerSettings(
         var currentInputName by remember { mutableStateOf("") }
         val requester = remember { FocusRequester() }
         val noDeviceMessage = stringResource(R.string.automatic_mapping_no_device)
-        val defaultsMessage = stringResource(R.string.automatic_mapping_defaults)
 
         LazyColumn(
             modifier = Modifier
@@ -873,7 +989,10 @@ fun PlayerControllerSettings(
                             inputBindings.putAll(InputBindingPrefs.loadBindings(playerSlot))
                             val message = matchedName?.let {
                                 context.getString(R.string.automatic_mapping_applied, it)
-                            } ?: defaultsMessage
+                            } ?: context.getString(
+                                R.string.automatic_mapping_defaults,
+                                device.name ?: "?",
+                            )
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                         }
                     }

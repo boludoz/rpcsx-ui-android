@@ -197,18 +197,29 @@ object GamepadAutoMapper {
     }
 
     private fun findByGuid(entries: List<DbEntry>, device: InputDevice): DbEntry? {
-        val descriptor = device.descriptor
-        if (!descriptor.isNullOrEmpty()) {
-            val legacy = legacyGuid(descriptor)
-            entries.find { it.guid == legacy }?.let { return it }
-        }
-
+        // Try the vendor/product-based GUID first: Android's InputDevice
+        // descriptor bakes in a per-*physical-unit* Bluetooth MAC address
+        // (via the kernel's EVIOCGUNIQ "uniq" field) whenever the device
+        // connected over Bluetooth, which is how most Android gamepads
+        // connect. That means two identical controller models end up with
+        // two different descriptors, so descriptor-based matching only
+        // ever succeeds against the exact physical unit that contributed
+        // that DB entry — effectively never for anyone else. Vendor/product
+        // IDs come from the device's HID descriptor instead (a property of
+        // the model, not the individual unit), so they're far more likely
+        // to actually match across different owners' pads.
         val modern = modernGuid(
             device.vendorId, device.productId,
             computeButtonMask(device), computeAxisMask(device),
         )
         if (modern != null) {
             entries.find { it.guid == modern }?.let { return it }
+        }
+
+        val descriptor = device.descriptor
+        if (!descriptor.isNullOrEmpty()) {
+            val legacy = legacyGuid(descriptor)
+            entries.find { it.guid == legacy }?.let { return it }
         }
 
         return null

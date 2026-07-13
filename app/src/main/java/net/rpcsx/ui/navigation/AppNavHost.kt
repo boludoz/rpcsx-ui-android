@@ -95,6 +95,7 @@ import net.rpcsx.ui.drivers.GpuDriversScreen
 import net.rpcsx.ui.games.GamesScreen
 import net.rpcsx.ui.settings.AdvancedSettingsScreen
 import net.rpcsx.ui.settings.ControllerSettings
+import net.rpcsx.ui.settings.GraphicsSettings
 import net.rpcsx.ui.settings.PlayerControllerSettings
 import net.rpcsx.ui.settings.SettingsScreen
 import net.rpcsx.ui.user.UsersScreen
@@ -252,6 +253,14 @@ fun AppNavHost() {
                 navigateBack = navController::navigateUp,
                 navigateTo = navigateTo,
                 onRefresh = refreshSettings
+            )
+        }
+
+        composable(
+            route = "graphics"
+        ) {
+            GraphicsSettings(
+                navigateBack = navController::navigateUp
             )
         }
 

@@ -86,6 +86,13 @@ class RPCSXActivity : Activity() {
             binding.oscToggle.setImageResource(if (binding.padOverlay.isInvisible) R.drawable.ic_osc_off else R.drawable.ic_show_osc)
         }
 
+        // The overlay and a physical slot-0 controller both target the same
+        // native pad, so route the overlay's touches through sendPadData
+        // too instead of it calling into native directly — otherwise
+        // whichever side last sent a full State() would silently drop the
+        // other's currently-held buttons.
+        binding.padOverlay.onPadStateChanged = { sendPadData(0, binding.padOverlay.currentState) }
+
         applyOverlayAutoVisibility(connectedGamepadCount() > 0)
 
         val gamePath = intent.getStringExtra("path")!!
@@ -312,13 +319,18 @@ class RPCSXActivity : Activity() {
 
     private fun sendPadData(slot: Int, state: State) {
         if (slot == 0 || maxVirtualPads <= 1) {
+            // Slot 0's native pad is shared by the on-screen overlay and a
+            // physical controller, so combine both sources here rather than
+            // sending `state` alone and clobbering whichever one didn't
+            // trigger this particular call.
+            val merged = mergedSlot0State(if (slot != 0) state else null)
             RPCSX.instance.overlayPadData(
-                state.digital[0],
-                state.digital[1],
-                state.leftStickX,
-                state.leftStickY,
-                state.rightStickX,
-                state.rightStickY
+                merged.digital[0],
+                merged.digital[1],
+                merged.leftStickX,
+                merged.leftStickY,
+                merged.rightStickX,
+                merged.rightStickY
             )
         } else {
             RPCSX.instance.multiPadData(
@@ -331,6 +343,39 @@ class RPCSXActivity : Activity() {
                 state.rightStickY
             )
         }
+    }
+
+    // Combines the overlay's touch state with slot 0's physical controller
+    // (if any), so both can be held/pressed at once instead of one input
+    // source overwriting the other. Digital buttons are OR'd together;
+    // sticks prefer whichever source is actually deflected from center,
+    // falling back to `extra` (a non-zero-slot controller being funneled
+    // into slot 0 on engine builds that only support one virtual pad) and
+    // finally to the physical slot-0 gamepad.
+    private fun mergedSlot0State(extra: State?): State {
+        val slot0DeviceId = GamepadRepository.slots[0]?.deviceId
+        val gamepadState = slot0DeviceId?.let { gamepadStates[it] } ?: State()
+        val overlayState = binding.padOverlay.currentState
+
+        fun isCentered(s: State) =
+            s.leftStickX == 127 && s.leftStickY == 127 && s.rightStickX == 127 && s.rightStickY == 127
+
+        val stickSource = when {
+            !isCentered(overlayState) -> overlayState
+            extra != null && !isCentered(extra) -> extra
+            else -> gamepadState
+        }
+
+        return State(
+            digital = intArrayOf(
+                gamepadState.digital[0] or overlayState.digital[0] or (extra?.digital?.get(0) ?: 0),
+                gamepadState.digital[1] or overlayState.digital[1] or (extra?.digital?.get(1) ?: 0),
+            ),
+            leftStickX = stickSource.leftStickX,
+            leftStickY = stickSource.leftStickY,
+            rightStickX = stickSource.rightStickX,
+            rightStickY = stickSource.rightStickY,
+        )
     }
 
     private fun enableFullScreenImmersive() {

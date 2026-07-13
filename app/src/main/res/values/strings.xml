@@ -95,7 +95,7 @@
     <string name="ask_if_reset_key">"Do you want to reset '%1$s' to its default value?"</string>
     <string name="automatic_mapping">Automatic Mapping</string>
     <string name="automatic_mapping_applied">Applied known mapping for %1$s</string>
-    <string name="automatic_mapping_defaults">No known controller matched — defaults applied</string>
+    <string name="automatic_mapping_defaults">No known mapping for %1$s — defaults applied</string>
     <string name="automatic_mapping_no_device">Connect a controller to this slot first</string>
     <string name="connected_controllers">Connected Controllers</string>
     <string name="controller_not_connected">Not connected</string>
@@ -110,12 +110,17 @@
     <string name="failed_to_assign_value">Failed to assign value %1$s to %2$s</string>
     <string name="failed_to_reset_key">Failed to reset %1$s</string>
     <string name="failed_to_view_internal_dir">Failed to view internal directory</string>
+    <string name="fsr_sharpening">FSR Sharpening</string>
+    <string name="fsr_sharpening_requires_fsr">Only applies when Output Scaling is set to FSR</string>
     <string name="gamepad_overlay">Gamepad Overlay</string>
+    <string name="graphics">Graphics</string>
+    <string name="graphics_description">Output scaling and FSR sharpening</string>
     <string name="install_custom_rpcsx_lib">Install Custom RPCSX Library</string>
     <string name="key_mappings">Key Mappings</string>
     <string name="log_not_found">Log file not found!</string>
     <string name="manage_settings">Manage Settings</string>
     <string name="no_activity_to_handle_action">No activity found to handle this action</string>
+    <string name="output_scaling">Output Scaling</string>
     <string name="perform_input">Perform Input</string>
     <string name="player_slot">Player %1$d</string>
     <string name="reset_setting">Reset Setting</string>
