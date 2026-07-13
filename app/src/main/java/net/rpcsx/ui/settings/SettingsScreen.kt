@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
+import android.view.InputDevice
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -95,6 +96,7 @@ import net.rpcsx.dialogs.AlertDialogQueue
 import net.rpcsx.provider.AppDataDocumentProvider
 import net.rpcsx.ui.common.ComposePreview
 import net.rpcsx.utils.FileUtil
+import net.rpcsx.utils.GamepadAutoMapper
 import net.rpcsx.utils.InputBindingPrefs
 import net.rpcsx.utils.RpcsxUpdater
 import org.json.JSONObject
@@ -821,6 +823,7 @@ fun PlayerControllerSettings(
             )
         }
     ) { contentPadding ->
+        val context = LocalContext.current
         val inputBindings = remember(playerSlot) {
             mutableStateMapOf<Int, Pair<Int, Int>>().apply {
                 putAll(InputBindingPrefs.loadBindings(playerSlot))
@@ -831,6 +834,8 @@ fun PlayerControllerSettings(
         var currentInput by remember { mutableStateOf(-1) }
         var currentInputName by remember { mutableStateOf("") }
         val requester = remember { FocusRequester() }
+        val noDeviceMessage = stringResource(R.string.automatic_mapping_no_device)
+        val defaultsMessage = stringResource(R.string.automatic_mapping_defaults)
 
         LazyColumn(
             modifier = Modifier
@@ -850,6 +855,28 @@ fun PlayerControllerSettings(
                         PreferenceValue(slot?.deviceName ?: stringResource(R.string.controller_not_connected))
                     },
                     onClick = {}
+                )
+            }
+
+            item {
+                RegularPreference(
+                    title = stringResource(R.string.automatic_mapping),
+                    leadingIcon = null,
+                    onClick = {
+                        val deviceId = GamepadRepository.slots[playerSlot]?.deviceId
+                        val device = deviceId?.let { InputDevice.getDevice(it) }
+                        if (device == null) {
+                            Toast.makeText(context, noDeviceMessage, Toast.LENGTH_SHORT).show()
+                        } else {
+                            val matchedName = GamepadAutoMapper.applyAutomaticMapping(context, playerSlot, device)
+                            inputBindings.clear()
+                            inputBindings.putAll(InputBindingPrefs.loadBindings(playerSlot))
+                            val message = matchedName?.let {
+                                context.getString(R.string.automatic_mapping_applied, it)
+                            } ?: defaultsMessage
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 )
             }
 
