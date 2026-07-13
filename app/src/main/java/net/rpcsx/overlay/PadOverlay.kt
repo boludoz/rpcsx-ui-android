@@ -25,7 +25,6 @@ import androidx.core.graphics.scale
 import net.rpcsx.Digital1Flags
 import net.rpcsx.Digital2Flags
 import net.rpcsx.R
-import net.rpcsx.RPCSX
 import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.GeneralSettings.int
 import kotlin.math.min
@@ -77,6 +76,12 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
         }
         
     var onSelectedInputChange: ((Any?) -> Unit)? = null
+    // Fired whenever a touch changes `state`. The activity owns actually
+    // sending pad data to native, so it can merge this overlay's state with
+    // slot 0's physical controller instead of one silently overwriting the
+    // other's currently-held buttons.
+    var onPadStateChanged: (() -> Unit)? = null
+    val currentState: State get() = state
     var isEditing = false
 
     private var fadeHandler: Handler? = null
@@ -388,14 +393,7 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                 }
             }
 
-            RPCSX.instance.overlayPadData(
-                state.digital[0],
-                state.digital[1],
-                state.leftStickX,
-                state.leftStickY,
-                state.rightStickX,
-                state.rightStickY
-            )
+            onPadStateChanged?.invoke()
 
             if (!hit && (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN)) {
                 val xInFloatingArea = x > buttonSize * 2 && x < totalWidth - buttonSize * 2

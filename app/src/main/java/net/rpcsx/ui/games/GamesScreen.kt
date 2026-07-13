@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,6 +56,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -166,9 +170,10 @@ fun GameItem(game: Game) {
         }
 
         Card(
-            shape = RectangleShape,
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(160.dp)
                 .combinedClickable(onClick = click@{
                     if (game.hasFlag(GameFlag.Locked)) {
                         AlertDialogQueue.showDialog(
@@ -216,7 +221,10 @@ fun GameItem(game: Game) {
                     if (game.info.name.value != "VSH") {
                         menuExpanded.value = true
                     }
-                })
+                }),
+            colors = androidx.compose.material3.CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            )
         ) {
             if (game.info.iconPath.value != null && !iconExists.value) {
                 if (game.progressList.isNotEmpty()) {
@@ -235,110 +243,147 @@ fun GameItem(game: Game) {
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .height(110.dp)
-                    .align(alignment = Alignment.CenterHorizontally)
-                    .fillMaxSize()
-            ) {
-                if (game.info.iconPath.value != null && iconExists.value) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    if (game.info.iconPath.value != null && iconExists.value) {
                         AsyncImage(
                             model = game.info.iconPath.value,
                             contentScale = if (game.info.name.value == "VSH") ContentScale.Fit else ContentScale.Crop,
                             contentDescription = null,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                        )
-                    }
-                }
-
-                if (game.progressList.isNotEmpty()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(withAlpha(Color.DarkGray, 0.6f))
-                    ) {}
-
-                    val progressChannel = game.progressList.first().id
-                    val progress = ProgressRepository.getItem(progressChannel)
-                    val progressValue = progress?.value?.value
-                    val maxValue = progress?.value?.max
-
-                    if (progressValue != null && maxValue != null) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    androidx.compose.ui.graphics.Brush.linearGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primaryContainer,
+                                            MaterialTheme.colorScheme.secondaryContainer
+                                        )
+                                    )
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
-                            if (maxValue.longValue != 0L) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .width(64.dp)
-                                        .height(64.dp),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    progress = {
-                                        progressValue.longValue.toFloat() / maxValue.longValue.toFloat()
-                                    },
-                                )
-                            } else {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .width(64.dp)
-                                        .height(64.dp),
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                )
-                            }
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.gamepad),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(36.dp)
+                            )
                         }
                     }
-                } else if (emulatorState == EmulatorState.Paused && emulatorActiveGame == game.info.path) {
-                    Card(modifier = Modifier.padding(5.dp)) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ic_play),
-                            contentDescription = null
-                        )
-                    }
-                }
 
-                if (game.hasFlag(GameFlag.Locked) || game.hasFlag(GameFlag.Trial)) {
-                    Row(
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
+                    if (game.progressList.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(withAlpha(Color.DarkGray, 0.6f))
+                        ) {}
+
+                        val progressChannel = game.progressList.first().id
+                        val progress = ProgressRepository.getItem(progressChannel)
+                        val progressValue = progress?.value?.value
+                        val maxValue = progress?.value?.max
+
+                        if (progressValue != null && maxValue != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxSize()
+                              ) {
+                                if (maxValue.longValue != 0L) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .width(48.dp)
+                                            .height(48.dp),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        progress = {
+                                            progressValue.longValue.toFloat() / maxValue.longValue.toFloat()
+                                        },
+                                    )
+                                } else {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .width(48.dp)
+                                            .height(48.dp),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    } else if (emulatorState == EmulatorState.Paused && emulatorActiveGame == game.info.path) {
                         Card(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.TopStart),
+                            colors = androidx.compose.material3.CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_play),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .size(18.dp)
+                            )
+                        }
+                    }
+
+                    if (game.hasFlag(GameFlag.Locked) || game.hasFlag(GameFlag.Trial)) {
+                        Card(
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.TopEnd),
                             onClick = {
                                 installKeyLauncher.launch("*/*")
-                            }) {
-
+                            },
+                            colors = androidx.compose.material3.CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_lock),
                                 contentDescription = "Game is locked",
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
                                 modifier = Modifier
-                                    .size(30.dp)
-                                    .padding(7.dp)
+                                    .size(24.dp)
+                                    .padding(4.dp)
                             )
                         }
                     }
                 }
 
-//                val name = game.info.name.value
-//                if (name != null) {
-//                    Row(
-//                        verticalAlignment = Alignment.Bottom,
-//                        horizontalArrangement = Arrangement.Center,
-//                        modifier = Modifier.fillMaxSize()
-//                    ) {
-//                        Text(name, textAlign = TextAlign.Center)
-//                    }
-//                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = game.info.name.value ?: "Unknown Game",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = game.info.path.substringAfterLast("/").substringBeforeLast("."),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
@@ -589,13 +634,49 @@ fun GamesScreen() {
             }
         },
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 320.dp * 0.6f),
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(count = games.size, key = { index -> games[index].info.path }) { index ->
-                GameItem(games[index])
+        if (games.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.gamepad),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                        modifier = Modifier.size(96.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.no_games_found),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.no_games_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 160.dp),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(count = games.size, key = { index -> games[index].info.path }) { index ->
+                    GameItem(games[index])
+                }
             }
         }
     }
