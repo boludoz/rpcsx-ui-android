@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">Добавить</string>
+    <string name="close">Закрыть</string>
+    <string name="error">Ошибка</string>
+    <string name="export">Экспорт</string>
+    <string name="import_">Импорт</string>
+    <string name="none">Нет</string>
+    <string name="reset">Сбросить</string>
+
+    <!-- AppNavHost -->
+    <string name="about">О программе</string>
+    <string name="copied_to_clipboard">Скопировано в буфер обмена!</string>
+    <string name="device_info">Информация об устройстве</string>
+    <string name="driver_download_channel">Канал загрузки драйверов GPU</string>
+    <string name="edit_overlay">Редактор сенсорных кнопок</string>
+    <string name="firmware">Прошивка</string>
+    <string name="rpcsx_download_channel">Канал загрузки RPCSX</string>
+    <string name="select_game_file">Установить PKG, ISO или RAP</string>
+    <string name="select_game_folder">Добавить папку с игрой</string>
+    <string name="settings">Настройки</string>
+    <string name="ui_update_channel">Канал обновлений RPCSX UI Android</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">Установка директории</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">Текущая версия: %1$s\nНовая версия: %2$s</string>
+    <string name="deleting_game">Удаление игры</string>
+    <string name="delete">Удалить</string>
+    <string name="downloading_latest_rpcsx">Загрузка последней версии RPCSX</string>
+    <string name="downloading_rpcsx">Загрузка RPCSX %1$s</string>
+    <string name="downloading_ui">Загрузка RPCSX UI Android %1$s</string>
+    <string name="failed_to_delete_game_cache">Не удалось удалить кэш игры</string>
+    <string name="failed_to_download_rpcsx">Не удалось загрузить RPCSX</string>
+    <string name="game_compiling_not_finished">Компиляция игры еще не завершена</string>
+    <string name="game_require_key">Для этой игры требуется ключ</string>
+    <string name="install_custom_version">Установить кастомную версию</string>
+    <string name="install_firmware_to_continue">Пожалуйста, установите необходимую прошивку для продолжения.</string>
+    <string name="install_rap_file">Установить RAP-файл</string>
+    <string name="license_installation">Установка лицензии</string>
+    <string name="missing_firmware">Отсутствует прошивка</string>
+    <string name="missing_key">Отсутствует ключ</string>
+    <string name="missing_rpcsx_lib">Отсутствует библиотека RPCSX</string>
+    <string name="retry">Повторить</string>
+    <string name="rpcsx_update_available">Доступно обновление RPCSX</string>
+    <string name="ui_update_available">Доступно обновление интерфейса</string>
+    <string name="unexpected_error">Непредвиденная ошибка</string>
+    <string name="update">Обновить</string>
+    <string name="wait_until_firmware_install">Пожалуйста, подождите успешной установки прошивки для продолжения.</string>
+    <string name="wait_until_game_compile">Пожалуйста, подождите завершения компиляции игры для продолжения.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">Выбрать</string>
+    <string name="download">Скачать</string>
+    <string name="downloading">Загрузка…</string>
+    <string name="drivers">Драйверы</string>
+    <string name="failed_to_load_selected_driver">Не удалось загрузить выбранный драйвер</string>
+    <string name="fetching">Получение…</string>
+    <string name="install">Установить</string>
+    <string name="installing">Установка…</string>
+    <string name="please_wait">Пожалуйста, подождите</string>
+    <string name="select_driver">Выберите драйвер GPU</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">Не удалось загрузить новую версию, восстановлена предыдущая.</string>
+    <string name="failed_to_update_rpcsx">Не удалось обновить RPCSX</string>
+    <string name="installation_progress">Прогресс установки</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">Сбросить %1$s?</string>
+    <string name="ask_if_reset_button_description">Вы уверены, что хотите сбросить %1$s?</string>
+    <string name="control_panel">Панель управления</string>
+    <string name="editing">Редактирование</string>
+    <string name="opacity">Прозрачность</string>
+    <string name="scale">Масштаб</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">Установка прошивки</string>
+    <string name="package_installation">Установка пакета</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">Ошибка: %1$s</string>
+    <string name="failed_to_boot">Не удалось запустить</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">Перезапустите RPCSX UI для применения изменений</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">Активный пользователь</string>
+    <string name="advanced_settings">Дополнительные настройки</string>
+    <string name="advanced_settings_description">Настройка расширенных параметров эмулятора</string>
+    <string name="ask_if_reset_key">"Сбросить значение '%1$s' по умолчанию?"</string>
+    <string name="automatic_mapping">Автоматическая раскладка</string>
+    <string name="automatic_mapping_applied">Применена известная раскладка для %1$s</string>
+    <string name="automatic_mapping_defaults">Нет известной раскладки для %1$s — применены настройки по умолчанию</string>
+    <string name="automatic_mapping_no_device">Сначала подключите контроллер к этому слоту</string>
+    <string name="connected_controllers">Подключенные контроллеры</string>
+    <string name="controller_not_connected">Не подключен</string>
+    <string name="controls">Управление</string>
+    <string name="controls_description">Настройка управления</string>
+    <string name="custom_driver">Собственный драйвер GPU</string>
+    <string name="custom_driver_description">Установка альтернативных драйверов для повышения производительности или точности</string>
+    <string name="custom_driver_not_supported">Драйверы не поддерживаются</string>
+    <string name="custom_driver_not_supported_description">Загрузка сторонних драйверов не поддерживается на этом устройстве.</string>
+    <string name="download_channels">Каналы загрузки</string>
+    <string name="enable_haptic_feedback">Включить тактильную отдачу</string>
+    <string name="failed_to_assign_value">Не удалось присвоить значение %1$s параметру %2$s</string>
+    <string name="failed_to_reset_key">Не удалось сбросить %1$s</string>
+    <string name="failed_to_view_internal_dir">Не удалось открыть внутреннюю директорию</string>
+    <string name="fsr_sharpening">Резкость FSR</string>
+    <string name="fsr_sharpening_requires_fsr">Применяется только при использовании масштабирования FSR</string>
+    <string name="gamepad_overlay">Наэкранный геймпад</string>
+    <string name="graphics">Графика</string>
+    <string name="graphics_description">Масштабирование вывода и резкость FSR</string>
+    <string name="install_custom_rpcsx_lib">Установить кастомную библиотеку RPCSX</string>
+    <string name="key_mappings">Назначение клавиш</string>
+    <string name="log_not_found">Файл лога не найден!</string>
+    <string name="manage_settings">Управление настройками</string>
+    <string name="no_activity_to_handle_action">Не найдено приложение для этого действия</string>
+    <string name="output_scaling">Масштабирование</string>
+    <string name="perform_input">Эмуляция ввода</string>
+    <string name="player_slot">Игрок %1$d</string>
+    <string name="reset_setting">Сбросить параметр</string>
+    <string name="search">Поиск</string>
+    <string name="share_log">Поделиться логом</string>
+    <string name="share_log_description">Поделиться лог-файлом RPCSX для помощи в отладке</string>
+    <string name="touchpad">Сенсорная панель</string>
+    <string name="users">Пользователи</string>
+    <string name="view_internal_dir">Открыть внутреннюю папку</string>
+    <string name="view_internal_dir_description">Открыть внутренний каталог RPCSX в файловом менеджере</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">Значение должно быть кратно шагу %1$d в диапазоне от %2$.0f до %3$.0f</string>
+    <string name="value">Значение</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">Не удалось обновить интерфейс</string>
+    <string name="permission_required">Требуется разрешение</string>
+    <string name="permission_required_description">Разрешите установку из этого источника для обновления.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">Введите URL репозитория</string>
+    <string name="select_repo">Выберите репозиторий</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">Остановить эмулятор?</string>
+    <string name="ask_if_stop_emu_description">Чтобы сменить пользователя, сначала необходимо остановить эмулятор.\n\nОстановить эмулятор сейчас?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Язык</string>
+    <string name="language_auto">По умолчанию (Автоопределение)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">Игры не найдены</string>
+    <string name="no_games_description">Нажмите кнопку \'+\' в правом нижнем углу, чтобы установить игру или выбрать папку.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">Дополнительные настройки графики</string>
+    <string name="advanced_graphics_description">Масштабирование FSR, резкость и другие расширенные параметры</string>
+    <string name="resolution_scale">Масштаб разрешения</string>
+    <string name="directory_not_resolvable">Эту папку нельзя использовать на месте. Выберите папку в локальном хранилище устройства и предоставьте «Разрешить доступ для управления всеми файлами» при появлении запроса.</string>
+    <string name="manage_directories">Управление каталогами</string>
+    <string name="game_settings">Настройки игры</string>
+    <string name="per_game_overrides_note">Изменения здесь применяются только к этой игре. Долгое нажатие на значение вернет его к глобальной настройке.</string>
+    <string name="custom_mapping">Пользовательская раскладка</string>
+    <string name="delete_cache">Удалить кэши</string>
+    <string name="delete_cache_desc">Удаляет скомпилированные кэши шейдеров и PPU этой игры</string>
+    <string name="cache_deleted">Кэши удалены</string>
+    <string name="reset_game_settings">Сбросить настройки игры</string>
+    <string name="reset_game_settings_desc">Удаляет пользовательскую конфигурацию и раскладку клавиш этой игры</string>
+    <string name="reset_game_settings_done">Настройки игры сброшены</string>
+    <string name="ask_if_reset_game">Сбросить все пользовательские настройки для %1$s?</string>
+    <string name="no_directories">Каталоги еще не добавлены. Добавьте папку с игрой или каталог ISO, чтобы увидеть их здесь.</string>
+    <string name="rescan_directory">Пересканировать</string>
+    <string name="remove_directory">Удалить</string>
+    <string name="directory_kind_games">Папка с игрой</string>
+    <string name="directory_kind_iso">Каталог ISO</string>
+    <string name="touchpad_port">Порт тачпада</string>
+    <string name="touchpad_port_desc">Каким портом игрока управляет наэкранный тачпад. Он делит порт с любым назначенным ему контроллером.</string>
+    <string name="touchpad_auto_hide">Автоматически скрывать тачпад</string>
+    <string name="touchpad_auto_hide_desc">Автоматически скрывает тачпад после периода неактивности.</string>
+    <string name="never">Никогда</string>
+    <string name="seconds_2">2 секунды</string>
+    <string name="seconds_5">5 секунд</string>
+    <string name="seconds_10">10 секунд</string>
+    <string name="seconds_15">15 секунд</string>
+    <string name="seconds_30">30 секунд</string>
+    <string name="controller_port">Порт</string>
+    <string name="select_iso_folder">Добавить каталог ISO</string>
+</resources>

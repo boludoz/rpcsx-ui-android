@@ -18,13 +18,23 @@
 struct RPCSXApi {
   bool (*overlayPadData)(int digital1, int digital2, int leftStickX,
                          int leftStickY, int rightStickX, int rightStickY);
+  bool (*multiPadData)(int playerIndex, int digital1, int digital2,
+                       int leftStickX, int leftStickY, int rightStickX,
+                       int rightStickY);
+  int (*getMaxVirtualPads)();
   bool (*initialize)(std::string_view rootDir, std::string_view user);
   bool (*processCompilationQueue)(JNIEnv *env);
   bool (*startMainThreadProcessor)(JNIEnv *env);
   bool (*collectGameInfo)(JNIEnv *env, std::string_view rootDir,
                           long progressId);
+  bool (*collectGameInfoFromUri)(JNIEnv *env, std::string_view treeUri,
+                                 long progressId);
+  bool (*collectIsoInfoFromUri)(JNIEnv *env, std::string_view treeUri,
+                                long progressId);
+  jstring (*resolveTreeUriToPath)(JNIEnv *env, std::string_view treeUri);
   void (*shutdown)();
-  int (*boot)(std::string_view path_);
+  int (*boot)(std::string_view path_, std::string_view configPath);
+  int (*bootIsoFd)(int fd, std::string_view configPath);
   int (*getState)();
   void (*kill)();
   void (*resume)();
@@ -35,14 +45,17 @@ struct RPCSXApi {
   bool (*installFw)(JNIEnv *env, int fd, long progressId);
   bool (*isInstallableFile)(jint fd);
   jstring (*getDirInstallPath)(JNIEnv *env, jint fd);
-  bool (*install)(JNIEnv *env, int fd, long progressId);
+  bool (*install)(JNIEnv *env, int fd, long progressId, std::string_view gamePath);
   bool (*installKey)(JNIEnv *env, int fd, long progressId,
                      std::string_view gamePath);
   std::string (*systemInfo)();
   void (*loginUser)(std::string_view userId);
   std::string (*getUser)();
-  std::string (*settingsGet)(std::string_view path);
-  bool (*settingsSet)(std::string_view path, std::string_view valueString);
+  std::string (*settingsGet)(std::string_view titleId, std::string_view path);
+  bool (*settingsSet)(std::string_view titleId, std::string_view path,
+                      std::string_view valueString);
+  bool (*settingsRemove)(std::string_view titleId, std::string_view path);
+  bool (*settingsLiveApply)(std::string_view path, std::string_view valueString);
   std::string (*getVersion)();
   void *(*setCustomDriver)(void *driverHandle);
 };
@@ -82,12 +95,18 @@ struct RPCSXLibrary : RPCSXApi {
 
     // clang-format off
     result.overlayPadData = reinterpret_cast<decltype(overlayPadData)>(dlsym(handle, "_rpcsx_overlayPadData"));
+    result.multiPadData = reinterpret_cast<decltype(multiPadData)>(dlsym(handle, "_rpcsx_multiPadData"));
+    result.getMaxVirtualPads = reinterpret_cast<decltype(getMaxVirtualPads)>(dlsym(handle, "_rpcsx_getMaxVirtualPads"));
     result.initialize = reinterpret_cast<decltype(initialize)>(dlsym(handle, "_rpcsx_initialize"));
     result.processCompilationQueue = reinterpret_cast<decltype(processCompilationQueue)>(dlsym(handle, "_rpcsx_processCompilationQueue"));
     result.startMainThreadProcessor = reinterpret_cast<decltype(startMainThreadProcessor)>(dlsym(handle, "_rpcsx_startMainThreadProcessor"));
     result.collectGameInfo = reinterpret_cast<decltype(collectGameInfo)>(dlsym(handle, "_rpcsx_collectGameInfo"));
+    result.collectGameInfoFromUri = reinterpret_cast<decltype(collectGameInfoFromUri)>(dlsym(handle, "_rpcsx_collectGameInfoFromUri"));
+    result.collectIsoInfoFromUri = reinterpret_cast<decltype(collectIsoInfoFromUri)>(dlsym(handle, "_rpcsx_collectIsoInfoFromUri"));
+    result.resolveTreeUriToPath = reinterpret_cast<decltype(resolveTreeUriToPath)>(dlsym(handle, "_rpcsx_resolveTreeUriToPath"));
     result.shutdown = reinterpret_cast<decltype(shutdown)>(dlsym(handle, "_rpcsx_shutdown"));
     result.boot = reinterpret_cast<decltype(boot)>(dlsym(handle, "_rpcsx_boot"));
+    result.bootIsoFd = reinterpret_cast<decltype(bootIsoFd)>(dlsym(handle, "_rpcsx_bootIsoFd"));
     result.getState = reinterpret_cast<decltype(getState)>(dlsym(handle, "_rpcsx_getState"));
     result.kill = reinterpret_cast<decltype(kill)>(dlsym(handle, "_rpcsx_kill"));
     result.resume = reinterpret_cast<decltype(resume)>(dlsym(handle, "_rpcsx_resume"));
@@ -103,8 +122,10 @@ struct RPCSXLibrary : RPCSXApi {
     result.systemInfo = reinterpret_cast<decltype(systemInfo)>(dlsym(handle, "_rpcsx_systemInfo"));
     result.loginUser = reinterpret_cast<decltype(loginUser)>(dlsym(handle, "_rpcsx_loginUser"));
     result.getUser = reinterpret_cast<decltype(getUser)>(dlsym(handle, "_rpcsx_getUser"));
-    result.settingsGet = reinterpret_cast<decltype(settingsGet)>(dlsym(handle, "_rpcsx_settingsGet"));
-    result.settingsSet = reinterpret_cast<decltype(settingsSet)>(dlsym(handle, "_rpcsx_settingsSet"));
+    result.settingsGet = reinterpret_cast<decltype(settingsGet)>(dlsym(handle, "_rpcsx_configGet"));
+    result.settingsSet = reinterpret_cast<decltype(settingsSet)>(dlsym(handle, "_rpcsx_configSet"));
+    result.settingsRemove = reinterpret_cast<decltype(settingsRemove)>(dlsym(handle, "_rpcsx_configRemove"));
+    result.settingsLiveApply = reinterpret_cast<decltype(settingsLiveApply)>(dlsym(handle, "_rpcsx_configLiveApply"));
     result.getVersion = reinterpret_cast<decltype(getVersion)>(dlsym(handle, "_rpcsx_getVersion"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
     // clang-format on
@@ -156,6 +177,28 @@ extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_overlayPadData(
                                  rightStickX, rightStickY);
 }
 
+// Older downloaded engine builds may not export _rpcsx_multiPadData yet, so
+// these two calls must tolerate a null function pointer instead of crashing.
+extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_multiPadData(
+    JNIEnv *, jobject, jint playerIndex, jint digital1, jint digital2,
+    jint leftStickX, jint leftStickY, jint rightStickX, jint rightStickY) {
+  if (rpcsxLib.multiPadData == nullptr) {
+    return false;
+  }
+
+  return rpcsxLib.multiPadData(playerIndex, digital1, digital2, leftStickX,
+                               leftStickY, rightStickX, rightStickY);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_net_rpcsx_RPCSX_getMaxVirtualPads(JNIEnv *, jobject) {
+  if (rpcsxLib.getMaxVirtualPads == nullptr) {
+    return 1;
+  }
+
+  return rpcsxLib.getMaxVirtualPads();
+}
+
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_initialize(
     JNIEnv *env, jobject, jstring rootDir, jstring user) {
   return rpcsxLib.initialize(unwrap(env, rootDir), unwrap(env, user));
@@ -176,6 +219,37 @@ extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_collectGameInfo(
   return rpcsxLib.collectGameInfo(env, unwrap(env, jrootDir), progressId);
 }
 
+extern "C" JNIEXPORT jboolean JNICALL
+Java_net_rpcsx_RPCSX_collectGameInfoFromUri(JNIEnv *env, jobject,
+                                            jstring jtreeUri,
+                                            jlong progressId) {
+  if (rpcsxLib.collectGameInfoFromUri == nullptr) {
+    return false;
+  }
+  return rpcsxLib.collectGameInfoFromUri(env, unwrap(env, jtreeUri),
+                                         progressId);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_net_rpcsx_RPCSX_collectIsoInfoFromUri(JNIEnv *env, jobject,
+                                           jstring jtreeUri,
+                                           jlong progressId) {
+  if (rpcsxLib.collectIsoInfoFromUri == nullptr) {
+    return false;
+  }
+  return rpcsxLib.collectIsoInfoFromUri(env, unwrap(env, jtreeUri),
+                                        progressId);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_net_rpcsx_RPCSX_resolveTreeUriToPath(JNIEnv *env, jobject,
+                                          jstring jtreeUri) {
+  if (rpcsxLib.resolveTreeUriToPath == nullptr) {
+    return nullptr;
+  }
+  return rpcsxLib.resolveTreeUriToPath(env, unwrap(env, jtreeUri));
+}
+
 extern "C" JNIEXPORT void JNICALL Java_net_rpcsx_RPCSX_shutdown(JNIEnv *env,
                                                                 jobject) {
   return rpcsxLib.shutdown();
@@ -183,8 +257,24 @@ extern "C" JNIEXPORT void JNICALL Java_net_rpcsx_RPCSX_shutdown(JNIEnv *env,
 
 extern "C" JNIEXPORT jint JNICALL Java_net_rpcsx_RPCSX_boot(JNIEnv *env,
                                                             jobject,
-                                                            jstring jpath) {
-  return rpcsxLib.boot(unwrap(env, jpath));
+                                                            jstring jpath,
+                                                            jstring jconfigPath) {
+  return rpcsxLib.boot(unwrap(env, jpath), unwrap(env, jconfigPath));
+}
+
+extern "C" JNIEXPORT jint JNICALL Java_net_rpcsx_RPCSX_bootIsoFd(JNIEnv *env,
+                                                                 jobject,
+                                                                 jint fd,
+                                                                 jstring jconfigPath) {
+  if (rpcsxLib.bootIsoFd == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "bootIsoFd: core library too old - update the core .so");
+    if (fd >= 0) {
+      close(fd);
+    }
+    return 1; // GenericError
+  }
+  return rpcsxLib.bootIsoFd(fd, unwrap(env, jconfigPath));
 }
 
 extern "C" JNIEXPORT jint JNICALL Java_net_rpcsx_RPCSX_getState(JNIEnv *env,
@@ -238,8 +328,8 @@ Java_net_rpcsx_RPCSX_getDirInstallPath(JNIEnv *env, jobject, jint fd) {
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_install(JNIEnv *env, jobject, jint fd, jlong progressId) {
-  return rpcsxLib.install(env, fd, progressId);
+Java_net_rpcsx_RPCSX_install(JNIEnv *env, jobject, jint fd, jlong progressId, jstring jgamePath) {
+  return rpcsxLib.install(env, fd, progressId, unwrap(env, jgamePath));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_installKey(
@@ -262,14 +352,48 @@ extern "C" JNIEXPORT jstring JNICALL Java_net_rpcsx_RPCSX_getUser(JNIEnv *env,
   return wrap(env, rpcsxLib.getUser());
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_net_rpcsx_RPCSX_settingsGet(JNIEnv *env, jobject, jstring jpath) {
-  return wrap(env, rpcsxLib.settingsGet(unwrap(env, jpath)));
+// Settings bridge: one API for global (titleId "") and per-title scope. The
+// core owns the global config.json; this shim only forwards. Null-checked so
+// a core .so built before this API degrades loudly instead of crashing.
+extern "C" JNIEXPORT jstring JNICALL Java_net_rpcsx_RPCSX_settingsGet(
+    JNIEnv *env, jobject, jstring jtitleId, jstring jpath) {
+  if (rpcsxLib.settingsGet == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "settingsGet: core library too old - update the core .so");
+    return wrap(env, "{}");
+  }
+  return wrap(env, rpcsxLib.settingsGet(unwrap(env, jtitleId), unwrap(env, jpath)));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_settingsSet(
+    JNIEnv *env, jobject, jstring jtitleId, jstring jpath, jstring jvalue) {
+  if (rpcsxLib.settingsSet == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "settingsSet: core library too old - update the core .so");
+    return false;
+  }
+  return rpcsxLib.settingsSet(unwrap(env, jtitleId), unwrap(env, jpath),
+                              unwrap(env, jvalue));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_settingsRemove(
+    JNIEnv *env, jobject, jstring jtitleId, jstring jpath) {
+  if (rpcsxLib.settingsRemove == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "settingsRemove: core library too old - update the core .so");
+    return false;
+  }
+  return rpcsxLib.settingsRemove(unwrap(env, jtitleId), unwrap(env, jpath));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_settingsLiveApply(
     JNIEnv *env, jobject, jstring jpath, jstring jvalue) {
-  return rpcsxLib.settingsSet(unwrap(env, jpath), unwrap(env, jvalue));
+  if (rpcsxLib.settingsLiveApply == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "settingsLiveApply: core library too old - update the core .so");
+    return false;
+  }
+  return rpcsxLib.settingsLiveApply(unwrap(env, jpath), unwrap(env, jvalue));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
