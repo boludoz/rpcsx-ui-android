@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">Idagdag</string>
+    <string name="close">Isara</string>
+    <string name="error">Error</string>
+    <string name="export">I-export</string>
+    <string name="import_">I-import</string>
+    <string name="none">Wala</string>
+    <string name="reset">I-reset</string>
+
+    <!-- AppNavHost -->
+    <string name="about">Tungkol</string>
+    <string name="copied_to_clipboard">Kopyado sa clipboard!</string>
+    <string name="device_info">Impormasyon ng Device</string>
+    <string name="driver_download_channel">GPU Driver Download Channel</string>
+    <string name="edit_overlay">I-edit ang Touch Overlay</string>
+    <string name="firmware">Firmware</string>
+    <string name="rpcsx_download_channel">RPCSX Download Channel</string>
+    <string name="select_game_file">I-install ang PKG, ISO o RAP</string>
+    <string name="select_game_folder">I-install ang Folder</string>
+    <string name="settings">Mga Setting</string>
+    <string name="ui_update_channel">RPCSX UI Android Update Channel</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">Ino-organisa ang directory</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">Kasalukuyang bersyon: %1$s\nBagong bersyon: %2$s</string>
+    <string name="deleting_game">Binubura ang Laro</string>
+    <string name="delete">Burahin</string>
+    <string name="downloading_latest_rpcsx">Dina-download ang pinakabagong RPCSX</string>
+    <string name="downloading_rpcsx">Dina-download ang RPCSX %1$s</string>
+    <string name="downloading_ui">Dina-download ang RPCSX UI Android %1$s</string>
+    <string name="failed_to_delete_game_cache">Bigo na burahin ang cache ng laro</string>
+    <string name="failed_to_download_rpcsx">Bigo na i-download ang RPCSX</string>
+    <string name="game_compiling_not_finished">Hindi pa tapos ang pag-compile ng laro</string>
+    <string name="game_require_key">Kailangan ng license key upang laruin ang larong ito</string>
+    <string name="install_custom_version">I-install ang custom na bersyon</string>
+    <string name="install_firmware_to_continue">Mangyaring i-install ang kailangang firmware upang magpatuloy.</string>
+    <string name="install_rap_file">I-install ang RAP file</string>
+    <string name="license_installation">Pag-install ng Lisensya</string>
+    <string name="missing_firmware">Walang Firmware</string>
+    <string name="missing_key">Walang License Key</string>
+    <string name="missing_rpcsx_lib">Walang RPCSX Library</string>
+    <string name="retry">Subukan Uli</string>
+    <string name="rpcsx_update_available">May Bagong Update ang RPCSX</string>
+    <string name="ui_update_available">May Bagong Update ang UI</string>
+    <string name="unexpected_error">Hindi Inaasahang Error</string>
+    <string name="update">I-update</string>
+    <string name="wait_until_firmware_install">Mangyaring maghintay hanggang matapos ang pag-install ng firmware upang magpatuloy.</string>
+    <string name="wait_until_game_compile">Mangyaring maghintay hanggang matapos ang pag-compile ng laro upang magpatuloy.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">Pumili</string>
+    <string name="download">I-download</string>
+    <string name="downloading">Dina-download…</string>
+    <string name="drivers">Mga Driver</string>
+    <string name="failed_to_load_selected_driver">Bigo na i-load ang napiling driver</string>
+    <string name="fetching">Kinukuha…</string>
+    <string name="install">I-install</string>
+    <string name="installing">Ino-install…</string>
+    <string name="please_wait">Mangyaring maghintay</string>
+    <string name="select_driver">Pumili ng GPU Driver</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">Bigo na i-load ang bagong bersyon, ibinalik ang dating bersyon.</string>
+    <string name="failed_to_update_rpcsx">Bigo na i-update ang RPCSX</string>
+    <string name="installation_progress">Progreso ng Pag-install</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">I-reset ang %1$s?</string>
+    <string name="ask_if_reset_button_description">Sigurado ka ba na gusto mong i-reset ang %1$s?</string>
+    <string name="control_panel">Control Panel</string>
+    <string name="editing">Ine-edit</string>
+    <string name="opacity">Kapangyawan (Opacity)</string>
+    <string name="scale">Sukat</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">Pag-install ng Firmware</string>
+    <string name="package_installation">Pag-install ng Package</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">Error: %1$s</string>
+    <string name="failed_to_boot">Bigo na mag-boot</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">I-restart ang RPCSX UI upang mailapat ang mga pagbabago</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">Aktibong User</string>
+    <string name="advanced_settings">Mga Advanced na Setting</string>
+    <string name="advanced_settings_description">I-configure ang mga advanced na setting ng emulator</string>
+    <string name="ask_if_reset_key">"Gusto mo bang i-reset ang '%1$s' sa default na halaga nito?"</string>
+    <string name="automatic_mapping">Awtomatikong Mapping</string>
+    <string name="automatic_mapping_applied">Inilapat ang kilalang mapping para sa %1$s</string>
+    <string name="automatic_mapping_defaults">Walang kilalang mapping para sa %1$s — inilapat ang default</string>
+    <string name="automatic_mapping_no_device">Mag-connect muna ng controller sa slot na ito</string>
+    <string name="connected_controllers">Mga Nakakonektang Controller</string>
+    <string name="controller_not_connected">Hindi nakakonekta</string>
+    <string name="controls">Mga Kontrol</string>
+    <string name="controls_description">I-configure ang controller</string>
+    <string name="custom_driver">Custom na GPU Driver</string>
+    <string name="custom_driver_description">Mag-install ng mga alternatibong driver para sa mas magandang performance o accuracy</string>
+    <string name="custom_driver_not_supported">Hindi Suportado ang Custom Driver</string>
+    <string name="custom_driver_not_supported_description">Ang pag-load ng custom driver ay kasalukuyang hindi suportado sa device na ito.</string>
+    <string name="download_channels">Mga Channel ng Download</string>
+    <string name="enable_haptic_feedback">I-enable ang Haptic Feedback</string>
+    <string name="failed_to_assign_value">Bigo na italaga ang halagang %1$s sa %2$s</string>
+    <string name="failed_to_reset_key">Bigo na i-reset ang %1$s</string>
+    <string name="failed_to_view_internal_dir">Bigo na makita ang internal directory</string>
+    <string name="fsr_sharpening">FSR Sharpening</string>
+    <string name="fsr_sharpening_requires_fsr">Nalalapat lamang kapag ang Output Scaling ay naka-set sa FSR</string>
+    <string name="gamepad_overlay">Gamepad Overlay</string>
+    <string name="graphics">Grapiko</string>
+    <string name="graphics_description">Output scaling at FSR sharpening</string>
+    <string name="install_custom_rpcsx_lib">I-install ang Custom na RPCSX Library</string>
+    <string name="key_mappings">Mga Key Mapping</string>
+    <string name="log_not_found">Hindi nahanap ang log file!</string>
+    <string name="manage_settings">Pamahalaan ang mga Setting</string>
+    <string name="no_activity_to_handle_action">Walang nahanap na app upang gawin ang aksyong ito</string>
+    <string name="output_scaling">Output Scaling</string>
+    <string name="perform_input">Gawin ang Input</string>
+    <string name="player_slot">Manlalaro %1$d</string>
+    <string name="reset_setting">I-reset ang Setting</string>
+    <string name="search">Maghanap</string>
+    <string name="share_log">Ibahagi ang Log</string>
+    <string name="share_log_description">Ibahagi ang log file ng RPCSX upang makatulong sa pag-debug</string>
+    <string name="touchpad">Touchpad</string>
+    <string name="users">Mga User</string>
+    <string name="view_internal_dir">Tingnan ang Internal Directory</string>
+    <string name="view_internal_dir_description">Buksan ang internal directory ng RPCSX sa file manager</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">Ang halaga ay dapat na multiple ng sukat ng hakbang %1$d sa pagitan ng %2$.0f at %3$.0f</string>
+    <string name="value">Halaga</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">Bigo na i-update ang UI</string>
+    <string name="permission_required">Kailangan ng Permiso</string>
+    <string name="permission_required_description">I-enable ang permiso sa pag-install mula sa pinagmulang ito upang mag-update.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">Ilagay ang URL ng Repositori</string>
+    <string name="select_repo">Pumili ng Repositori</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">Ihinto ang Emulator?</string>
+    <string name="ask_if_stop_emu_description">Upang palitan ang user, kailangan mo munang ihinto ang emulator.\n\nIhinto ang emulator ngayon?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Wika</string>
+    <string name="language_auto">Default ng System (Awtomatiko)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">Walang Nahanap na Laro</string>
+    <string name="no_games_description">Pindutin ang \'+\' button sa kanang ibaba upang mag-install ng file ng laro o pumili ng directory.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">Advanced na Grapiko</string>
+    <string name="advanced_graphics_description">FSR scaling, sharpening, at iba pang advanced na setting ng grapiko</string>
+    <string name="resolution_scale">Resolution Scale</string>
+</resources>

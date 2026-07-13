@@ -10,11 +10,76 @@ import net.rpcsx.R
 import net.rpcsx.RPCSX
 import net.rpcsx.dialogs.AlertDialogQueue
 import net.rpcsx.ui.channels.DevRpcsxChannel
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 import java.io.File
 import kotlin.system.exitProcess
 
-
 object RpcsxUpdater {
+    @Serializable
+    data class DownloadedVersion(
+        val version: String,
+        val arch: String,
+        val fileName: String,
+        val filePath: String
+    )
+
+    fun getDownloadedVersions(context: Context): List<DownloadedVersion> {
+        val filesDir = context.filesDir
+        val files = filesDir.listFiles() ?: return emptyList()
+        return files.filter { it.name.startsWith("librpcsx-android_") && it.name.endsWith(".so") }
+            .mapNotNull { file ->
+                val version = getFileVersion(file) ?: return@mapNotNull null
+                val arch = getFileArch(file) ?: return@mapNotNull null
+                DownloadedVersion(
+                    version = version,
+                    arch = arch,
+                    fileName = file.name,
+                    filePath = file.absolutePath
+                )
+            }
+    }
+
+    fun syncDownloadedVersionsJson(context: Context) {
+        val versions = getDownloadedVersions(context)
+        val jsonString = Json.encodeToString(versions)
+        try {
+            val file = File(context.filesDir, "downloaded_versions.json")
+            file.writeText(jsonString)
+        } catch (e: Exception) {
+            Log.e("RpcsxUpdater", "Failed to write downloaded_versions.json", e)
+        }
+    }
+
+    fun deleteVersion(context: Context, version: DownloadedVersion) {
+        val file = File(version.filePath)
+        if (file.exists()) {
+            file.delete()
+        }
+        val currentLib = GeneralSettings["rpcsx_library"] as? String
+        if (currentLib == version.filePath) {
+            GeneralSettings["rpcsx_library"] = null
+            GeneralSettings["rpcsx_installed_arch"] = null
+            RPCSX.activeLibrary.value = null
+        }
+        syncDownloadedVersionsJson(context)
+    }
+
+    fun wipeDownloads(context: Context) {
+        val filesDir = context.filesDir
+        val files = filesDir.listFiles() ?: return
+        files.forEach { file ->
+            if (file.name.startsWith("librpcsx-android_") && file.name.endsWith(".so")) {
+                file.delete()
+            }
+        }
+        GeneralSettings["rpcsx_library"] = null
+        GeneralSettings["rpcsx_installed_arch"] = null
+        RPCSX.activeLibrary.value = null
+        syncDownloadedVersionsJson(context)
+    }
+
     fun getCurrentVersion(): String? {
         if (RPCSX.activeLibrary.value == null) {
             return null
@@ -55,7 +120,7 @@ object RpcsxUpdater {
     }
 
     suspend fun checkForUpdate(): String? {
-        val url = DevRpcsxChannel // TODO: update once RPCSX has release with android support
+        val url = GeneralSettings["rpcsx_channel"] as? String ?: DevRpcsxChannel
 
         val arch = getArch()
         when (val fetchResult = GitHub.fetchLatestRelease(url)) {
@@ -84,7 +149,7 @@ object RpcsxUpdater {
     }
 
     suspend fun downloadUpdate(destinationDir: File, progressCallback: (Long, Long) -> Unit): File? {
-        val url = DevRpcsxChannel // TODO: GeneralSettings["rpcsx_channel"] as String
+        val url = GeneralSettings["rpcsx_channel"] as? String ?: DevRpcsxChannel
         val arch = getArch()
 
         when (val fetchResult = GitHub.fetchLatestRelease(url)) {
@@ -151,6 +216,7 @@ object RpcsxUpdater {
         GeneralSettings["rpcsx_installed_arch"] = getFileArch(updateFile)
 
         Log.e("RPCSX-UI", "registered update file ${GeneralSettings["rpcsx_library"]}")
+        syncDownloadedVersionsJson(context)
 
         if (prevLibrary == null) {
             restart()

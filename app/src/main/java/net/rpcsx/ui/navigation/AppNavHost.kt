@@ -17,15 +17,25 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
@@ -41,6 +51,7 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -92,6 +103,8 @@ import net.rpcsx.ui.drivers.GpuDriversScreen
 import net.rpcsx.ui.games.GamesScreen
 import net.rpcsx.ui.settings.AdvancedSettingsScreen
 import net.rpcsx.ui.settings.ControllerSettings
+import net.rpcsx.ui.settings.GraphicsSettings
+import net.rpcsx.ui.settings.PlayerControllerSettings
 import net.rpcsx.ui.settings.SettingsScreen
 import net.rpcsx.ui.user.UsersScreen
 import net.rpcsx.utils.FileUtil
@@ -149,13 +162,13 @@ fun AppNavHost() {
 
     if (prefs.getString("ui_channel", "") == "") {
         prefs.edit {
-            putString("ui_channel", ReleaseUiChannel)
+            putString("ui_channel", DevUiChannel)
         }
     }
 
     if (prefs.getString("rpcsx_channel", "") == "") {
         prefs.edit {
-            putString("rpcsx_channel", ReleaseRpcsxChannel)
+            putString("rpcsx_channel", DevRpcsxChannel)
         }
     }
 
@@ -170,7 +183,8 @@ fun AppNavHost() {
     if (rpcsxLibrary == null) {
         GamesDestination(
             navigateToSettings = { },
-            drawerState
+            navigateToControls = { },
+            drawerState = drawerState
         )
 
         return
@@ -190,6 +204,7 @@ fun AppNavHost() {
         ) {
             GamesDestination(
                 navigateToSettings = { navigateTo("settings") },
+                navigateToControls = { navigateTo("controls") },
                 drawerState
             )
         }
@@ -252,9 +267,58 @@ fun AppNavHost() {
         }
 
         composable(
+            route = "graphics"
+        ) {
+            GraphicsSettings(
+                navigateBack = navController::navigateUp,
+                navigateTo = navigateTo
+            )
+        }
+
+        composable(
             route = "controls"
         ) {
             ControllerSettings(
+                navigateBack = navController::navigateUp,
+                navigateToPlayer = { slot -> navController.navigate("controls_player_$slot") },
+                navigateToTouchpad = {
+                    context.startActivity(Intent(context, OverlayEditActivity::class.java))
+                }
+            )
+        }
+
+        composable(
+            route = "controls_player_0"
+        ) {
+            PlayerControllerSettings(
+                playerSlot = 0,
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
+            route = "controls_player_1"
+        ) {
+            PlayerControllerSettings(
+                playerSlot = 1,
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
+            route = "controls_player_2"
+        ) {
+            PlayerControllerSettings(
+                playerSlot = 2,
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
+            route = "controls_player_3"
+        ) {
+            PlayerControllerSettings(
+                playerSlot = 3,
                 navigateBack = navController::navigateUp
             )
         }
@@ -368,7 +432,7 @@ fun AppNavHost() {
         }
 
         composable(
-            route = "rpcsx_channels"
+            route = "rpcsx_repositories"
         ) {
             UpdateChannelListScreen(
                 navigateBack = navController::navigateUp,
@@ -426,42 +490,7 @@ fun AppNavHost() {
                         )
                     }
                 },
-                isDeletable = { isValidChannel(it, ReleaseRpcsxChannel, DevRpcsxChannel) },
-                actions = actions@{
-                    if (RpcsxUpdater.getAbi() != "arm64-v8a") {
-                        return@actions
-                    }
-                    var downloadArch by remember { mutableStateOf(RpcsxUpdater.getArch()) }
-                    var expanded by remember { mutableStateOf(false) }
-
-                    TextButton(onClick = { expanded = true }) {
-                        Text(downloadArch)
-                    }
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        listOf(
-                            "armv8-a",
-                            "armv8.1-a",
-                            "armv8.2-a",
-                            "armv8.4-a",
-                            "armv8.5-a",
-                            "armv9-a",
-                            "armv9.1-a",
-                        ).forEach { arch ->
-                            DropdownMenuItem(
-                                text = { Text(arch) },
-                                onClick = {
-                                    RpcsxUpdater.setArch(arch)
-                                    downloadArch = arch
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+                isDeletable = { isValidChannel(it, ReleaseRpcsxChannel, DevRpcsxChannel) }
             )
         }
 
@@ -473,6 +502,7 @@ fun AppNavHost() {
 @Composable
 fun GamesDestination(
     navigateToSettings: () -> Unit,
+    navigateToControls: () -> Unit,
     drawerState: androidx.compose.material3.DrawerState
 ) {
     val context = LocalContext.current
@@ -481,6 +511,7 @@ fun GamesDestination(
     var emulatorState by remember { RPCSX.state }
     val emulatorActiveGame by remember { RPCSX.activeGame }
     val rpcsxLibrary by remember { RPCSX.activeLibrary }
+    val activeUser by remember { UserRepository.activeUser }
 
     if (rpcsxLibrary == null) {
         GamesScreen()
@@ -536,7 +567,57 @@ fun GamesDestination(
                             rememberScrollState()
                         )
                 ) {
-                    Spacer(Modifier.height(12.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp, bottom = 8.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.primaryContainer,
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                )
+                            )
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    val firstChar = UserRepository.getUsername(activeUser)?.firstOrNull()?.uppercase() ?: "U"
+                                    Text(
+                                        text = firstChar,
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    )
+                                }
+                            }
+                            Column {
+                                Text(
+                                    text = UserRepository.getUsername(activeUser) ?: "User",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "RPCSX User",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(8.dp))
 
                     NavigationDrawerItem(
                         label = {
@@ -592,22 +673,10 @@ fun GamesDestination(
                     )
 
                     NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.edit_overlay)) },
+                        label = { Text(stringResource(R.string.controls)) },
                         selected = false,
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_show_osc),
-                                null
-                            )
-                        },
-                        onClick = {
-                            context.startActivity(
-                                Intent(
-                                    context,
-                                    OverlayEditActivity::class.java
-                                )
-                            )
-                        }
+                        icon = { Icon(painterResource(id = R.drawable.gamepad), null) },
+                        onClick = navigateToControls
                     )
 
                     NavigationDrawerItem(
@@ -678,8 +747,8 @@ fun GamesDestination(
             topBar = {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.background,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
                     ),
                     title = {
                         Text(
@@ -751,24 +820,16 @@ fun DropUpFloatingActionButton(
                 )
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FloatingActionButton(
-                        onClick = { installPkgLauncher.launch("*/*"); expanded = false },
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_description),
-                            contentDescription = "Select Game"
-                        )
-                    }
-                    FloatingActionButton(
-                        onClick = { gameFolderPickerLauncher.launch(null); expanded = false },
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_folder),
-                            contentDescription = "Select Folder"
-                        )
-                    }
+                    LabeledFabAction(
+                        label = stringResource(R.string.select_game_file),
+                        icon = painterResource(id = R.drawable.ic_description),
+                        onClick = { installPkgLauncher.launch("*/*"); expanded = false }
+                    )
+                    LabeledFabAction(
+                        label = stringResource(R.string.select_game_folder),
+                        icon = painterResource(id = R.drawable.ic_folder),
+                        onClick = { gameFolderPickerLauncher.launch(null); expanded = false }
+                    )
                 }
             }
 
@@ -777,6 +838,35 @@ fun DropUpFloatingActionButton(
             ) {
                 Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Add")
             }
+        }
+    }
+}
+
+@Composable
+private fun LabeledFabAction(
+    label: String,
+    icon: androidx.compose.ui.graphics.painter.Painter,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer
+        ) {
+            Text(
+                text = label,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
+        FloatingActionButton(
+            onClick = onClick,
+            containerColor = MaterialTheme.colorScheme.secondary
+        ) {
+            Icon(painter = icon, contentDescription = label)
         }
     }
 }

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">जोड़ें</string>
+    <string name="close">बंद करें</string>
+    <string name="error">त्रुटि</string>
+    <string name="export">निर्यात</string>
+    <string name="import_">आयात</string>
+    <string name="none">कोई नहीं</string>
+    <string name="reset">रीसेट</string>
+
+    <!-- AppNavHost -->
+    <string name="about">के बारे में</string>
+    <string name="copied_to_clipboard">क्लिपबोर्ड पर कॉपी किया गया!</string>
+    <string name="device_info">डिवाइस जानकारी</string>
+    <string name="driver_download_channel">जीपीयू ड्राइवर डाउनलोड चैनल</string>
+    <string name="edit_overlay">टच ओवरले संपादित करें</string>
+    <string name="firmware">फर्मवेयर</string>
+    <string name="rpcsx_download_channel">RPCSX डाउनलोड चैनल</string>
+    <string name="select_game_file">PKG, ISO या RAP इंस्टॉल करें</string>
+    <string name="select_game_folder">फ़ोल्डर इंस्टॉल करें</string>
+    <string name="settings">सेटिंग्स</string>
+    <string name="ui_update_channel">RPCSX UI Android अपडेट चैनल</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">निर्देशिका इंस्टॉल की जा रही है</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">वर्तमान संस्करण: %1$s\nनया संस्करण: %2$s</string>
+    <string name="deleting_game">गेम हटाया जा रहा है</string>
+    <string name="delete">हटाएं</string>
+    <string name="downloading_latest_rpcsx">नवीनतम RPCSX डाउनलोड किया जा रहा है</string>
+    <string name="downloading_rpcsx">RPCSX %1$s डाउनलोड किया जा रहा है</string>
+    <string name="downloading_ui">RPCSX UI Android %1$s डाउनलोड किया जा रहा है</string>
+    <string name="failed_to_delete_game_cache">गेम कैश हटाने में विफल</string>
+    <string name="failed_to_download_rpcsx">RPCSX डाउनलोड करने में विफल</string>
+    <string name="game_compiling_not_finished">गेम कंपाइल करना अभी समाप्त नहीं हुआ है</string>
+    <string name="game_require_key">इस गेम को खेलने के लिए कुंजी की आवश्यकता है</string>
+    <string name="install_custom_version">कस्टम संस्करण इंस्टॉल करें</string>
+    <string name="install_firmware_to_continue">जारी रखने के लिए कृपया आवश्यक फर्मवेयर इंस्टॉल करें।</string>
+    <string name="install_rap_file">RAP फ़ाइल इंस्टॉल करें</string>
+    <string name="license_installation">लाइसेंस इंस्टॉलेशन</string>
+    <string name="missing_firmware">फर्मवेयर गायब है</string>
+    <string name="missing_key">कुंजी गायब है</string>
+    <string name="missing_rpcsx_lib">RPCSX लाइब्रेरी गायब है</string>
+    <string name="retry">पुनः प्रयास करें</string>
+    <string name="rpcsx_update_available">RPCSX अपडेट उपलब्ध है</string>
+    <string name="ui_update_available">UI अपडेट उपलब्ध है</string>
+    <string name="unexpected_error">अप्रत्यशित त्रुटि</string>
+    <string name="update">अपडेट करें</string>
+    <string name="wait_until_firmware_install">जारी रखने के लिए कृपया फर्मवेयर के सफलतापूर्वक इंस्टॉल होने तक प्रतीक्षा करें।</string>
+    <string name="wait_until_game_compile">जारी रखने के लिए कृपया गेम कंपाइल होने तक प्रतीक्षा करें।</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">चुनें</string>
+    <string name="download">डाउनलोड करें</string>
+    <string name="downloading">डाउनलोड हो रहा है…</string>
+    <string name="drivers">ड्राइवर</string>
+    <string name="failed_to_load_selected_driver">चयनित ड्राइवर लोड करने में विफल</string>
+    <string name="fetching">लाया जा रहा है…</string>
+    <string name="install">इंस्टॉल करें</string>
+    <string name="installing">इंस्टॉल हो रहा है…</string>
+    <string name="please_wait">कृपया प्रतीक्षा करें</string>
+    <string name="select_driver">जीपीयू ड्राइवर चुनें</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">नया संस्करण लोड करने में विफल, पिछला संस्करण बहाल किया गया था।</string>
+    <string name="failed_to_update_rpcsx">RPCSX अपडेट करने में विफल</string>
+    <string name="installation_progress">इंस्टॉल प्रगति</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">क्या %1$s रीसेट करना चाहते हैं?</string>
+    <string name="ask_if_reset_button_description">क्या आप वाकई %1$s रीसेट करना चाहते हैं?</string>
+    <string name="control_panel">नियंत्रण पैनल</string>
+    <string name="editing">संपादन</string>
+    <string name="opacity">अपारदर्शिता</string>
+    <string name="scale">पैमाना</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">फर्मवेयर इंस्टॉलेशन</string>
+    <string name="package_installation">पैकेज इंस्टॉलेशन</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">त्रुटि: %1$s</string>
+    <string name="failed_to_boot">बूट करने में विफल</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">परिवर्तन लागू करने के लिए RPCSX UI को पुनरारंभ करें</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">सक्रिय उपयोगकर्ता</string>
+    <string name="advanced_settings">उन्नत सेटिंग्स</string>
+    <string name="advanced_settings_description">एमुलेटर उन्नत सेटिंग्स कॉन्फ़िगर करें</string>
+    <string name="ask_if_reset_key">"क्या आप '%1$s' को उसके डिफ़ॉल्ट मान पर रीसेट करना चाहते हैं?"</string>
+    <string name="automatic_mapping">स्वचालित मैपिंग</string>
+    <string name="automatic_mapping_applied">"%1$s के लिए ज्ञात मैपिंग लागू की गई"</string>
+    <string name="automatic_mapping_defaults">"%1$s के लिए कोई ज्ञात मैपिंग नहीं — डिफ़ॉल्ट लागू किया गया"</string>
+    <string name="automatic_mapping_no_device">पहले इस स्लॉट में एक नियंत्रक कनेक्ट करें</string>
+    <string name="connected_controllers">कनेक्टेड नियंत्रक</string>
+    <string name="controller_not_connected">कनेक्ट नहीं है</string>
+    <string name="controls">नियंत्रण</string>
+    <string name="controls_description">नियंत्रक कॉन्फ़िगर करें</string>
+    <string name="custom_driver">कस्टम जीपीयू ड्राइवर</string>
+    <string name="custom_driver_description">संभावित बेहतर प्रदर्शन या सटीकता के लिए वैकल्पिक ड्राइवर इंस्टॉल करें</string>
+    <string name="custom_driver_not_supported">कस्टम ड्राइवर समर्थित नहीं है</string>
+    <string name="custom_driver_not_supported_description">इस डिवाइस पर कस्टम ड्राइवर लोड करना वर्तमान में समर्थित नहीं है।</string>
+    <string name="download_channels">डाउनलोड चैनल</string>
+    <string name="enable_haptic_feedback">हैप्टिक फीडबैक सक्षम करें</string>
+    <string name="failed_to_assign_value">"%2$s को मान %1$s सौंपने में विफल"</string>
+    <string name="failed_to_reset_key">"%1$s रीसेट करने में विफल"</string>
+    <string name="failed_to_view_internal_dir">आंतरिक निर्देशिका देखने में विफल</string>
+    <string name="fsr_sharpening">FSR तीक्ष्णता</string>
+    <string name="fsr_sharpening_requires_fsr">केवल तभी लागू होता है जब आउटपुट स्केलिंग FSR पर सेट हो</string>
+    <string name="gamepad_overlay">गेमपैड ओवरले</string>
+    <string name="graphics">ग्राफिक्स</string>
+    <string name="graphics_description">आउटपुट स्केलिंग और FSR तीक्ष्णता</string>
+    <string name="install_custom_rpcsx_lib">कस्टम RPCSX लाइब्रेरी इंस्टॉल करें</string>
+    <string name="key_mappings">कुंजी मैपिंग</string>
+    <string name="log_not_found">लॉग फ़ाइल नहीं मिली!</string>
+    <string name="manage_settings">सेटिंग्स प्रबंधित करें</string>
+    <string name="no_activity_to_handle_action">इस क्रिया को संभालने के लिए कोई गतिविधि नहीं मिली</string>
+    <string name="output_scaling">आउटपुट स्केलिंग</string>
+    <string name="perform_input">इनपुट निष्पादित करें</string>
+    <string name="player_slot">खिलाड़ी %1$d</string>
+    <string name="reset_setting">सेटिंग रीसेट करें</string>
+    <string name="search">खोजें</string>
+    <string name="share_log">लॉग साझा करें</string>
+    <string name="share_log_description">समस्याओं को डीबг करने में सहायता के लिए RPCSX की लॉग फ़ाइल साझा करें</string>
+    <string name="touchpad">टचपैड</string>
+    <string name="users">उपयोगकर्ता</string>
+    <string name="view_internal_dir">आंतरिक निर्देशिका देखें</string>
+    <string name="view_internal_dir_description">फ़ाइल प्रबंधक में RPCSX की आंतरिक निर्देशिका खोलें</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">मान %2$.0f से %3$.0f के बीच चरण आकार %1$d का गुणज होना चाहिए</string>
+    <string name="value">मान</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">यूआई अपडेट करने में विफल</string>
+    <string name="permission_required">अनुमति आवश्यक है</string>
+    <string name="permission_required_description">अपडेट करने के लिए इस स्रोत से इंस्टॉल करने की अनुमति सक्षम करें।</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">रिपोजिटरी URL दर्ज करें</string>
+    <string name="select_repo">रिपोजिटरी चुनें</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">एमुलेटर रोकें?</string>
+    <string name="ask_if_stop_emu_description">उपयोगकर्ता बदलने के लिए, आपको पहले एमुलेटर को रोकना होगा।\n\nक्या अब एमुलेटर को रोकें?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">भाषा</string>
+    <string name="language_auto">सिस्टम डिफ़ॉल्ट (ऑटो-डिटेक्ट)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">कोई गेम नहीं मिला</string>
+    <string name="no_games_description">गेम फ़ाइल इंस्टॉल करने या निर्देशिका चुनने के लिए नीचे दाईं ओर \'+\' बटन टैप करें।</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">उन्नत ग्राफिक्स</string>
+    <string name="advanced_graphics_description">FSR स्केलिंग, तीक्ष्णता और अन्य उन्नत सेटिंग्स</string>
+    <string name="resolution_scale">Resolution Scale</string>
+</resources>

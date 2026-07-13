@@ -158,6 +158,7 @@ object GitHub {
         try {
             val request = Request.Builder().url(assetUrl).head().build()
             val response = client.newCall(request).execute()
+            val resolvedUrl = response.request.url.toString()
             val contentLength = response.header("Content-Length")?.toLongOrNull() ?: return@withContext DownloadStatus.Error("Unable to get file size")
             val supportsRange = response.header("Accept-Ranges") == "bytes"
             if (!supportsRange) return@withContext DownloadStatus.Error("Server does not support range requests")
@@ -172,7 +173,7 @@ object GitHub {
 
                 async(Dispatchers.IO) {
                     val partRequest = Request.Builder()
-                        .url(assetUrl)
+                        .url(resolvedUrl)
                         .addHeader("Range", "bytes=$start-$end")
                         .build()
 
