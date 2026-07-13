@@ -55,7 +55,7 @@ object RpcsxUpdater {
     }
 
     suspend fun checkForUpdate(): String? {
-        val url = DevRpcsxChannel // TODO: update once RPCSX has release with android support
+        val url = GeneralSettings["rpcsx_channel"] as? String ?: DevRpcsxChannel
 
         val arch = getArch()
         when (val fetchResult = GitHub.fetchLatestRelease(url)) {
@@ -84,7 +84,7 @@ object RpcsxUpdater {
     }
 
     suspend fun downloadUpdate(destinationDir: File, progressCallback: (Long, Long) -> Unit): File? {
-        val url = DevRpcsxChannel // TODO: GeneralSettings["rpcsx_channel"] as String
+        val url = GeneralSettings["rpcsx_channel"] as? String ?: DevRpcsxChannel
         val arch = getArch()
 
         when (val fetchResult = GitHub.fetchLatestRelease(url)) {

@@ -18,6 +18,10 @@
 struct RPCSXApi {
   bool (*overlayPadData)(int digital1, int digital2, int leftStickX,
                          int leftStickY, int rightStickX, int rightStickY);
+  bool (*multiPadData)(int playerIndex, int digital1, int digital2,
+                       int leftStickX, int leftStickY, int rightStickX,
+                       int rightStickY);
+  int (*getMaxVirtualPads)();
   bool (*initialize)(std::string_view rootDir, std::string_view user);
   bool (*processCompilationQueue)(JNIEnv *env);
   bool (*startMainThreadProcessor)(JNIEnv *env);
@@ -82,6 +86,8 @@ struct RPCSXLibrary : RPCSXApi {
 
     // clang-format off
     result.overlayPadData = reinterpret_cast<decltype(overlayPadData)>(dlsym(handle, "_rpcsx_overlayPadData"));
+    result.multiPadData = reinterpret_cast<decltype(multiPadData)>(dlsym(handle, "_rpcsx_multiPadData"));
+    result.getMaxVirtualPads = reinterpret_cast<decltype(getMaxVirtualPads)>(dlsym(handle, "_rpcsx_getMaxVirtualPads"));
     result.initialize = reinterpret_cast<decltype(initialize)>(dlsym(handle, "_rpcsx_initialize"));
     result.processCompilationQueue = reinterpret_cast<decltype(processCompilationQueue)>(dlsym(handle, "_rpcsx_processCompilationQueue"));
     result.startMainThreadProcessor = reinterpret_cast<decltype(startMainThreadProcessor)>(dlsym(handle, "_rpcsx_startMainThreadProcessor"));
@@ -154,6 +160,28 @@ extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_overlayPadData(
     jint leftStickY, jint rightStickX, jint rightStickY) {
   return rpcsxLib.overlayPadData(digital1, digital2, leftStickX, leftStickY,
                                  rightStickX, rightStickY);
+}
+
+// Older downloaded engine builds may not export _rpcsx_multiPadData yet, so
+// these two calls must tolerate a null function pointer instead of crashing.
+extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_multiPadData(
+    JNIEnv *, jobject, jint playerIndex, jint digital1, jint digital2,
+    jint leftStickX, jint leftStickY, jint rightStickX, jint rightStickY) {
+  if (rpcsxLib.multiPadData == nullptr) {
+    return false;
+  }
+
+  return rpcsxLib.multiPadData(playerIndex, digital1, digital2, leftStickX,
+                               leftStickY, rightStickX, rightStickY);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_net_rpcsx_RPCSX_getMaxVirtualPads(JNIEnv *, jobject) {
+  if (rpcsxLib.getMaxVirtualPads == nullptr) {
+    return 1;
+  }
+
+  return rpcsxLib.getMaxVirtualPads();
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_initialize(

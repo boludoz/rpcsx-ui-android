@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">추가</string>
+    <string name="close">닫기</string>
+    <string name="error">오류</string>
+    <string name="export">내보내기</string>
+    <string name="import_">가져오기</string>
+    <string name="none">없음</string>
+    <string name="reset">초기화</string>
+
+    <!-- AppNavHost -->
+    <string name="about">정보</string>
+    <string name="copied_to_clipboard">클립보드에 복사되었습니다!</string>
+    <string name="device_info">기기 정보</string>
+    <string name="driver_download_channel">GPU 드라이버 다운로드 채널</string>
+    <string name="edit_overlay">터치 오버레이 편집</string>
+    <string name="firmware">펌웨어</string>
+    <string name="rpcsx_download_channel">RPCSX 다운로드 채널</string>
+    <string name="select_game_file">PKG, ISO 또는 RAP 설치</string>
+    <string name="select_game_folder">폴더 설치</string>
+    <string name="settings">설정</string>
+    <string name="ui_update_channel">RPCSX UI Android 업데이트 채널</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">디렉토리 설치 중</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">현재 버전: %1$s\n새 버전: %2$s</string>
+    <string name="deleting_game">게임 삭제 중</string>
+    <string name="delete">삭제</string>
+    <string name="downloading_latest_rpcsx">최신 RPCSX 다운로드 중</string>
+    <string name="downloading_rpcsx">RPCSX %1$s 다운로드 중</string>
+    <string name="downloading_ui">RPCSX UI Android %1$s 다운로드 중</string>
+    <string name="failed_to_delete_game_cache">게임 캐시 삭제 실패</string>
+    <string name="failed_to_download_rpcsx">RPCSX 다운로드 실패</string>
+    <string name="game_compiling_not_finished">게임 컴파일이 아직 완료되지 않았습니다</string>
+    <string name="game_require_key">이 게임을 플레이하려면 라이선스 키가 필요합니다</string>
+    <string name="install_custom_version">사용자 지정 버전 설치</string>
+    <string name="install_firmware_to_continue">계속하려면 필요한 펌웨어를 설치하십시오.</string>
+    <string name="install_rap_file">RAP 파일 설치</string>
+    <string name="license_installation">라이선스 설치</string>
+    <string name="missing_firmware">펌웨어 누락</string>
+    <string name="missing_key">라이선스 키 누락</string>
+    <string name="missing_rpcsx_lib">RPCSX 라이브러리 누락</string>
+    <string name="retry">재시도</string>
+    <string name="rpcsx_update_available">RPCSX 업데이트 가능</string>
+    <string name="ui_update_available">UI 업데이트 가능</string>
+    <string name="unexpected_error">예기치 않은 오류</string>
+    <string name="update">업데이트</string>
+    <string name="wait_until_firmware_install">계속하려면 펌웨어가 성공적으로 설치될 때까지 기다려십시오.</string>
+    <string name="wait_until_game_compile">계속하려면 게임이 컴파일될 때까지 기다려십시오.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">선택</string>
+    <string name="download">다운로드</string>
+    <string name="downloading">다운로드 중…</string>
+    <string name="drivers">드라이버</string>
+    <string name="failed_to_load_selected_driver">선택한 드라이버를 로드하지 못했습니다</string>
+    <string name="fetching">가져오는 중…</string>
+    <string name="install">설치</string>
+    <string name="installing">설치 중…</string>
+    <string name="please_wait">잠시만 기다려 주십시오</string>
+    <string name="select_driver">GPU 드라이버 선택</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">새 버전을 로드하지 못했습니다. 이전 버전으로 복구되었습니다.</string>
+    <string name="failed_to_update_rpcsx">RPCSX 업데이트 실패</string>
+    <string name="installation_progress">설치 진행 상황</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">%1$s을(를) 초기화하시겠습니까?</string>
+    <string name="ask_if_reset_button_description">정말로 %1$s을(를) 초기화하시겠습니까?</string>
+    <string name="control_panel">제어판</string>
+    <string name="editing">편집 중</string>
+    <string name="opacity">불투명도</string>
+    <string name="scale">크기</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">펌웨어 설치</string>
+    <string name="package_installation">패키지 설치</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">오류: %1$s</string>
+    <string name="failed_to_boot">부팅 실패</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">변경 사항을 적용하려면 RPCSX UI를 다시 시작하십시오</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">활성 사용자</string>
+    <string name="advanced_settings">고급 설정</string>
+    <string name="advanced_settings_description">에뮬레이터 고급 설정 구성</string>
+    <string name="ask_if_reset_key">"('%1$s'을(를) 기본값으로 초기화하시겠습니까?"</string>
+    <string name="automatic_mapping">자동 매핑</string>
+    <string name="automatic_mapping_applied">"%1$s에 대한 기존 매핑이 적용되었습니다"</string>
+    <string name="automatic_mapping_defaults">"%1$s에 대한 기존 매핑이 없습니다 — 기본값이 적용되었습니다"</string>
+    <string name="automatic_mapping_no_device">이 슬롯에 컨트롤러를 먼저 연결하십시오</string>
+    <string name="connected_controllers">연결된 컨트롤러</string>
+    <string name="controller_not_connected">연결되지 않음</string>
+    <string name="controls">컨트롤</string>
+    <string name="controls_description">컨트롤러 설정</string>
+    <string name="custom_driver">사용자 지정 GPU 드라이버</string>
+    <string name="custom_driver_description">잠재적으로 더 나은 성능 또는 정확도를 위해 대체 드라이버 설치</string>
+    <string name="custom_driver_not_supported">사용자 지정 드라이버 지원되지 않음</string>
+    <string name="custom_driver_not_supported_description">이 기기에서는 현재 사용자 지정 드라이버 로드를 지원하지 않습니다.</string>
+    <string name="download_channels">다운로드 채널</string>
+    <string name="enable_haptic_feedback">진동 피드백 활성화</string>
+    <string name="failed_to_assign_value">"%2$s에 값 %1$s을(를) 할당하지 못했습니다"</string>
+    <string name="failed_to_reset_key">"%1$s 초기화 실패"</string>
+    <string name="failed_to_view_internal_dir">내부 디렉토리를 열지 못했습니다</string>
+    <string name="fsr_sharpening">FSR 선명도</string>
+    <string name="fsr_sharpening_requires_fsr">출력 스케일링이 FSR로 설정된 경우에만 적용됩니다</string>
+    <string name="gamepad_overlay">게임패드 오버레이</string>
+    <string name="graphics">그래픽</string>
+    <string name="graphics_description">출력 스케일링 및 FSR 선명도 설정</string>
+    <string name="install_custom_rpcsx_lib">사용자 지정 RPCSX 라이브러리 설치</string>
+    <string name="key_mappings">키 매핑</string>
+    <string name="log_not_found">로그 파일을 찾을 수 없습니다!</string>
+    <string name="manage_settings">설정 관리</string>
+    <string name="no_activity_to_handle_action">이 작업을 처리할 앱을 찾을 수 없습니다</string>
+    <string name="output_scaling">출력 스케일링</string>
+    <string name="perform_input">입력 에뮬레이트</string>
+    <string name="player_slot">플레이어 %1$d</string>
+    <string name="reset_setting">설정 초기화</string>
+    <string name="search">검색</string>
+    <string name="share_log">로그 공유</string>
+    <string name="share_log_description">디버깅을 돕기 위해 RPCSX 로그 파일 공유</string>
+    <string name="touchpad">터치패드</string>
+    <string name="users">사용자</string>
+    <string name="view_internal_dir">내부 디렉토리 표시</string>
+    <string name="view_internal_dir_description">파일 관리자에서 RPCSX 내부 디렉토리 열기</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">값은 %2$.0f에서 %3$.0f 사이의 단계 크기 %1$d의 배수여야 합니다</string>
+    <string name="value">값</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">UI 업데이트 실패</string>
+    <string name="permission_required">권한 필요</string>
+    <string name="permission_required_description">업데이트하려면 이 소스의 설치 권한을 활성화하십시오.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">저장소 URL 입력</string>
+    <string name="select_repo">저장소 선택</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">에뮬레이터를 중지하시겠습니까?</string>
+    <string name="ask_if_stop_emu_description">사용자를 변경하려면 먼저 에뮬레이터를 중지해야 합니다.\n\n지금 에뮬레이터를 중지하시겠습니까?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">언어</string>
+    <string name="language_auto">시스템 기본값 (자동 감지)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">게임을 찾을 수 없음</string>
+    <string name="no_games_description">게임 파일을 설치하거나 디렉토리를 선택하려면 오른쪽 하단의 \'+\' 버튼을 누르십시오.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">고급 그래픽 설정</string>
+    <string name="advanced_graphics_description">FSR 스케일링, 선명도 및 기타 고급 그래픽 설정</string>
+</resources>

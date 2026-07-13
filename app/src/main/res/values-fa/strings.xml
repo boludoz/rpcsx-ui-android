@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">افزودن</string>
+    <string name="close">بستن</string>
+    <string name="error">خطا</string>
+    <string name="export">خروجی گرفتن</string>
+    <string name="import_">وارد کردن</string>
+    <string name="none">هیچ‌کدام</string>
+    <string name="reset">بازنشانی</string>
+
+    <!-- AppNavHost -->
+    <string name="about">درباره</string>
+    <string name="copied_to_clipboard">در حافظه موقت کپی شد!"</string>
+    <string name="device_info">اطلاعات دستگاه</string>
+    <string name="driver_download_channel">کانال دانلود درایور GPU</string>
+    <string name="edit_overlay">ویرایش دکمه‌های صفحه</string>
+    <string name="firmware">فت‌ور (فریمور)</string>
+    <string name="rpcsx_download_channel">کانال دانلود RPCSX</string>
+    <string name="select_game_file">نصب PKG، ISO یا RAP</string>
+    <string name="select_game_folder">نصب پوشه بازی</string>
+    <string name="settings">تنظیمات</string>
+    <string name="ui_update_channel">کانال بروزرسانی رابط کاربری RPCSX</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">در حال نصب پوشه</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">نسخه فعلی: %1$s\nنسخه جدید: %2$s</string>
+    <string name="deleting_game">در حال حذف بازی</string>
+    <string name="delete">حذف</string>
+    <string name="downloading_latest_rpcsx">در حال دانلود آخرین نسخه RPCSX</string>
+    <string name="downloading_rpcsx">در حال دانلود RPCSX %1$s</string>
+    <string name="downloading_ui">در حال دانلود رابط کاربری RPCSX %1$s</string>
+    <string name="failed_to_delete_game_cache">خطا در حذف حافظه پنهان بازی</string>
+    <string name="failed_to_download_rpcsx">خطا در دانلود RPCSX</string>
+    <string name="game_compiling_not_finished">کامپایل بازی هنوز به پایان نرسیده است</string>
+    <string name="game_require_key">این بازی برای اجرا نیاز به کلید لایسنس دارد</string>
+    <string name="install_custom_version">نصب نسخه سفارشی</string>
+    <string name="install_firmware_to_continue">لطفاً برای ادامه، فریمور مورد نیاز را نصب کنید।</string>
+    <string name="install_rap_file">نصب فایل RAP</string>
+    <string name="license_installation">نصب لایسنس</string>
+    <string name="missing_firmware">فریمور یافت نشد</string>
+    <string name="missing_key">کلید لایسنس یافت نشد</string>
+    <string name="missing_rpcsx_lib">کتابخانه RPCSX یافت نشد</string>
+    <string name="retry">تلاش مجدد</string>
+    <string name="rpcsx_update_available">بروزرسانی RPCSX در دسترس است</string>
+    <string name="ui_update_available">بروزرسانی رابط کاربری در دسترس است</string>
+    <string name="unexpected_error">خطای غیرمنتظره</string>
+    <string name="update">بروزرسانی</string>
+    <string name="wait_until_firmware_install">لطفاً تا نصب موفقیت‌آمیز فریمور منتظر بمانید।</string>
+    <string name="wait_until_game_compile">لطفاً تا پایان کامپایل بازی منتظر بمانید।</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">انتخاب</string>
+    <string name="download">دانلود</string>
+    <string name="downloading">در حال دانلود…</string>
+    <string name="drivers">درایورها</string>
+    <string name="failed_to_load_selected_driver">خطا در بارگیری درایور انتخاب‌شده</string>
+    <string name="fetching">در حال دریافت اطلاعات…</string>
+    <string name="install">نصب</string>
+    <string name="installing">در حال نصب…</string>
+    <string name="please_wait">لطفاً منتظر بمانید</string>
+    <string name="select_driver">یک درایور GPU انتخاب کنید</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">خطا در بارگیری نسخه جدید، نسخه قبلی بازیابی شد।"</string>
+    <string name="failed_to_update_rpcsx">خطا در بروزرسانی RPCSX</string>
+    <string name="installation_progress">پیشرفت نصب</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">تنظیمات %1$s بازنشانی شود؟</string>
+    <string name="ask_if_reset_button_description">آیا مطمئن هستید که می‌خواهید تنظیمات %1$s را بازنشانی کنید؟</string>
+    <string name="control_panel">پنل کنترل</string>
+    <string name="editing">در حال ویرایش</string>
+    <string name="opacity">شفافیت</string>
+    <string name="scale">اندازه</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">نصب فریمور</string>
+    <string name="package_installation">نصب بسته</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">خطا: %1$s</string>
+    <string name="failed_to_boot">خطا در راه‌اندازی</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">برای اعمال تغییرات، رابط کاربری را دوباره راه‌اندازی کنید</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">کاربر فعال</string>
+    <string name="advanced_settings">تنظیمات پیشرفته</string>
+    <string name="advanced_settings_description">پیکربندی تنظیمات پیشرفته شبیه‌ساز</string>
+    <string name="ask_if_reset_key">"آیا می‌خواهید تنظیمات '%1$s' به مقدار پیش‌فرض بازنشانی شود؟"</string>
+    <string name="automatic_mapping">نقشه‌برداری خودکار</string>
+    <string name="automatic_mapping_applied">"تنظیمات دکمه شناخته‌شده برای %1$s اعمال شد"</string>
+    <string name="automatic_mapping_defaults">"تنظیمات دکمه شناخته‌شده‌ای یافت نشد — پیش‌فرض اعمال شد"</string>
+    <string name="automatic_mapping_no_device">ابتدا یک دسته بازی به این اسلات متصل کنید</string>
+    <string name="connected_controllers">دسته‌های متصل‌شده</string>
+    <string name="controller_not_connected">متصل نیست</string>
+    <string name="controls">کنترل‌ها</string>
+    <string name="controls_description">پیکربندی دسته بازی</string>
+    <string name="custom_driver">درایور GPU سفارشی</string>
+    <string name="custom_driver_description">نصب درایورهای جایگزین برای بهبود احتمالی عملکرد یا دقت</string>
+    <string name="custom_driver_not_supported">درایور سفارشی پشتیبانی نمی‌شود</string>
+    <string name="custom_driver_not_supported_description">بارگیری درایورهای سفارشی در این دستگاه پشتیبانی نمی‌شود.</string>
+    <string name="download_channels">کانال‌های دانلود</string>
+    <string name="enable_haptic_feedback">فعال‌سازی لرزش (ویبره)</string>
+    <string name="failed_to_assign_value">خطا در تخصیص مقدار %1$s به %2$s</string>
+    <string name="failed_to_reset_key">خطا در بازنشانی %1$s</string>
+    <string name="failed_to_view_internal_dir">خطا در نمایش پوشه داخلی</string>
+    <string name="fsr_sharpening">شفافیت FSR</string>
+    <string name="fsr_sharpening_requires_fsr">فقط هنگامی که حالت مقیاس‌گذاری روی FSR باشد اعمال می‌شود</string>
+    <string name="gamepad_overlay">دسته بازی روی صفحه</string>
+    <string name="graphics">گرافیک</string>
+    <string name="graphics_description">تنظیمات مقیاس‌گذاری خروجی و شفافیت FSR</string>
+    <string name="install_custom_rpcsx_lib">نصب کتابخانه سفارشی RPCSX</string>
+    <string name="key_mappings">تنظیمات کلیدها</string>
+    <string name="log_not_found">فایل گزارش (لاگ) یافت نشد!</string>
+    <string name="manage_settings">مدیریت تنظیمات</string>
+    <string name="no_activity_to_handle_action">برنامه‌ای برای انجام این کار یافت نشد</string>
+    <string name="output_scaling">مقیاس‌گذاری خروجی</string>
+    <string name="perform_input">شبیه‌سازی ورودی</string>
+    <string name="player_slot">بازیکن %1$d</string>
+    <string name="reset_setting">بازنشانی تنظیم</string>
+    <string name="search">جستجو</string>
+    <string name="share_log">اشتراک‌گذاری لاگ</string>
+    <string name="share_log_description">اشتراک‌گذاری فایل گزارش RPCSX برای کمک به عیب‌یابی</string>
+    <string name="touchpad">صفحه لمسی</string>
+    <string name="users">کاربران</string>
+    <string name="view_internal_dir">نمایش پوشه داخلی</string>
+    <string name="view_internal_dir_description">باز کردن پوشه داخلی RPCSX در مدیریت فایل</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">مقدار باید مضربی از اندازه گام %1$d در محدوده %2$.0f تا %3$.0f باشد</string>
+    <string name="value">مقدار</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">خطا در بروزرسانی رابط کاربری</string>
+    <string name="permission_required">مجوز لازم است</string>
+    <string name="permission_required_description">برای بروزرسانی، مجوز نصب از این منبع را فعال کنید.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">آدرس مخزن را وارد کنید</string>
+    <string name="select_repo">مخزن را انتخاب کنید</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">شبیه‌ساز متوقف شود؟</string>
+    <string name="ask_if_stop_emu_description">برای تغییر کاربر ابتدا باید شبیه‌ساز را متوقف کنید.\n\nشبیه‌ساز متوقف شود؟</string>
+
+    <!-- Settings language strings -->
+    <string name="language">زبان</string>
+    <string name="language_auto">پیش‌فرض سیستم (تشخیص خودکار)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">هیچ بازی یافت نشد</string>
+    <string name="no_games_description">برای نصب بازی یا انتخاب پوشه، روی دکمه '+' در پایین سمت راست ضربه بزنید.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">تنظیمات گرافیکی پیشرفته</string>
+    <string name="advanced_graphics_description">مقیاس‌گذاری FSR، شفافیت و سایر تنظیمات پیشرفته گرافیک</string>
+</resources>

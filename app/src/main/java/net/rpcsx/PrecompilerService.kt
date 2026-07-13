@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.IntentCompat
 import kotlin.concurrent.thread
 
 enum class PrecompilerServiceAction {
@@ -98,8 +99,8 @@ class PrecompilerService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val batch = intent?.getParcelableArrayListExtra<Uri>("batch")
-        val uri = intent?.getParcelableExtra<Uri>("uri")
+        val batch = intent?.let { IntentCompat.getParcelableArrayListExtra(it, "batch", Uri::class.java) }
+        val uri = intent?.let { IntentCompat.getParcelableExtra(it, "uri", Uri::class.java) }
         val action = intent?.getIntExtra("action", 0)
         val isFwInstall = action == PrecompilerServiceAction.InstallFirmware.ordinal
 

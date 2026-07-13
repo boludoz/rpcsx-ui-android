@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">Thêm</string>
+    <string name="close">Đóng</string>
+    <string name="error">Lỗi</string>
+    <string name="export">Xuất</string>
+    <string name="import_">Nhập</string>
+    <string name="none">Không</string>
+    <string name="reset">Đặt lại</string>
+
+    <!-- AppNavHost -->
+    <string name="about">Giới thiệu</string>
+    <string name="copied_to_clipboard">Đã sao chép vào bộ nhớ tạm!</string>
+    <string name="device_info">Thông tin thiết bị</string>
+    <string name="driver_download_channel">Kênh tải xuống trình điều khiển GPU</string>
+    <string name="edit_overlay">Chỉnh sửa nút ảo màn hình</string>
+    <string name="firmware">Firmware</string>
+    <string name="rpcsx_download_channel">Kênh tải xuống RPCSX</string>
+    <string name="select_game_file">Cài đặt file PKG, ISO hoặc RAP</string>
+    <string name="select_game_folder">Cài đặt thư mục trò chơi</string>
+    <string name="settings">Cài đặt</string>
+    <string name="ui_update_channel">Kênh cập nhật giao diện RPCSX Android</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">Đang cài đặt thư mục</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">Phiên bản hiện tại: %1$s\nPhiên bản mới: %2$s</string>
+    <string name="deleting_game">Đang xóa trò chơi</string>
+    <string name="delete">Xóa</string>
+    <string name="downloading_latest_rpcsx">Đang tải xuống RPCSX mới nhất</string>
+    <string name="downloading_rpcsx">Đang tải xuống RPCSX %1$s</string>
+    <string name="downloading_ui">Đang tải xuống giao diện RPCSX %1$s</string>
+    <string name="failed_to_delete_game_cache">Xóa bộ nhớ đệm trò chơi thất bại</string>
+    <string name="failed_to_download_rpcsx">Tải xuống RPCSX thất bại</string>
+    <string name="game_compiling_not_finished">Quá trình biên dịch trò chơi chưa kết thúc</string>
+    <string name="game_require_key">Trò chơi này yêu cầu khóa bản quyền để chơi</string>
+    <string name="install_custom_version">Cài đặt phiên bản tùy chỉnh</string>
+    <string name="install_firmware_to_continue">Vui lòng cài đặt firmware cần thiết để tiếp tục.</string>
+    <string name="install_rap_file">Cài đặt file RAP</string>
+    <string name="license_installation">Cài đặt bản quyền</string>
+    <string name="missing_firmware">Thiếu Firmware</string>
+    <string name="missing_key">Thiếu khóa bản quyền</string>
+    <string name="missing_rpcsx_lib">Thiếu thư viện RPCSX</string>
+    <string name="retry">Thử lại</string>
+    <string name="rpcsx_update_available">Có bản cập nhật RPCSX mới</string>
+    <string name="ui_update_available">Có bản cập nhật giao diện mới</string>
+    <string name="unexpected_error">Lỗi không xác định</string>
+    <string name="update">Cập nhật</string>
+    <string name="wait_until_firmware_install">Vui lòng đợi cho đến khi firmware được cài đặt thành công để tiếp tục.</string>
+    <string name="wait_until_game_compile">Vui lòng đợi trò chơi biên dịch xong để tiếp tục.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">Chọn</string>
+    <string name="download">Tải xuống</string>
+    <string name="downloading">Đang tải xuống…</string>
+    <string name="drivers">Trình điều khiển</string>
+    <string name="failed_to_load_selected_driver">Tải trình điều khiển đã chọn thất bại</string>
+    <string name="fetching">Đang lấy dữ liệu…</string>
+    <string name="install">Cài đặt</string>
+    <string name="installing">Đang cài đặt…</string>
+    <string name="please_wait">Vui lòng đợi</string>
+    <string name="select_driver">Chọn trình điều khiển GPU</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">Tải phiên bản mới thất bại, phiên bản trước đó đã được khôi phục.</string>
+    <string name="failed_to_update_rpcsx">Cập nhật RPCSX thất bại</string>
+    <string name="installation_progress">Tiến trình cài đặt</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">Đặt lại %1$s?</string>
+    <string name="ask_if_reset_button_description">Bạn có chắc chắn muốn đặt lại %1$s không?</string>
+    <string name="control_panel">Bảng điều khiển</string>
+    <string name="editing">Đang chỉnh sửa</string>
+    <string name="opacity">Độ mờ</string>
+    <string name="scale">Tỷ lệ</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">Cài đặt firmware</string>
+    <string name="package_installation">Cài đặt gói</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">Lỗi: %1$s</string>
+    <string name="failed_to_boot">Khởi động thất bại</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">Khởi động lại giao diện để áp dụng thay đổi</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">Người dùng đang hoạt động</string>
+    <string name="advanced_settings">Cài đặt nâng cao</string>
+    <string name="advanced_settings_description">Cấu hình cài đặt nâng cao của trình giả lập</string>
+    <string name="ask_if_reset_key">"Bạn có muốn đặt lại '%1$s' về giá trị mặc định không?"</string>
+    <string name="automatic_mapping">Tự động ánh xạ</string>
+    <string name="automatic_mapping_applied">Đã áp dụng sơ đồ phím đã biết cho %1$s</string>
+    <string name="automatic_mapping_defaults">Không có sơ đồ phím đã biết cho %1$s — áp dụng mặc định</string>
+    <string name="automatic_mapping_no_device">Vui lòng kết nối tay cầm vào khe này trước</string>
+    <string name="connected_controllers">Tay cầm đã kết nối</string>
+    <string name="controller_not_connected">Chưa kết nối</string>
+    <string name="controls">Điều khiển</string>
+    <string name="controls_description">Cấu hình tay cầm chơi game</string>
+    <string name="custom_driver">Trình điều khiển GPU tùy chỉnh</string>
+    <string name="custom_driver_description">Cài đặt trình điều khiển thay thế để có hiệu suất hoặc độ chính xác tốt hơn</string>
+    <string name="custom_driver_not_supported">Không hỗ trợ trình điều khiển tùy chỉnh</string>
+    <string name="custom_driver_not_supported_description">Tải trình điều khiển tùy chỉnh hiện không được hỗ trợ trên thiết bị này.</string>
+    <string name="download_channels">Kênh tải xuống</string>
+    <string name="enable_haptic_feedback">Bật phản hồi rung</string>
+    <string name="failed_to_assign_value">Đặt giá trị %1$s cho %2$s thất bại</string>
+    <string name="failed_to_reset_key">Đặt lại %1$s thất bại</string>
+    <string name="failed_to_view_internal_dir">Xem thư mục nội bộ thất bại</string>
+    <string name="fsr_sharpening">Độ sắc nét FSR</string>
+    <string name="fsr_sharpening_requires_fsr">Chỉ áp dụng khi chế độ tỉ lệ đầu ra được đặt thành FSR</string>
+    <string name="gamepad_overlay">Nút ảo trên màn hình</string>
+    <string name="graphics">Đồ họa</string>
+    <string name="graphics_description">Tỷ lệ đầu ra và độ sắc nét FSR</string>
+    <string name="install_custom_rpcsx_lib">Cài đặt thư viện RPCSX tùy chỉnh</string>
+    <string name="key_mappings">Sơ đồ phím bấm</string>
+    <string name="log_not_found">Không tìm thấy file log!</string>
+    <string name="manage_settings">Quản lý cài đặt</string>
+    <string name="no_activity_to_handle_action">Không tìm thấy ứng dụng để xử lý hành động này</string>
+    <string name="output_scaling">Tỷ lệ đầu ra</string>
+    <string name="perform_input">Giả lập đầu vào</string>
+    <string name="player_slot">Người chơi %1$d</string>
+    <string name="reset_setting">Đặt lại cài đặt</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="share_log">Chia sẻ log</string>
+    <string name="share_log_description">Chia sẻ file log của RPCSX để giúp gỡ lỗi</string>
+    <string name="touchpad">Bàn di chuột</string>
+    <string name="users">Người dùng</string>
+    <string name="view_internal_dir">Xem thư mục nội bộ</string>
+    <string name="view_internal_dir_description">Mở thư mục nội bộ của RPCSX trong trình quản lý tệp</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">Giá trị phải là bội số của cỡ bước %1$d trong khoảng từ %2$.0f đến %3$.0f</string>
+    <string name="value">Giá trị</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">Cập nhật giao diện thất bại</string>
+    <string name="permission_required">Yêu cầu quyền truy cập</string>
+    <string name="permission_required_description">Cho phép cài đặt từ nguồn này để cập nhật.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">Nhập URL kho lưu trữ</string>
+    <string name="select_repo">Chọn kho lưu trữ</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">Dừng trình giả lập?</string>
+    <string name="ask_if_stop_emu_description">Để thay đổi người dùng, trước tiên bạn phải dừng trình giả lập.\n\nDừng trình giả lập bây giờ?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Ngôn ngữ</string>
+    <string name="language_auto">Mặc định hệ thống (Tự động)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">Không tìm thấy trò chơi nào</string>
+    <string name="no_games_description">Nhấn nút \'+\' ở góc dưới bên phải để cài đặt file trò chơi hoặc chọn một thư mục.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">Đồ họa nâng cao</string>
+    <string name="advanced_graphics_description">Tỉ lệ FSR, độ sắc nét và các cài đặt đồ họa nâng cao khác</string>
+</resources>

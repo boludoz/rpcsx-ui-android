@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -19,12 +20,14 @@ import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
     private lateinit var unregisterUsbEventListener: () -> Unit
+    private lateinit var unregisterGamepadEventListener: () -> Unit
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        GeneralSettings.init(this)
+        unregisterGamepadEventListener = listenGamepadEvents(this)
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        GeneralSettings.init(this)
 
         if (!RPCSX.initialized) {
             Permission.PostNotifications.requestPermission(this)
@@ -143,5 +146,6 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterUsbEventListener()
+        unregisterGamepadEventListener()
     }
 }

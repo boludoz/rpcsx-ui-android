@@ -8,6 +8,7 @@ import android.content.pm.PackageInstaller
 import android.provider.Settings
 import android.util.Log
 import androidx.core.net.toUri
+import androidx.core.content.IntentCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.rpcsx.BuildConfig
@@ -20,7 +21,7 @@ class PackageInstallStatusReceiver : BroadcastReceiver() {
         when (intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)) {
             PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                 val activityIntent =
-                    intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
+                    IntentCompat.getParcelableExtra(intent, Intent.EXTRA_INTENT, Intent::class.java)
 
                 context.startActivity(activityIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             }

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">إضافة</string>
+    <string name="close">إغلاق</string>
+    <string name="error">خطأ</string>
+    <string name="export">تصدير</string>
+    <string name="import_">استيراد</string>
+    <string name="none">بلا</string>
+    <string name="reset">إعادة تعيين</string>
+
+    <!-- AppNavHost -->
+    <string name="about">حول</string>
+    <string name="copied_to_clipboard">تم النسخ إلى الحافظة!</string>
+    <string name="device_info">معلومات الجهاز</string>
+    <string name="driver_download_channel">قناة تنزيل تعريفات GPU</string>
+    <string name="edit_overlay">تعديل أزرار الشاشة</string>
+    <string name="firmware">البرنامج الثابت</string>
+    <string name="rpcsx_download_channel">قناة تنزيل RPCSX</string>
+    <string name="select_game_file">تثبيت PKG أو ISO أو RAP</string>
+    <string name="select_game_folder">تثبيت مجلد</string>
+    <string name="settings">الإعدادات</string>
+    <string name="ui_update_channel">قناة تحديث واجهة RPCSX للـ Android</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">تثبيت المجلد</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">النسخة الحالية: %1$s\nالنسخة الجديدة: %2$s</string>
+    <string name="deleting_game">حذف اللعبة</string>
+    <string name="delete">حذف</string>
+    <string name="downloading_latest_rpcsx">تنزيل أحدث إصدار من RPCSX</string>
+    <string name="downloading_rpcsx">تنزيل RPCSX %1$s</string>
+    <string name="downloading_ui">تنزيل واجهة RPCSX %1$s</string>
+    <string name="failed_to_delete_game_cache">فشل حذف ذاكرة التخزين المؤقت للعبة</string>
+    <string name="failed_to_download_rpcsx">فشل تنزيل RPCSX</string>
+    <string name="game_compiling_not_finished">لم ينتهِ تجميع اللعبة بعد</string>
+    <string name="game_require_key">تتطلب هذه اللعبة مفتاح ترخيص للعب</string>
+    <string name="install_custom_version">تثبيت نسخة مخصصة</string>
+    <string name="install_firmware_to_continue">يرجى تثبيت البرنامج الثابت المطلوب للمتابعة.</string>
+    <string name="install_rap_file">تثبيت ملف RAP</string>
+    <string name="license_installation">تثبيت الترخيص</string>
+    <string name="missing_firmware">البرنامج الثابت مفقود</string>
+    <string name="missing_key">مفتاح الترخيص مفقود</string>
+    <string name="missing_rpcsx_lib">مكتبة RPCSX مفقودة</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="rpcsx_update_available">تحديث RPCSX متاح</string>
+    <string name="ui_update_available">تحديث الواجهة متاح</string>
+    <string name="unexpected_error">خطأ غير متوقع</string>
+    <string name="update">تحديث</string>
+    <string name="wait_until_firmware_install">يرجى الانتظار حتى يتم تثبيت البرنامج الثابت بنجاح للمتابعة.</string>
+    <string name="wait_until_game_compile">يرجى الانتظار حتى يتم تجميع اللعبة للمتابعة.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">اختر</string>
+    <string name="download">تنزيل</string>
+    <string name="downloading">جاري التنزيل…</string>
+    <string name="drivers">التعريفات</string>
+    <string name="failed_to_load_selected_driver">فشل تحميل التعريف المحدد</string>
+    <string name="fetching">جاري جلب البيانات…</string>
+    <string name="install">تثبيت</string>
+    <string name="installing">جاري التثبيت…</string>
+    <string name="please_wait">يرجى الانتظار</string>
+    <string name="select_driver">اختر تعريف GPU</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">فشل تحميل النسخة الجديدة، تم استعادة النسخة السابقة.</string>
+    <string name="failed_to_update_rpcsx">فشل تحديث RPCSX</string>
+    <string name="installation_progress">تقدم التثبيت</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">إعادة تعيين %1$s؟</string>
+    <string name="ask_if_reset_button_description">هل أنت متأكد من رغبتك في إعادة تعيين %1$s؟</string>
+    <string name="control_panel">لوحة التحكم</string>
+    <string name="editing">تعديل</string>
+    <string name="opacity">الشفافية</string>
+    <string name="scale">المقياس</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">تثبيت البرنامج الثابت</string>
+    <string name="package_installation">تثبيت الحزمة</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">خطأ: %1$s</string>
+    <string name="failed_to_boot">فشل الإقلاع</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">أعد تشغيل الواجهة لتطبيق التغييرات</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">المستخدم النشط</string>
+    <string name="advanced_settings">الإعدادات المتقدمة</string>
+    <string name="advanced_settings_description">تهيئة الإعدادات المتقدمة للمحاكي</string>
+    <string name="ask_if_reset_key">"هل تريد إعادة تعيين '%1$s' إلى قيمته الافتراضية؟"</string>
+    <string name="automatic_mapping">التعيين التلقائي</string>
+    <string name="automatic_mapping_applied">تم تطبيق التعيين المعروف لـ %1$s</string>
+    <string name="automatic_mapping_defaults">لا يوجد تعيين معروف لـ %1$s — تم تطبيق الإعدادات الافتراضية</string>
+    <string name="automatic_mapping_no_device">قم بتوصيل ذراع التحكم في هذا المنفذ أولاً</string>
+    <string name="connected_controllers">أذرع التحكم المتصلة</string>
+    <string name="controller_not_connected">غير متصل</string>
+    <string name="controls">التحكم</string>
+    <string name="controls_description">تهيئة ذراع التحكم</string>
+    <string name="custom_driver">تعريف GPU مخصص</string>
+    <string name="custom_driver_description">تثبيت تعريفات بديلة لأداء أو دقة أفضل محتملة</string>
+    <string name="custom_driver_not_supported">التعريف المخصص غير مدعوم</string>
+    <string name="custom_driver_not_supported_description">تحميل تعريفات مخصصة غير مدعوم حاليًا على هذا الجهاز.</string>
+    <string name="download_channels">قنوات التنزيل</string>
+    <string name="enable_haptic_feedback">تمكين الاهتزاز اللمسي</string>
+    <string name="failed_to_assign_value">فشل تعيين القيمة %1$s إلى %2$s</string>
+    <string name="failed_to_reset_key">فشل إعادة تعيين %1$s</string>
+    <string name="failed_to_view_internal_dir">فشل عرض المجلد الداخلي</string>
+    <string name="fsr_sharpening">حدة FSR</string>
+    <string name="fsr_sharpening_requires_fsr">ينطبق فقط عندما يتم تعيين قياس المخرج إلى FSR</string>
+    <string name="gamepad_overlay">أزرار التحكم على الشاشة</string>
+    <string name="graphics">الرسوميات</string>
+    <string name="graphics_description">قياس المخرج وحدة FSR</string>
+    <string name="install_custom_rpcsx_lib">تثبيت مكتبة RPCSX مخصصة</string>
+    <string name="key_mappings">تعيينات المفاتيح</string>
+    <string name="log_not_found">ملف السجل غير موجود!</string>
+    <string name="manage_settings">إدارة الإعدادات</string>
+    <string name="no_activity_to_handle_action">لم يتم العثور على تطبيق للتعامل مع هذا الإجراء</string>
+    <string name="output_scaling">قياس المخرج</string>
+    <string name="perform_input">محاكاة الإدخال</string>
+    <string name="player_slot">اللاعب %1$d</string>
+    <string name="reset_setting">إعادة تعيين الإعداد</string>
+    <string name="search">بحث</string>
+    <string name="share_log">مشاركة السجل</string>
+    <string name="share_log_description">مشاركة ملف سجل RPCSX للمساعدة في حل المشكلات</string>
+    <string name="touchpad">لوحة اللمس</string>
+    <string name="users">المستخدمون</string>
+    <string name="view_internal_dir">عرض المجلد الداخلي</string>
+    <string name="view_internal_dir_description">فتح المجلد الداخلي لـ RPCSX في مدير الملفات</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">يجب أن تكون القيمة مضاعفة لحجم الخطوة %1$d من %2$.0f إلى %3$.0f</string>
+    <string name="value">القيمة</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">فشل تحديث الواجهة</string>
+    <string name="permission_required">الإذن مطلوب</string>
+    <string name="permission_required_description">قم بتمكين إذن التثبيت من هذا المصدر للتحديث.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">أدخل عنوان URL للمستودع</string>
+    <string name="select_repo">اختر المستودع</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">إيقاف المحاكي؟</string>
+    <string name="ask_if_stop_emu_description">لتغيير المستخدم، يجب عليك إيقاف المحاكي أولاً.\n\nهل تريد إيقاف المحاكي الآن؟</string>
+
+    <!-- Settings language strings -->
+    <string name="language">اللغة</string>
+    <string name="language_auto">افتراضي النظام (تحديد تلقائي)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">لم يتم العثور على ألعاب</string>
+    <string name="no_games_description">اضغط على زر \'+\' في الأسفل لتثبيت لعبة أو اختيار مجلد.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">رسوميات متقدمة</string>
+    <string name="advanced_graphics_description">قياس FSR، الحدة، وإعدادات رسومية متقدمة أخرى</string>
+</resources>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">Ekle</string>
+    <string name="close">Kapat</string>
+    <string name="error">Hata</string>
+    <string name="export">Dışa Aktar</string>
+    <string name="import_">İçe Aktar</string>
+    <string name="none">Hiçbiri</string>
+    <string name="reset">Sıfırla</string>
+
+    <!-- AppNavHost -->
+    <string name="about">Hakkında</string>
+    <string name="copied_to_clipboard">Panoya kopyalandı!</string>
+    <string name="device_info">Cihaz Bilgisi</string>
+    <string name="driver_download_channel">GPU Sürücüsü İndirme Kanalı</string>
+    <string name="edit_overlay">Dokunmatik Düzeni Düzenle</string>
+    <string name="firmware">Firmware</string>
+    <string name="rpcsx_download_channel">RPCSX İndirme Kanalı</string>
+    <string name="select_game_file">PKG, ISO veya RAP Yükle</string>
+    <string name="select_game_folder">Klasör Yükle</string>
+    <string name="settings">Ayarlar</string>
+    <string name="ui_update_channel">RPCSX UI Android Güncelleme Kanalı</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">Dizin kuruluyor</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">Mevcut sürüm: %1$s\nYeni sürüm: %2$s</string>
+    <string name="deleting_game">Oyun Siliniyor</string>
+    <string name="delete">Sil</string>
+    <string name="downloading_latest_rpcsx">En son RPCSX indiriliyor</string>
+    <string name="downloading_rpcsx">RPCSX %1$s indiriliyor</string>
+    <string name="downloading_ui">RPCSX UI Android %1$s indiriliyor</string>
+    <string name="failed_to_delete_game_cache">Oyun önbelleği silinemedi</string>
+    <string name="failed_to_download_rpcsx">RPCSX indirilemedi</string>
+    <string name="game_compiling_not_finished">Oyun derlemesi henüz bitmedi</string>
+    <string name="game_require_key">Bu oyunu oynamak için lisans anahtarı gerekiyor</string>
+    <string name="install_custom_version">Özel sürüm yükle</string>
+    <string name="install_firmware_to_continue">Devam etmek için lütfen gerekli firmware\'i yükleyin.</string>
+    <string name="install_rap_file">RAP dosyası yükle</string>
+    <string name="license_installation">Lisans Kurulumu</string>
+    <string name="missing_firmware">Eksik Firmware</string>
+    <string name="missing_key">Eksik Lisans Anahtarı</string>
+    <string name="missing_rpcsx_lib">Eksik RPCSX Kütüphanesi</string>
+    <string name="retry">Yeniden Dene</string>
+    <string name="rpcsx_update_available">RPCSX Güncellemesi Mevcut</string>
+    <string name="ui_update_available">Arayüz Güncellemesi Mevcut</string>
+    <string name="unexpected_error">Beklenmeyen Hata</string>
+    <string name="update">Güncelle</string>
+    <string name="wait_until_firmware_install">Devam etmek için lütfen firmware yüklenene kadar bekleyin.</string>
+    <string name="wait_until_game_compile">Devam etmek için lütfen oyun derlenene kadar bekleyin.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">Seç</string>
+    <string name="download">İndir</string>
+    <string name="downloading">İndiriliyor…</string>
+    <string name="drivers">Sürücüler</string>
+    <string name="failed_to_load_selected_driver">Seçilen sürücü yüklenemedi</string>
+    <string name="fetching">Alınıyor…</string>
+    <string name="install">Yükle</string>
+    <string name="installing">Yükleniyor…</string>
+    <string name="please_wait">Lütfen bekleyin</string>
+    <string name="select_driver">Bir GPU Sürücüsü Seçin</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">Yeni sürüm yüklenemedi, önceki sürüm geri yüklendi.</string>
+    <string name="failed_to_update_rpcsx">RPCSX güncellenemedi</string>
+    <string name="installation_progress">Kurulum ilerlemesi</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">%1$s sıfırlansın mı?</string>
+    <string name="ask_if_reset_button_description">%1$s sıfırlamak istediğinizden emin misiniz?</string>
+    <string name="control_panel">Kontrol Paneli</string>
+    <string name="editing">Düzenleniyor</string>
+    <string name="opacity">Opaklık</string>
+    <string name="scale">Ölçek</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">Firmware Kurulumu</string>
+    <string name="package_installation">Paket Kurulumu</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">Hata: %1$s</string>
+    <string name="failed_to_boot">Başlatılamadı</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">Değişikliği uygulamak için RPCSX UI\'yı yeniden başlatın</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">Aktif Kullanıcı</string>
+    <string name="advanced_settings">Gelişmiş Ayarlar</string>
+    <string name="advanced_settings_description">Emülatör gelişmiş ayarlarını yapılandır</string>
+    <string name="ask_if_reset_key">" '%1$s' varsayılan değerine sıfırlansın mı?"</string>
+    <string name="automatic_mapping">Otomatik Eşleme</string>
+    <string name="automatic_mapping_applied">"%1$s için bilinen eşleme uygulandı"</string>
+    <string name="automatic_mapping_defaults">"%1$s için bilinen eşleme yok — varsayılanlar uygulandı"</string>
+    <string name="automatic_mapping_no_device">Önce bu yuvaya bir kontrolcü bağlayın</string>
+    <string name="connected_controllers">Bağlı Kontrolcüler</string>
+    <string name="controller_not_connected">Bağlı değil</string>
+    <string name="controls">Kontroller</string>
+    <string name="controls_description">Kontrolcüyü yapılandır</string>
+    <string name="custom_driver">Özel GPU Sürücüsü</string>
+    <string name="custom_driver_description">Potansiyel olarak daha iyi performans veya doğruluk için alternatif sürücüler yükleyin</string>
+    <string name="custom_driver_not_supported">Özel Sürücü Desteklenmiyor</string>
+    <string name="custom_driver_not_supported_description">Özel sürücü yükleme bu cihazda şu anda desteklenmiyor.</string>
+    <string name="download_channels">İndirme Kanalları</string>
+    <string name="enable_haptic_feedback">Titreşim Geri Bildirimini Etkinleştir</string>
+    <string name="failed_to_assign_value">"%1$s değeri %2$s konumuna atanamadı"</string>
+    <string name="failed_to_reset_key">"%1$s sıfırlanamadı"</string>
+    <string name="failed_to_view_internal_dir">Dahili dizin görüntülenemedi</string>
+    <string name="fsr_sharpening">FSR Keskinleştirme</string>
+    <string name="fsr_sharpening_requires_fsr">Yalnızca Çıkış Ölçeklendirme FSR olarak ayarlandığında uygulanır</string>
+    <string name="gamepad_overlay">Gamepad Ekran Düzeni</string>
+    <string name="graphics">Grafikler</string>
+    <string name="graphics_description">Çıkış ölçeklendirme ve FSR keskinleştirme</string>
+    <string name="install_custom_rpcsx_lib">Özel RPCSX Kitaplığı Yükle</string>
+    <string name="key_mappings">Tuş Eşlemeleri</string>
+    <string name="log_not_found">Log dosyası bulunamadı!</string>
+    <string name="manage_settings">Ayarları Yönet</string>
+    <string name="no_activity_to_handle_action">Bu eylemi gerçekleştirecek uygulama bulunamadı</string>
+    <string name="output_scaling">Çıkış Ölçeklendirme</string>
+    <string name="perform_input">Girişi Simüle Et</string>
+    <string name="player_slot">Oyuncu %1$d</string>
+    <string name="reset_setting">Ayarı Sıfırla</string>
+    <string name="search">Ara</string>
+    <string name="share_log">Log Paylaş</string>
+    <string name="share_log_description">Sorunları gidermeye yardımcı olmak için RPCSX log dosyasını paylaşın</string>
+    <string name="touchpad">Dokunmatik Yüzey</string>
+    <string name="users">Kullanıcılar</string>
+    <string name="view_internal_dir">Dahili Dizini Görüntüle</string>
+    <string name="view_internal_dir_description">Dosya yöneticisinde RPCSX dahili dizinini aç</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">Değer, %2$.0f ile %3$.0f arasında adım boyutu %1$d katı olmalıdır</string>
+    <string name="value">Değer</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">Arayüz güncellenemedi</string>
+    <string name="permission_required">İzin Gerekli</string>
+    <string name="permission_required_description">Güncellemek için bu kaynaktan yükleme iznini etkinleştirin.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">Depo URL\'sini Girin</string>
+    <string name="select_repo">Depo Seç</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">Emülatör Durdurulsun mu?</string>
+    <string name="ask_if_stop_emu_description">Kullanıcıyı değiştirmek için önce emülatörü durdurmalısınız.\n\nEmülatör şimdi durdurulsun mu?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Dil</string>
+    <string name="language_auto">Sistem Varsayılanı (Otomatik)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">Oyun Bulunamadı</string>
+    <string name="no_games_description">Bir oyun yüklemek veya dizin seçmek için sağ alttaki \'+\' düğmesine dokunun.</string>
+
+    <!-- Advanced Graphics strings -->
+    <string name="advanced_graphics">Gelişmiş Grafikler</string>
+    <string name="advanced_graphics_description">FSR ölçeklendirme, keskinleştirme ve diğer gelişmiş grafik ayarları</string>
+</resources>
