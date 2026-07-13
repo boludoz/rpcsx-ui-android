@@ -93,6 +93,8 @@
     <string name="advanced_settings">Advanced Settings</string>
     <string name="advanced_settings_description">Configure emulator advanced settings</string>
     <string name="ask_if_reset_key">"Do you want to reset '%1$s' to its default value?"</string>
+    <string name="connected_controllers">Connected Controllers</string>
+    <string name="controller_not_connected">Not connected</string>
     <string name="controls">Controls</string>
     <string name="controls_description">Configure controller</string>
     <string name="custom_driver">Custom GPU Driver</string>
@@ -111,6 +113,7 @@
     <string name="manage_settings">Manage Settings</string>
     <string name="no_activity_to_handle_action">No activity found to handle this action</string>
     <string name="perform_input">Perform Input</string>
+    <string name="player_slot">Player %1$d</string>
     <string name="reset_setting">Reset Setting</string>
     <string name="search">Search</string>
     <string name="share_log">Share Log</string>

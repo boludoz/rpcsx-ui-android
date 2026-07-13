@@ -95,7 +95,7 @@ fun UpdateChannelsScreen(
             RegularPreference(
                 title = stringResource(R.string.rpcsx_download_channel),
                 leadingIcon = null,
-                subtitle = { PreferenceSubtitle(text = prefs.getString("rpcsx_channel", ReleaseRpcsxChannel)!!) },
+                subtitle = { PreferenceSubtitle(text = prefs.getString("rpcsx_channel", DevRpcsxChannel)!!) },
                 onClick = {
                     navigateTo("rpcsx_channels")
                 })

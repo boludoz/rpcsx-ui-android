@@ -19,8 +19,11 @@ import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
     private lateinit var unregisterUsbEventListener: () -> Unit
+    private lateinit var unregisterGamepadEventListener: () -> Unit
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        unregisterGamepadEventListener = listenGamepadEvents(this)
 
         GeneralSettings.init(this)
 
@@ -143,5 +146,6 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         unregisterUsbEventListener()
+        unregisterGamepadEventListener()
     }
 }

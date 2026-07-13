@@ -86,6 +86,8 @@ import net.rpcsx.ui.settings.components.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.rpcsx.GamepadRepository
+import net.rpcsx.MaxGamepadPlayers
 import net.rpcsx.R
 import net.rpcsx.RPCSX
 import net.rpcsx.UserRepository
@@ -762,6 +764,26 @@ fun ControllerSettings(
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                PreferenceHeader(stringResource(R.string.connected_controllers))
+            }
+
+            items(MaxGamepadPlayers) { playerIndex ->
+                val slot = GamepadRepository.slots[playerIndex]
+                RegularPreference(
+                    title = stringResource(R.string.player_slot, playerIndex + 1),
+                    leadingIcon = null,
+                    value = {
+                        PreferenceValue(slot?.deviceName ?: stringResource(R.string.controller_not_connected))
+                    },
+                    onClick = {}
+                )
+            }
+
+            item {
+                HorizontalDivider()
             }
 
             item {
