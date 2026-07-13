@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">RPCSX</string>
+
+    <string name="add">Añadir</string>
+    <string name="close">Cerrar</string>
+    <string name="error">Error</string>
+    <string name="export">Exportar</string>
+    <string name="import_">Importar</string>
+    <string name="none">Ninguno</string>
+    <string name="reset">Restablecer</string>
+
+    <!-- AppNavHost -->
+    <string name="about">Acerca de</string>
+    <string name="copied_to_clipboard">¡Copiado al portapapeles!</string>
+    <string name="device_info">Información del dispositivo</string>
+    <string name="driver_download_channel">Canal de descarga del controlador de GPU</string>
+    <string name="edit_overlay">Editar controles en pantalla</string>
+    <string name="firmware">Firmware</string>
+    <string name="rpcsx_download_channel">Canal de descarga de RPCSX</string>
+    <string name="select_game_file">Instalar PKG, ISO o RAP</string>
+    <string name="select_game_folder">Instalar carpeta</string>
+    <string name="settings">Ajustes</string>
+    <string name="ui_update_channel">Canal de actualización de RPCSX UI Android</string>
+
+    <!-- FileUtil -->
+    <string name="installing_dir">Instalando directorio</string>
+
+    <!-- GamesScreen -->
+    <string name="current_and_new_version">Versión actual: %1$s\nNueva versión: %2$s</string>
+    <string name="deleting_game">Eliminando juego</string>
+    <string name="delete">Eliminar</string>
+    <string name="downloading_latest_rpcsx">Descargando la última versión de RPCSX</string>
+    <string name="downloading_rpcsx">Descargando RPCSX %1$s</string>
+    <string name="downloading_ui">Descargando RPCSX UI Android %1$s</string>
+    <string name="failed_to_delete_game_cache">Error al eliminar la caché del juego</string>
+    <string name="failed_to_download_rpcsx">Error al descargar RPCSX</string>
+    <string name="game_compiling_not_finished">La compilación del juego aún no ha terminado</string>
+    <string name="game_require_key">Este juego requiere una clave para jugar</string>
+    <string name="install_custom_version">Instalar versión personalizada</string>
+    <string name="install_firmware_to_continue">Instale el firmware requerido para continuar.</string>
+    <string name="install_rap_file">Instalar archivo RAP</string>
+    <string name="license_installation">Instalación de licencia</string>
+    <string name="missing_firmware">Falta el firmware</string>
+    <string name="missing_key">Falta la clave</string>
+    <string name="missing_rpcsx_lib">Falta la biblioteca RPCSX</string>
+    <string name="retry">Reintentar</string>
+    <string name="rpcsx_update_available">Actualización de RPCSX disponible</string>
+    <string name="ui_update_available">Actualización de la interfaz disponible</string>
+    <string name="unexpected_error">Error inesperado</string>
+    <string name="update">Actualizar</string>
+    <string name="wait_until_firmware_install">Espere a que el firmware se instale correctamente para continuar.</string>
+    <string name="wait_until_game_compile">Espere a que el juego se compile para continuar.</string>
+
+    <!-- GpuDriversScreen -->
+    <string name="choose">Elegir</string>
+    <string name="download">Descargar</string>
+    <string name="downloading">Descargando…</string>
+    <string name="drivers">Controladores</string>
+    <string name="failed_to_load_selected_driver">Error al cargar el controlador seleccionado</string>
+    <string name="fetching">Buscando…</string>
+    <string name="install">Instalar</string>
+    <string name="installing">Instalando…</string>
+    <string name="please_wait">Por favor, espere</string>
+    <string name="select_driver">Seleccione un controlador de GPU</string>
+
+    <!-- MainActivity -->
+    <string name="failed_to_load_new_version">Error al cargar la nueva versión, se restauró la versión anterior.</string>
+    <string name="failed_to_update_rpcsx">Error al actualizar RPCSX</string>
+    <string name="installation_progress">Progreso de instalación</string>
+
+    <!-- OverlayEditActivity -->
+    <string name="ask_if_reset_button">¿Restablecer %1$s?</string>
+    <string name="ask_if_reset_button_description">¿Está seguro de que desea restablecer %1$s?</string>
+    <string name="control_panel">Panel de control</string>
+    <string name="editing">Editando</string>
+    <string name="opacity">Opacidad</string>
+    <string name="scale">Escala</string>
+
+    <!-- PrecompilerService -->
+    <string name="firmware_installation">Instalación de firmware</string>
+    <string name="package_installation">Instalación de paquete</string>
+
+    <!-- RPCSXActivity -->
+    <string name="error_with_msg">Error: %1$s</string>
+    <string name="failed_to_boot">Error al iniciar</string>
+
+    <!-- RpcsxUpdater -->
+    <string name="restart_ui_to_apply_change">Reinicie RPCSX UI para aplicar los cambios</string>
+
+    <!-- SettingsScreen -->
+    <string name="active_user">Usuario activo</string>
+    <string name="advanced_settings">Ajustes avanzados</string>
+    <string name="advanced_settings_description">Configurar los ajustes avanzados del emulador</string>
+    <string name="ask_if_reset_key">"¿Desea restablecer '%1$s' a su valor predeterminado?"</string>
+    <string name="automatic_mapping">Mapeo automático</string>
+    <string name="automatic_mapping_applied">Se aplicó el mapeo conocido para %1$s</string>
+    <string name="automatic_mapping_defaults">Sin mapeo conocido para %1$s — se aplicaron los valores predeterminados</string>
+    <string name="automatic_mapping_no_device">Conecte un mando a este slot primero</string>
+    <string name="connected_controllers">Mandos conectados</string>
+    <string name="controller_not_connected">No conectado</string>
+    <string name="controls">Controles</string>
+    <string name="controls_description">Configurar mandos</string>
+    <string name="custom_driver">Controlador de GPU personalizado</string>
+    <string name="custom_driver_description">Instalar controladores alternativos para un rendimiento o precisión potencialmente mejores</string>
+    <string name="custom_driver_not_supported">Controlador personalizado no compatible</string>
+    <string name="custom_driver_not_supported_description">La carga de controladores personalizados no es compatible actualmente en este dispositivo.</string>
+    <string name="download_channels">Canales de descarga</string>
+    <string name="enable_haptic_feedback">Activar vibración táctil</string>
+    <string name="failed_to_assign_value">Error al asignar el valor %1$s a %2$s</string>
+    <string name="failed_to_reset_key">Error al restablecer %1$s</string>
+    <string name="failed_to_view_internal_dir">Error al ver el directorio interno</string>
+    <string name="fsr_sharpening">Nitidez FSR</string>
+    <string name="fsr_sharpening_requires_fsr">Solo se aplica cuando el Escalado de Salida está en FSR</string>
+    <string name="gamepad_overlay">Controles táctiles</string>
+    <string name="graphics">Gráficos</string>
+    <string name="graphics_description">Escalado de salida y nitidez FSR</string>
+    <string name="install_custom_rpcsx_lib">Instalar biblioteca RPCSX personalizada</string>
+    <string name="key_mappings">Mapeo de teclas</string>
+    <string name="log_not_found">¡Archivo de registro no encontrado!</string>
+    <string name="manage_settings">Administrar ajustes</string>
+    <string name="no_activity_to_handle_action">No se encontró ninguna actividad para manejar esta acción</string>
+    <string name="output_scaling">Escalado de salida</string>
+    <string name="perform_input">Realizar entrada</string>
+    <string name="player_slot">Jugador %1$d</string>
+    <string name="reset_setting">Restablecer ajuste</string>
+    <string name="search">Buscar</string>
+    <string name="share_log">Compartir registro</string>
+    <string name="share_log_description">Compartir el archivo de registro de RPCSX para ayudar a depurar problemas</string>
+    <string name="touchpad">Touchpad</string>
+    <string name="users">Usuarios</string>
+    <string name="view_internal_dir">Ver directorio interno</string>
+    <string name="view_internal_dir_description">Abrir el directorio interno de RPCSX en el administrador de archivos</string>
+
+    <!-- SliderPreference -->
+    <string name="slider_value_supporting">El valor debe ser múltiplo de %1$d entre %2$.0f y %3$.0f</string>
+    <string name="value">Valor</string>
+
+    <!-- UiUpdater -->
+    <string name="failed_to_update_ui">Error al actualizar la interfaz</string>
+    <string name="permission_required">Permiso requerido</string>
+    <string name="permission_required_description">Habilite el permiso de instalación desde esta fuente para actualizar.</string>
+
+    <!-- UpdateChannelListScreen -->
+    <string name="enter_repo_url">Introduzca la URL del repositorio</string>
+    <string name="select_repo">Seleccionar repositorio</string>
+
+    <!-- UsersScreen -->
+    <string name="ask_if_stop_emu">¿Detener el emulador?</string>
+    <string name="ask_if_stop_emu_description">Para cambiar el usuario, primero debe detener el emulador.\n\n¿Detener el emulador ahora?</string>
+
+    <!-- Settings language strings -->
+    <string name="language">Idioma</string>
+    <string name="language_auto">Predeterminado del sistema (Autodetección)</string>
+
+    <!-- Empty state strings -->
+    <string name="no_games_found">No se encontraron juegos</string>
+    <string name="no_games_description">Toque el botón \'+\' en la esquina inferior derecha para instalar un juego o seleccionar una carpeta.</string>
+</resources>

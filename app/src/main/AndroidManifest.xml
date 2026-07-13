@@ -42,6 +42,8 @@
             android:name=".RPCSXActivity"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:screenOrientation="sensorLandscape"
+            android:resizeableActivity="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density|keyboard|navigation"
             android:launchMode="singleTask"
             android:exported="false" >
             <intent-filter>
@@ -54,13 +56,16 @@
             android:name=".overlay.OverlayEditActivity"
             android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
             android:screenOrientation="sensorLandscape"
+            android:resizeableActivity="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density|keyboard|navigation"
             android:launchMode="singleTask"
             android:exported="false" >
         </activity>
         
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize"
+            android:resizeableActivity="true"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density|keyboard|navigation"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

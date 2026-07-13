@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.util.Log
+import android.view.InputDevice
 import android.view.KeyEvent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -52,6 +53,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -86,14 +88,18 @@ import net.rpcsx.ui.settings.components.preference.SwitchPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.rpcsx.GamepadRepository
+import net.rpcsx.MaxGamepadPlayers
 import net.rpcsx.R
 import net.rpcsx.RPCSX
 import net.rpcsx.UserRepository
 import net.rpcsx.dialogs.AlertDialogQueue
 import net.rpcsx.provider.AppDataDocumentProvider
 import net.rpcsx.ui.common.ComposePreview
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import net.rpcsx.utils.FileUtil
-import net.rpcsx.utils.GeneralSettings
+import net.rpcsx.utils.GamepadAutoMapper
 import net.rpcsx.utils.InputBindingPrefs
 import net.rpcsx.utils.RpcsxUpdater
 import org.json.JSONObject
@@ -685,7 +691,55 @@ fun SettingsScreen(
                     icon = { Icon(painterResource(R.drawable.gamepad), null) },
                     description = stringResource(R.string.controls_description),
                     onClick = { navigateTo("controls") }
-                )       
+                )
+            }
+
+            item(key = "graphics") {
+                HomePreference(
+                    title = stringResource(R.string.graphics),
+                    icon = { Icon(painterResource(R.drawable.ic_palette), null) },
+                    description = stringResource(R.string.graphics_description),
+                    onClick = { navigateTo("graphics") }
+                )
+            }
+
+            item(key = "language") {
+                var showLanguageDialog by remember { mutableStateOf(false) }
+                val languageOptions = listOf(
+                    "" to stringResource(R.string.language_auto),
+                    "en" to "English",
+                    "es" to "Español",
+                    "pt" to "Português"
+                )
+                val currentLangTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+                val currentLanguageName = languageOptions.find { it.first == currentLangTag }?.second ?: languageOptions[0].second
+
+                HomePreference(
+                    title = stringResource(R.string.language),
+                    icon = { Icon(painterResource(R.drawable.ic_language), null) },
+                    description = currentLanguageName,
+                    onClick = { showLanguageDialog = true }
+                )
+
+                if (showLanguageDialog) {
+                    SingleSelectionDialog(
+                        currentValue = currentLangTag,
+                        onValueChange = { tag ->
+                            showLanguageDialog = false
+                            val localeList = if (tag.isEmpty()) {
+                                LocaleListCompat.getEmptyLocaleList()
+                            } else {
+                                LocaleListCompat.forLanguageTags(tag)
+                            }
+                            AppCompatDelegate.setApplicationLocales(localeList)
+                        },
+                        values = languageOptions.map { it.first },
+                        title = stringResource(R.string.language),
+                        valueToText = { tag ->
+                            languageOptions.find { it.first == tag }?.second ?: ""
+                        }
+                    )
+                }
             }
 
             item(key = "share_logs") {
@@ -718,11 +772,16 @@ fun SettingsScreen(
     }
 }
 
+// Hub screen: one entry per player slot (independent button mapping each,
+// mirroring NetherSX2/AetherSX2's per-controller settings) plus a separate
+// Touchpad entry for repositioning the on-screen overlay buttons.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ControllerSettings(
     modifier: Modifier = Modifier,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    navigateToPlayer: (Int) -> Unit,
+    navigateToTouchpad: () -> Unit
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
@@ -743,10 +802,394 @@ fun ControllerSettings(
             )
         }
     ) { contentPadding ->
-        //val context = LocalContext.current
-        val inputBindings = remember {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                PreferenceHeader(stringResource(R.string.connected_controllers))
+            }
+
+            items(MaxGamepadPlayers) { playerIndex ->
+                val slot = GamepadRepository.slots[playerIndex]
+                RegularPreference(
+                    title = stringResource(R.string.player_slot, playerIndex + 1),
+                    leadingIcon = null,
+                    value = {
+                        PreferenceValue(slot?.deviceName ?: stringResource(R.string.controller_not_connected))
+                    },
+                    onClick = { navigateToPlayer(playerIndex) }
+                )
+            }
+
+            item {
+                HorizontalDivider()
+            }
+
+            item {
+                PreferenceHeader(stringResource(R.string.touchpad))
+            }
+
+            item {
+                RegularPreference(
+                    title = stringResource(R.string.edit_overlay),
+                    leadingIcon = null,
+                    onClick = navigateToTouchpad
+                )
+            }
+        }
+    }
+}
+
+private const val OutputScalingPath = "Video@@Output Scaling Mode"
+private const val FsrSharpeningPath = "Video@@Vulkan@@FidelityFX CAS Sharpening Intensity"
+private const val FsrScalingValue = "FidelityFX Super Resolution"
+
+// Helper function to search the settings schema JSON dynamically for matching keys
+private fun findVideoSettingPath(settings: JSONObject, searchKeyword: String, defaultKey: String, ignoreKeyword: String? = null): String {
+    val videoGroup = settings.optJSONObject("Video") ?: return "Video@@$defaultKey"
+    for (key in videoGroup.keys()) {
+        if (key.contains(searchKeyword, ignoreCase = true) && (ignoreKeyword == null || !key.contains(ignoreKeyword, ignoreCase = true))) {
+            return "Video@@$key"
+        }
+        val subGroup = videoGroup.optJSONObject(key)
+        if (subGroup != null) {
+            for (subKey in subGroup.keys()) {
+                if (subKey.contains(searchKeyword, ignoreCase = true) && (ignoreKeyword == null || !subKey.contains(ignoreKeyword, ignoreCase = true))) {
+                    return "Video@@$key@@$subKey"
+                }
+            }
+        }
+    }
+    return "Video@@$defaultKey"
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GraphicsSettings(
+    modifier: Modifier = Modifier,
+    navigateBack: () -> Unit,
+    navigateTo: (path: String) -> Unit
+) {
+    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val context = LocalContext.current
+
+    // Dynamically find settings paths using settingsGet("") JSON
+    val rootSettingsJson = remember {
+        try {
+            JSONObject(RPCSX.instance.settingsGet(""))
+        } catch (e: Exception) {
+            JSONObject()
+        }
+    }
+
+    val rendererPath = remember(rootSettingsJson) {
+        findVideoSettingPath(rootSettingsJson, "renderer", "Renderer")
+    }
+
+    val resolutionPath = remember(rootSettingsJson) {
+        findVideoSettingPath(rootSettingsJson, "resolution", "Resolution", ignoreKeyword = "scaling")
+    }
+
+    // Renderer setting
+    val rendererNode = remember(rendererPath) {
+        try {
+            JSONObject(RPCSX.instance.settingsGet(rendererPath))
+        } catch (e: Exception) {
+            JSONObject()
+        }
+    }
+    var rendererValue by remember {
+        mutableStateOf(if (rendererNode.has("value")) rendererNode.getString("value") else "")
+    }
+    val rendererVariants = remember(rendererNode) {
+        if (rendererNode.has("variants")) {
+            val variantsJson = rendererNode.getJSONArray("variants")
+            (0 until variantsJson.length()).map { variantsJson.getString(it) }
+        } else emptyList()
+    }
+
+    // Resolution setting
+    val resolutionNode = remember(resolutionPath) {
+        try {
+            JSONObject(RPCSX.instance.settingsGet(resolutionPath))
+        } catch (e: Exception) {
+            JSONObject()
+        }
+    }
+    var resolutionValue by remember {
+        mutableStateOf(if (resolutionNode.has("value")) resolutionNode.getString("value") else "")
+    }
+    val resolutionVariants = remember(resolutionNode) {
+        if (resolutionNode.has("variants")) {
+            val variantsJson = resolutionNode.getJSONArray("variants")
+            (0 until variantsJson.length()).map { variantsJson.getString(it) }
+        } else emptyList()
+    }
+
+    // Resolution slider option if numeric
+    var resolutionSliderValue by remember {
+        mutableFloatStateOf(if (resolutionNode.has("value") && !resolutionNode.has("variants")) resolutionNode.getString("value").toFloatOrNull() ?: 100f else 100f)
+    }
+    val resolutionMin = remember(resolutionNode) {
+        if (resolutionNode.has("min")) resolutionNode.getString("min").toFloatOrNull() ?: 50f else 50f
+    }
+    val resolutionMax = remember(resolutionNode) {
+        if (resolutionNode.has("max")) resolutionNode.getString("max").toFloatOrNull() ?: 300f else 300f
+    }
+
+    Scaffold(
+        modifier = Modifier
+            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+            .then(modifier),
+        topBar = {
+            LargeTopAppBar(
+                title = { Text(text = stringResource(R.string.graphics), fontWeight = FontWeight.Medium) },
+                scrollBehavior = topBarScrollBehavior,
+                navigationIcon = {
+                    IconButton(onClick = navigateBack) {
+                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
+                    }
+                }
+            )
+        }
+    ) { contentPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // 1. Rendering Engine
+            if (rendererVariants.isNotEmpty()) {
+                item {
+                    val cleanTitle = rendererPath.substringAfterLast("@@")
+                    SingleSelectionDialog(
+                        currentValue = if (rendererValue in rendererVariants) rendererValue else rendererVariants[0],
+                        values = rendererVariants,
+                        title = cleanTitle,
+                        icon = null,
+                        onValueChange = { value ->
+                            if (RPCSX.instance.settingsSet(rendererPath, "\"$value\"")) {
+                                rendererValue = value
+                            } else {
+                                AlertDialogQueue.showDialog(
+                                    context.getString(R.string.error),
+                                    context.getString(
+                                        R.string.failed_to_assign_value,
+                                        value,
+                                        rendererPath
+                                    )
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+
+            // 2. Resolution (List or Slider)
+            if (resolutionVariants.isNotEmpty()) {
+                item {
+                    val cleanTitle = resolutionPath.substringAfterLast("@@")
+                    SingleSelectionDialog(
+                        currentValue = if (resolutionValue in resolutionVariants) resolutionValue else resolutionVariants[0],
+                        values = resolutionVariants,
+                        title = cleanTitle,
+                        icon = null,
+                        onValueChange = { value ->
+                            if (RPCSX.instance.settingsSet(resolutionPath, "\"$value\"")) {
+                                resolutionValue = value
+                            } else {
+                                AlertDialogQueue.showDialog(
+                                    context.getString(R.string.error),
+                                    context.getString(
+                                        R.string.failed_to_assign_value,
+                                        value,
+                                        resolutionPath
+                                    )
+                                )
+                            }
+                        }
+                    )
+                }
+            } else if (resolutionNode.has("min")) {
+                item {
+                    val cleanTitle = resolutionPath.substringAfterLast("@@")
+                    SliderPreference(
+                        value = resolutionSliderValue,
+                        valueRange = resolutionMin..resolutionMax,
+                        title = cleanTitle,
+                        steps = (resolutionMax - resolutionMin).toInt() - 1,
+                        valueContent = { PreferenceValue(text = "${resolutionSliderValue.toInt()}%") },
+                        onValueChange = { value ->
+                            if (RPCSX.instance.settingsSet(resolutionPath, value.toLong().toString())) {
+                                resolutionSliderValue = value
+                            } else {
+                                AlertDialogQueue.showDialog(
+                                    context.getString(R.string.error),
+                                    context.getString(
+                                        R.string.failed_to_assign_value,
+                                        value.toString(),
+                                        resolutionPath
+                                    )
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+
+            // 3. Advanced Graphics Option
+            item {
+                HomePreference(
+                    title = "Advanced Graphics",
+                    icon = { Icon(painterResource(R.drawable.ic_palette), null) },
+                    description = "FSR scaling, sharpening, and other advanced settings",
+                    onClick = { navigateTo("advanced_graphics") }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdvancedGraphicsSettings(
+    modifier: Modifier = Modifier,
+    navigateBack: () -> Unit
+) {
+    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val context = LocalContext.current
+
+    val scalingNode = remember { JSONObject(RPCSX.instance.settingsGet(OutputScalingPath)) }
+    var scalingValue by remember { mutableStateOf(scalingNode.getString("value")) }
+    val scalingVariants = remember {
+        val variantsJson = scalingNode.getJSONArray("variants")
+        (0 until variantsJson.length()).map { variantsJson.getString(it) }
+    }
+
+    val sharpeningNode = remember { JSONObject(RPCSX.instance.settingsGet(FsrSharpeningPath)) }
+    var sharpeningValue by remember { mutableFloatStateOf(sharpeningNode.getString("value").toFloat()) }
+    val sharpeningMin = remember { sharpeningNode.getString("min").toFloat() }
+    val sharpeningMax = remember { sharpeningNode.getString("max").toFloat() }
+
+    Scaffold(
+        modifier = Modifier
+            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+            .then(modifier),
+        topBar = {
+            LargeTopAppBar(
+                title = { Text(text = "Advanced Graphics", fontWeight = FontWeight.Medium) },
+                scrollBehavior = topBarScrollBehavior,
+                navigationIcon = {
+                    IconButton(onClick = navigateBack) {
+                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
+                    }
+                }
+            )
+        }
+    ) { contentPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                SingleSelectionDialog(
+                    currentValue = if (scalingValue in scalingVariants) scalingValue else scalingVariants[0],
+                    values = scalingVariants,
+                    title = stringResource(R.string.output_scaling),
+                    icon = null,
+                    onValueChange = { value ->
+                        if (RPCSX.instance.settingsSet(OutputScalingPath, "\"$value\"")) {
+                            scalingValue = value
+                        } else {
+                            AlertDialogQueue.showDialog(
+                                context.getString(R.string.error),
+                                context.getString(
+                                    R.string.failed_to_assign_value,
+                                    value,
+                                    OutputScalingPath
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+
+            item {
+                SliderPreference(
+                    value = sharpeningValue,
+                    valueRange = sharpeningMin..sharpeningMax,
+                    title = stringResource(R.string.fsr_sharpening),
+                    subtitle = if (scalingValue == FsrScalingValue) null else stringResource(R.string.fsr_sharpening_requires_fsr),
+                    enabled = scalingValue == FsrScalingValue,
+                    steps = (sharpeningMax - sharpeningMin).toInt() - 1,
+                    valueContent = { PreferenceValue(text = "${sharpeningValue.toInt()}%") },
+                    onValueChange = { value ->
+                        if (RPCSX.instance.settingsSet(FsrSharpeningPath, value.toLong().toString())) {
+                            sharpeningValue = value
+                        } else {
+                            AlertDialogQueue.showDialog(
+                                context.getString(R.string.error),
+                                context.getString(
+                                    R.string.failed_to_assign_value,
+                                    value.toString(),
+                                    FsrSharpeningPath
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+// Per-player key mapping screen: same remap flow the old single global
+// screen had, but scoped to one of the independent per-slot bindings.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PlayerControllerSettings(
+    playerSlot: Int,
+    modifier: Modifier = Modifier,
+    navigateBack: () -> Unit
+) {
+    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    Scaffold(
+        modifier = Modifier
+            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
+            .then(modifier),
+        topBar = {
+            LargeTopAppBar(
+                title = { Text(text = stringResource(R.string.player_slot, playerSlot + 1), fontWeight = FontWeight.Medium) },
+                scrollBehavior = topBarScrollBehavior,
+                navigationIcon = {
+                    IconButton(
+                        onClick = navigateBack
+                    ) {
+                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
+                    }
+                }
+            )
+        }
+    ) { contentPadding ->
+        val context = LocalContext.current
+        val inputBindings = remember(playerSlot) {
             mutableStateMapOf<Int, Pair<Int, Int>>().apply {
-                putAll(InputBindingPrefs.loadBindings())
+                putAll(InputBindingPrefs.loadBindings(playerSlot))
             }
         }
 
@@ -754,6 +1197,7 @@ fun ControllerSettings(
         var currentInput by remember { mutableStateOf(-1) }
         var currentInputName by remember { mutableStateOf("") }
         val requester = remember { FocusRequester() }
+        val noDeviceMessage = stringResource(R.string.automatic_mapping_no_device)
 
         LazyColumn(
             modifier = Modifier
@@ -765,23 +1209,38 @@ fun ControllerSettings(
             }
 
             item {
-                PreferenceHeader(stringResource(R.string.gamepad_overlay))
+                val slot = GamepadRepository.slots[playerSlot]
+                RegularPreference(
+                    title = stringResource(R.string.connected_controllers),
+                    leadingIcon = null,
+                    value = {
+                        PreferenceValue(slot?.deviceName ?: stringResource(R.string.controller_not_connected))
+                    },
+                    onClick = {}
+                )
             }
 
             item {
-                var itemValue by remember {
-                    mutableStateOf(
-                        GeneralSettings["haptic_feedback"] as Boolean? ?: true
-                    )
-                }
-                val def = true
-                SwitchPreference(
-                    checked = itemValue,
-                    title = stringResource(R.string.enable_haptic_feedback) + if (itemValue == def) "" else " *",
+                RegularPreference(
+                    title = stringResource(R.string.automatic_mapping),
                     leadingIcon = null,
-                    onClick = { value ->
-                        GeneralSettings.setValue("haptic_feedback", value)
-                        itemValue = value
+                    onClick = {
+                        val deviceId = GamepadRepository.slots[playerSlot]?.deviceId
+                        val device = deviceId?.let { InputDevice.getDevice(it) }
+                        if (device == null) {
+                            Toast.makeText(context, noDeviceMessage, Toast.LENGTH_SHORT).show()
+                        } else {
+                            val matchedName = GamepadAutoMapper.applyAutomaticMapping(context, playerSlot, device)
+                            inputBindings.clear()
+                            inputBindings.putAll(InputBindingPrefs.loadBindings(playerSlot))
+                            val message = matchedName?.let {
+                                context.getString(R.string.automatic_mapping_applied, it)
+                            } ?: context.getString(
+                                R.string.automatic_mapping_defaults,
+                                device.name ?: "?",
+                            )
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 )
             }
@@ -843,7 +1302,7 @@ fun ControllerSettings(
                                 inputBindings.remove(currentInput)
                                 inputBindings[it.key] = value
                             }
-                            InputBindingPrefs.saveBindings(inputBindings.toMap())
+                            InputBindingPrefs.saveBindings(playerSlot, inputBindings.toMap())
                         }
                     }
                 },
@@ -862,7 +1321,7 @@ fun ControllerSettings(
                                     inputBindings.remove(currentInput)
                                     inputBindings[keyEvent.nativeKeyEvent.keyCode] = value
                                 }
-                                InputBindingPrefs.saveBindings(inputBindings.toMap())
+                                InputBindingPrefs.saveBindings(playerSlot, inputBindings.toMap())
                                 showDialog = false
                                 true
                             } else false
