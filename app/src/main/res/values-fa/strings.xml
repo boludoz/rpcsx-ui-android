@@ -12,7 +12,7 @@
 
     <!-- AppNavHost -->
     <string name="about">درباره</string>
-    <string name="copied_to_clipboard">در حافظه موقت کپی شد!"</string>
+    <string name="copied_to_clipboard">در حافظه موقت کپی شد!</string>
     <string name="device_info">اطلاعات دستگاه</string>
     <string name="driver_download_channel">کانال دانلود درایور GPU</string>
     <string name="edit_overlay">ویرایش دکمه‌های صفحه</string>
@@ -38,7 +38,7 @@
     <string name="game_compiling_not_finished">کامپایل بازی هنوز به پایان نرسیده است</string>
     <string name="game_require_key">این بازی برای اجرا نیاز به کلید لایسنس دارد</string>
     <string name="install_custom_version">نصب نسخه سفارشی</string>
-    <string name="install_firmware_to_continue">لطفاً برای ادامه، فریمور مورد نیاز را نصب کنید।</string>
+    <string name="install_firmware_to_continue">لطفاً برای ادامه، فریمور مورد نیاز را نصب کنید.</string>
     <string name="install_rap_file">نصب فایل RAP</string>
     <string name="license_installation">نصب لایسنس</string>
     <string name="missing_firmware">فریمور یافت نشد</string>
@@ -49,8 +49,8 @@
     <string name="ui_update_available">بروزرسانی رابط کاربری در دسترس است</string>
     <string name="unexpected_error">خطای غیرمنتظره</string>
     <string name="update">بروزرسانی</string>
-    <string name="wait_until_firmware_install">لطفاً تا نصب موفقیت‌آمیز فریمور منتظر بمانید।</string>
-    <string name="wait_until_game_compile">لطفاً تا پایان کامپایل بازی منتظر بمانید।</string>
+    <string name="wait_until_firmware_install">لطفاً تا نصب موفقیت‌آمیز فریمور منتظر بمانید.</string>
+    <string name="wait_until_game_compile">لطفاً تا پایان کامپایل بازی منتظر بمانید.</string>
 
     <!-- GpuDriversScreen -->
     <string name="choose">انتخاب</string>
@@ -65,7 +65,7 @@
     <string name="select_driver">یک درایور GPU انتخاب کنید</string>
 
     <!-- MainActivity -->
-    <string name="failed_to_load_new_version">خطا در بارگیری نسخه جدید، نسخه قبلی بازیابی شد।"</string>
+    <string name="failed_to_load_new_version">خطا در بارگیری نسخه جدید، نسخه قبلی بازیابی شد.</string>
     <string name="failed_to_update_rpcsx">خطا در بروزرسانی RPCSX</string>
     <string name="installation_progress">پیشرفت نصب</string>
 
@@ -155,7 +155,7 @@
 
     <!-- Empty state strings -->
     <string name="no_games_found">هیچ بازی یافت نشد</string>
-    <string name="no_games_description">برای نصب بازی یا انتخاب پوشه، روی دکمه '+' در پایین سمت راست ضربه بزنید.</string>
+    <string name="no_games_description">برای نصب بازی یا انتخاب پوشه، روی دکمه \'+\' در پایین سمت راست ضربه بزنید.</string>
 
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">تنظیمات گرافیکی پیشرفته</string>

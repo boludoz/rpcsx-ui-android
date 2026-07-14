@@ -25,16 +25,9 @@ import net.rpcsx.ui.settings.components.preference.RegularPreference
 import net.rpcsx.R
 
 const val DefaultGpuDriverChannel = "https://github.com/K11MCH1/AdrenoToolsDrivers"
-const val ReleaseUiChannel = "https://github.com/RPCSX/rpcsx-ui-android"
-// Points at this fork (boludoz/rpcsx-ui-android) instead of the upstream
-// RPCSX/rpcsx-ui-android-build repo: the upstream UI build doesn't have the
-// multi-controller/channel changes made on top of it here, so self-updating
-// from upstream would silently replace this fork's UI with an incompatible one.
 const val DevUiChannel = "https://github.com/boludoz/rpcsx-ui-android"
-const val ReleaseRpcsxChannel = "https://github.com/RPCSX/rpcsx"
-// Points at this fork (boludoz/rpcsx) instead of the upstream RPCSX/rpcsx-build
-// repo, since RpcsxUpdater currently always fetches from this channel and this
-// fork's engine build carries the multi-controller support added on top of it.
+const val ReleaseUiChannel = "https://github.com/boludoz/rpcsx-ui-android"
+const val ReleaseRpcsxChannel = "https://github.com/boludoz/rpcsx"
 const val DevRpcsxChannel = "https://github.com/boludoz/rpcsx"
 
 fun channelToUiText(channel: String, releaseRepo: String, devRepo: String): String {
@@ -91,7 +84,7 @@ fun UpdateChannelsScreen(
             RegularPreference(
                 title = stringResource(R.string.ui_update_channel),
                 leadingIcon = null,
-                subtitle = { PreferenceSubtitle(text = prefs.getString("ui_channel", DevUiChannel)!!) },
+                subtitle = { PreferenceSubtitle(text = prefs.getString("ui_channel", ReleaseUiChannel)!!) },
                 onClick = {
                     navigateTo("ui_channels")
                 })
@@ -99,7 +92,7 @@ fun UpdateChannelsScreen(
             RegularPreference(
                 title = stringResource(R.string.rpcsx_download_channel),
                 leadingIcon = null,
-                subtitle = { PreferenceSubtitle(text = prefs.getString("rpcsx_channel", DevRpcsxChannel)!!) },
+                subtitle = { PreferenceSubtitle(text = prefs.getString("rpcsx_channel", ReleaseRpcsxChannel)!!) },
                 onClick = {
                     navigateTo("rpcsx_channels")
                 })

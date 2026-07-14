@@ -184,7 +184,8 @@ fun AppNavHost() {
     if (rpcsxLibrary == null) {
         GamesDestination(
             navigateToSettings = { },
-            drawerState
+            navigateToControls = { },
+            drawerState = drawerState
         )
 
         return
