@@ -56,6 +56,7 @@ class MainActivity : ComponentActivity() {
 
             FirmwareRepository.load()
             GitHub.initialize(this)
+            RpcsxUpdater.syncDownloadedVersionsJson(this)
 
             var rpcsxLibrary = GeneralSettings["rpcsx_library"] as? String
             val rpcsxUpdateStatus = GeneralSettings["rpcsx_update_status"]

@@ -93,6 +93,7 @@ import net.rpcsx.ui.channels.DevRpcsxChannel
 import net.rpcsx.ui.channels.DevUiChannel
 import net.rpcsx.ui.channels.ReleaseRpcsxChannel
 import net.rpcsx.ui.channels.ReleaseUiChannel
+import net.rpcsx.ui.channels.RpcsxCoreUpdateScreen
 import net.rpcsx.ui.channels.UpdateChannelListScreen
 import net.rpcsx.ui.channels.UpdateChannelsScreen
 import net.rpcsx.ui.channels.channelToUiText
@@ -104,7 +105,6 @@ import net.rpcsx.ui.games.GamesScreen
 import net.rpcsx.ui.settings.AdvancedSettingsScreen
 import net.rpcsx.ui.settings.ControllerSettings
 import net.rpcsx.ui.settings.GraphicsSettings
-import net.rpcsx.ui.settings.AdvancedGraphicsSettings
 import net.rpcsx.ui.settings.PlayerControllerSettings
 import net.rpcsx.ui.settings.SettingsScreen
 import net.rpcsx.ui.user.UsersScreen
@@ -277,14 +277,6 @@ fun AppNavHost() {
         }
 
         composable(
-            route = "advanced_graphics"
-        ) {
-            AdvancedGraphicsSettings(
-                navigateBack = navController::navigateUp
-            )
-        }
-
-        composable(
             route = "controls"
         ) {
             ControllerSettings(
@@ -443,6 +435,15 @@ fun AppNavHost() {
         composable(
             route = "rpcsx_channels"
         ) {
+            RpcsxCoreUpdateScreen(
+                navigateBack = navController::navigateUp,
+                navigateTo = navigateTo
+            )
+        }
+
+        composable(
+            route = "rpcsx_repositories"
+        ) {
             UpdateChannelListScreen(
                 navigateBack = navController::navigateUp,
                 title = stringResource(R.string.rpcsx_download_channel),
@@ -499,42 +500,7 @@ fun AppNavHost() {
                         )
                     }
                 },
-                isDeletable = { isValidChannel(it, ReleaseRpcsxChannel, DevRpcsxChannel) },
-                actions = actions@{
-                    if (RpcsxUpdater.getAbi() != "arm64-v8a") {
-                        return@actions
-                    }
-                    var downloadArch by remember { mutableStateOf(RpcsxUpdater.getArch()) }
-                    var expanded by remember { mutableStateOf(false) }
-
-                    TextButton(onClick = { expanded = true }) {
-                        Text(downloadArch)
-                    }
-
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        listOf(
-                            "armv8-a",
-                            "armv8.1-a",
-                            "armv8.2-a",
-                            "armv8.4-a",
-                            "armv8.5-a",
-                            "armv9-a",
-                            "armv9.1-a",
-                        ).forEach { arch ->
-                            DropdownMenuItem(
-                                text = { Text(arch) },
-                                onClick = {
-                                    RpcsxUpdater.setArch(arch)
-                                    downloadArch = arch
-                                    expanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+                isDeletable = { isValidChannel(it, ReleaseRpcsxChannel, DevRpcsxChannel) }
             )
         }
 

@@ -906,6 +906,40 @@ fun GraphicsSettings(
         }
     }
 
+    val scalingNode = remember {
+        try {
+            JSONObject(RPCSX.instance.settingsGet(OutputScalingPath))
+        } catch (e: Exception) {
+            JSONObject()
+        }
+    }
+    var scalingValue by remember {
+        mutableStateOf(if (scalingNode.has("value")) scalingNode.getString("value") else "")
+    }
+    val scalingVariants = remember(scalingNode) {
+        if (scalingNode.has("variants")) {
+            val variantsJson = scalingNode.getJSONArray("variants")
+            (0 until variantsJson.length()).map { variantsJson.getString(it) }
+        } else emptyList()
+    }
+
+    val sharpeningNode = remember {
+        try {
+            JSONObject(RPCSX.instance.settingsGet(FsrSharpeningPath))
+        } catch (e: Exception) {
+            JSONObject()
+        }
+    }
+    var sharpeningValue by remember {
+        mutableFloatStateOf(if (sharpeningNode.has("value")) sharpeningNode.getString("value").toFloatOrNull() ?: 0f else 0f)
+    }
+    val sharpeningMin = remember(sharpeningNode) {
+        if (sharpeningNode.has("min")) sharpeningNode.getString("min").toFloatOrNull() ?: 0f else 0f
+    }
+    val sharpeningMax = remember(sharpeningNode) {
+        if (sharpeningNode.has("max")) sharpeningNode.getString("max").toFloatOrNull() ?: 100f else 100f
+    }
+
     val rendererPath = remember(rootSettingsJson) {
         findVideoSettingPath(rootSettingsJson, "renderer", "Renderer")
     }
@@ -1065,88 +1099,33 @@ fun GraphicsSettings(
                 }
             }
 
-            // 3. Advanced Graphics Option
-            item {
-                HomePreference(
-                    title = stringResource(R.string.advanced_graphics),
-                    icon = { Icon(painterResource(R.drawable.ic_palette), null) },
-                    description = stringResource(R.string.advanced_graphics_description),
-                    onClick = { navigateTo("advanced_graphics") }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AdvancedGraphicsSettings(
-    modifier: Modifier = Modifier,
-    navigateBack: () -> Unit
-) {
-    val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val context = LocalContext.current
-
-    val scalingNode = remember { JSONObject(RPCSX.instance.settingsGet(OutputScalingPath)) }
-    var scalingValue by remember { mutableStateOf(scalingNode.getString("value")) }
-    val scalingVariants = remember {
-        val variantsJson = scalingNode.getJSONArray("variants")
-        (0 until variantsJson.length()).map { variantsJson.getString(it) }
-    }
-
-    val sharpeningNode = remember { JSONObject(RPCSX.instance.settingsGet(FsrSharpeningPath)) }
-    var sharpeningValue by remember { mutableFloatStateOf(sharpeningNode.getString("value").toFloat()) }
-    val sharpeningMin = remember { sharpeningNode.getString("min").toFloat() }
-    val sharpeningMax = remember { sharpeningNode.getString("max").toFloat() }
-
-    Scaffold(
-        modifier = Modifier
-            .nestedScroll(topBarScrollBehavior.nestedScrollConnection)
-            .then(modifier),
-        topBar = {
-            LargeTopAppBar(
-                title = { Text(text = stringResource(R.string.advanced_graphics), fontWeight = FontWeight.Medium) },
-                scrollBehavior = topBarScrollBehavior,
-                navigationIcon = {
-                    IconButton(onClick = navigateBack) {
-                        Icon(painter = painterResource(id = R.drawable.ic_keyboard_arrow_left), null)
-                    }
-                }
-            )
-        }
-    ) { contentPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item {
-                SingleSelectionDialog(
-                    currentValue = if (scalingValue in scalingVariants) scalingValue else scalingVariants[0],
-                    values = scalingVariants,
-                    title = stringResource(R.string.output_scaling),
-                    icon = null,
-                    onValueChange = { value ->
-                        if (RPCSX.instance.settingsSet(OutputScalingPath, "\"$value\"")) {
-                            scalingValue = value
-                        } else {
-                            AlertDialogQueue.showDialog(
-                                context.getString(R.string.error),
-                                context.getString(
-                                    R.string.failed_to_assign_value,
-                                    value,
-                                    OutputScalingPath
+            // Output Scaling
+            if (scalingVariants.isNotEmpty()) {
+                item {
+                    SingleSelectionDialog(
+                        currentValue = if (scalingValue in scalingVariants) scalingValue else scalingVariants[0],
+                        values = scalingVariants,
+                        title = stringResource(R.string.output_scaling),
+                        icon = null,
+                        onValueChange = { value ->
+                            if (RPCSX.instance.settingsSet(OutputScalingPath, "\"$value\"")) {
+                                scalingValue = value
+                            } else {
+                                AlertDialogQueue.showDialog(
+                                    context.getString(R.string.error),
+                                    context.getString(
+                                        R.string.failed_to_assign_value,
+                                        value,
+                                        OutputScalingPath
+                                    )
                                 )
-                            )
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
 
+            // FSR Sharpening
             item {
                 SliderPreference(
                     value = sharpeningValue,
