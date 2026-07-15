@@ -124,6 +124,7 @@
     <string name="perform_input">Perform Input</string>
     <string name="player_slot">Player %1$d</string>
     <string name="reset_setting">Reset Setting</string>
+    <string name="resolution_scale">Resolution Scale</string>
     <string name="search">Search</string>
     <string name="share_log">Share Log</string>
     <string name="share_log_description">Share RPCSX\'s log file to help debug issues</string>

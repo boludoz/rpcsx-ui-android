@@ -905,6 +905,7 @@ fun ControllerSettings(
 }
 
 private const val OutputScalingPath = "Video@@Output Scaling Mode"
+private const val ResolutionScalePath = "Video@@Vulkan@@Resolution Scale"
 private const val FsrSharpeningPath = "Video@@Vulkan@@FidelityFX CAS Sharpening Intensity"
 private const val FsrScalingValue = "FidelityFX Super Resolution"
 
@@ -978,6 +979,23 @@ fun GraphicsSettings(
     }
     val sharpeningMax = remember(sharpeningNode) {
         if (sharpeningNode.has("max")) sharpeningNode.getString("max").toFloatOrNull() ?: 100f else 100f
+    }
+
+    val resolutionScaleNode = remember {
+        try {
+            JSONObject(RPCSX.instance.settingsGet(ResolutionScalePath))
+        } catch (e: Exception) {
+            JSONObject()
+        }
+    }
+    var resolutionScaleValue by remember {
+        mutableFloatStateOf(if (resolutionScaleNode.has("value")) resolutionScaleNode.getString("value").toFloatOrNull() ?: 100f else 100f)
+    }
+    val resolutionScaleMin = remember(resolutionScaleNode) {
+        if (resolutionScaleNode.has("min")) resolutionScaleNode.getString("min").toFloatOrNull() ?: 25f else 25f
+    }
+    val resolutionScaleMax = remember(resolutionScaleNode) {
+        if (resolutionScaleNode.has("max")) resolutionScaleNode.getString("max").toFloatOrNull() ?: 800f else 800f
     }
 
     val rendererPath = remember(rootSettingsJson) {
@@ -1137,6 +1155,31 @@ fun GraphicsSettings(
                         }
                     )
                 }
+            }
+
+            // Resolution Scale
+            item {
+                SliderPreference(
+                    value = resolutionScaleValue,
+                    valueRange = resolutionScaleMin..resolutionScaleMax,
+                    title = stringResource(R.string.resolution_scale),
+                    steps = (resolutionScaleMax - resolutionScaleMin).toInt() - 1,
+                    valueContent = { PreferenceValue(text = "${resolutionScaleValue.toInt()}%") },
+                    onValueChange = { value ->
+                        if (RPCSX.instance.settingsSet(ResolutionScalePath, value.toLong().toString())) {
+                            resolutionScaleValue = value
+                        } else {
+                            AlertDialogQueue.showDialog(
+                                context.getString(R.string.error),
+                                context.getString(
+                                    R.string.failed_to_assign_value,
+                                    value.toString(),
+                                    ResolutionScalePath
+                                )
+                            )
+                        }
+                    }
+                )
             }
 
             // Output Scaling
