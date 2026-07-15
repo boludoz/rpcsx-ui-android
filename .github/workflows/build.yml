@@ -67,6 +67,8 @@ jobs:
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v4
+      with:
+        packages: ''
 
     - name: Install packages
       run: yes | sdkmanager "cmake;3.31.6"
