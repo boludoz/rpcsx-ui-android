@@ -93,7 +93,6 @@ import net.rpcsx.ui.channels.DevRpcsxChannel
 import net.rpcsx.ui.channels.DevUiChannel
 import net.rpcsx.ui.channels.ReleaseRpcsxChannel
 import net.rpcsx.ui.channels.ReleaseUiChannel
-import net.rpcsx.ui.channels.RpcsxCoreUpdateScreen
 import net.rpcsx.ui.channels.UpdateChannelListScreen
 import net.rpcsx.ui.channels.UpdateChannelsScreen
 import net.rpcsx.ui.channels.channelToUiText
@@ -429,15 +428,6 @@ fun AppNavHost() {
                     }
                 },
                 isDeletable = { isValidChannel(it, ReleaseUiChannel, DevUiChannel) }
-            )
-        }
-
-        composable(
-            route = "rpcsx_channels"
-        ) {
-            RpcsxCoreUpdateScreen(
-                navigateBack = navController::navigateUp,
-                navigateTo = navigateTo
             )
         }
 

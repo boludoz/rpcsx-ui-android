@@ -23,15 +23,19 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -47,6 +51,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -77,6 +82,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.documentfile.provider.DocumentFile
+import net.rpcsx.ui.settings.components.base.BaseDialogPreference
 import net.rpcsx.ui.settings.components.core.PreferenceHeader
 import net.rpcsx.ui.settings.components.core.PreferenceIcon
 import net.rpcsx.ui.settings.components.core.PreferenceValue
@@ -740,21 +746,53 @@ fun SettingsScreen(
                 )
 
                 if (showLanguageDialog) {
-                    SingleSelectionDialog(
-                        currentValue = normalizedLangTag,
-                        onValueChange = { tag ->
-                            showLanguageDialog = false
-                            val localeList = if (tag.isEmpty()) {
-                                LocaleListCompat.getEmptyLocaleList()
-                            } else {
-                                LocaleListCompat.forLanguageTags(tag)
+                    BaseDialogPreference(
+                        onDismissRequest = { showLanguageDialog = false },
+                        title = { Text(stringResource(R.string.language)) },
+                        content = {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = 400.dp)
+                            ) {
+                                items(languageOptions) { option ->
+                                    val isSelected = option.first == normalizedLangTag
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                showLanguageDialog = false
+                                                val localeList = if (option.first.isEmpty()) {
+                                                    LocaleListCompat.getEmptyLocaleList()
+                                                } else {
+                                                    LocaleListCompat.forLanguageTags(option.first)
+                                                }
+                                                AppCompatDelegate.setApplicationLocales(localeList)
+                                            }
+                                            .padding(vertical = 12.dp, horizontal = 24.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        RadioButton(
+                                            selected = isSelected,
+                                            onClick = {
+                                                showLanguageDialog = false
+                                                val localeList = if (option.first.isEmpty()) {
+                                                    LocaleListCompat.getEmptyLocaleList()
+                                                } else {
+                                                    LocaleListCompat.forLanguageTags(option.first)
+                                                }
+                                                AppCompatDelegate.setApplicationLocales(localeList)
+                                            }
+                                        )
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Text(
+                                            text = option.second,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
                             }
-                            AppCompatDelegate.setApplicationLocales(localeList)
-                        },
-                        values = languageOptions.map { it.first },
-                        title = stringResource(R.string.language),
-                        valueToText = { tag ->
-                            languageOptions.find { it.first == tag }?.second ?: ""
                         }
                     )
                 }
