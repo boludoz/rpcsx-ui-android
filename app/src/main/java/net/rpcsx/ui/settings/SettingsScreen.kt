@@ -38,6 +38,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -77,6 +80,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -750,39 +754,37 @@ fun SettingsScreen(
                         onDismissRequest = { showLanguageDialog = false },
                         title = { Text(stringResource(R.string.language)) },
                         content = {
-                            LazyColumn(
+                            val scrollState = rememberScrollState()
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(max = 400.dp)
+                                    .verticalScroll(scrollState)
                             ) {
-                                items(languageOptions) { option ->
+                                languageOptions.forEach { option ->
                                     val isSelected = option.first == normalizedLangTag
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clickable {
-                                                showLanguageDialog = false
-                                                val localeList = if (option.first.isEmpty()) {
-                                                    LocaleListCompat.getEmptyLocaleList()
-                                                } else {
-                                                    LocaleListCompat.forLanguageTags(option.first)
+                                            .selectable(
+                                                selected = isSelected,
+                                                role = Role.RadioButton,
+                                                onClick = {
+                                                    showLanguageDialog = false
+                                                    val localeList = if (option.first.isEmpty()) {
+                                                        LocaleListCompat.getEmptyLocaleList()
+                                                    } else {
+                                                        LocaleListCompat.forLanguageTags(option.first)
+                                                    }
+                                                    AppCompatDelegate.setApplicationLocales(localeList)
                                                 }
-                                                AppCompatDelegate.setApplicationLocales(localeList)
-                                            }
+                                            )
                                             .padding(vertical = 12.dp, horizontal = 24.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         RadioButton(
                                             selected = isSelected,
-                                            onClick = {
-                                                showLanguageDialog = false
-                                                val localeList = if (option.first.isEmpty()) {
-                                                    LocaleListCompat.getEmptyLocaleList()
-                                                } else {
-                                                    LocaleListCompat.forLanguageTags(option.first)
-                                                }
-                                                AppCompatDelegate.setApplicationLocales(localeList)
-                                            }
+                                            onClick = null
                                         )
                                         Spacer(modifier = Modifier.width(16.dp))
                                         Text(
