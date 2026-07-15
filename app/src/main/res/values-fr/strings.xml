@@ -160,4 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">Graphismes avancés</string>
     <string name="advanced_graphics_description">Mise à l\'échelle FSR, netteté et autres paramètres graphiques avancés</string>
+    <string name="resolution_scale">Resolution Scale</string>
 </resources>

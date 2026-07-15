@@ -4,9 +4,9 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -18,7 +18,7 @@ import net.rpcsx.utils.RpcsxUpdater
 import java.io.File
 import kotlin.concurrent.thread
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     private lateinit var unregisterUsbEventListener: () -> Unit
     private lateinit var unregisterGamepadEventListener: () -> Unit
     override fun onCreate(savedInstanceState: Bundle?) {

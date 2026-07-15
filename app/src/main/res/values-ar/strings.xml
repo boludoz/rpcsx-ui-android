@@ -160,4 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">رسوميات متقدمة</string>
     <string name="advanced_graphics_description">قياس FSR، الحدة، وإعدادات رسومية متقدمة أخرى</string>
+    <string name="resolution_scale">Resolution Scale</string>
 </resources>

@@ -160,4 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">高度なグラフィックス設定</string>
     <string name="advanced_graphics_description">FSRスケーリング、シャープネス、およびその他の高度なグラフィックス設定</string>
+    <string name="resolution_scale">Resolution Scale</string>
 </resources>

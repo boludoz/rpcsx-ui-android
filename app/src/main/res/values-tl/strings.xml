@@ -160,4 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">Advanced na Grapiko</string>
     <string name="advanced_graphics_description">FSR scaling, sharpening, at iba pang advanced na setting ng grapiko</string>
+    <string name="resolution_scale">Resolution Scale</string>
 </resources>

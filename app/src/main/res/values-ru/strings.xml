@@ -160,4 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">Дополнительные настройки графики</string>
     <string name="advanced_graphics_description">Масштабирование FSR, резкость и другие расширенные параметры</string>
+    <string name="resolution_scale">Resolution Scale</string>
 </resources>

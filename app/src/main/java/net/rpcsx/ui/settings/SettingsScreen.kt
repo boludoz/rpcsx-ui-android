@@ -739,7 +739,11 @@ fun SettingsScreen(
                     "tl" to "Tagalog"
                 )
                 val currentLangTag = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-                val normalizedLangTag = if (currentLangTag == "in") "id" else currentLangTag
+                val normalizedLangTag = when {
+                    currentLangTag.isEmpty() || currentLangTag == "und" -> ""
+                    currentLangTag.startsWith("in") -> "id"
+                    else -> currentLangTag.split(",")[0].trim()
+                }
                 val currentLanguageName = languageOptions.find { it.first == normalizedLangTag }?.second ?: languageOptions[0].second
 
                 HomePreference(
@@ -1137,7 +1141,7 @@ fun GraphicsSettings(
                         value = resolutionSliderValue,
                         valueRange = resolutionMin..resolutionMax,
                         title = cleanTitle,
-                        steps = (resolutionMax - resolutionMin).toInt() - 1,
+                        steps = maxOf(0, (resolutionMax - resolutionMin).toInt() - 1),
                         valueContent = { PreferenceValue(text = "${resolutionSliderValue.toInt()}%") },
                         onValueChange = { value ->
                             if (RPCSX.instance.settingsSet(resolutionPath, value.toLong().toString())) {
@@ -1158,12 +1162,12 @@ fun GraphicsSettings(
             }
 
             // Resolution Scale
-            item {
+            if (resolutionScaleNode.has("min")) item {
                 SliderPreference(
                     value = resolutionScaleValue,
                     valueRange = resolutionScaleMin..resolutionScaleMax,
                     title = stringResource(R.string.resolution_scale),
-                    steps = (resolutionScaleMax - resolutionScaleMin).toInt() - 1,
+                    steps = maxOf(0, (resolutionScaleMax - resolutionScaleMin).toInt() - 1),
                     valueContent = { PreferenceValue(text = "${resolutionScaleValue.toInt()}%") },
                     onValueChange = { value ->
                         if (RPCSX.instance.settingsSet(ResolutionScalePath, value.toLong().toString())) {
@@ -1209,14 +1213,14 @@ fun GraphicsSettings(
             }
 
             // FSR Sharpening
-            item {
+            if (sharpeningNode.has("min")) item {
                 SliderPreference(
                     value = sharpeningValue,
                     valueRange = sharpeningMin..sharpeningMax,
                     title = stringResource(R.string.fsr_sharpening),
                     subtitle = if (scalingValue == FsrScalingValue) null else stringResource(R.string.fsr_sharpening_requires_fsr),
                     enabled = scalingValue == FsrScalingValue,
-                    steps = (sharpeningMax - sharpeningMin).toInt() - 1,
+                    steps = maxOf(0, (sharpeningMax - sharpeningMin).toInt() - 1),
                     valueContent = { PreferenceValue(text = "${sharpeningValue.toInt()}%") },
                     onValueChange = { value ->
                         if (RPCSX.instance.settingsSet(FsrSharpeningPath, value.toLong().toString())) {

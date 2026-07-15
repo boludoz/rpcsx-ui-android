@@ -73,6 +73,7 @@
         
         <activity
             android:name=".MainActivity"
+            android:theme="@style/Theme.RPCSX.Main"
             android:resizeableActivity="true"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density|keyboard|navigation"
             android:exported="true">

@@ -131,6 +131,21 @@
     <string name="ask_if_stop_emu">停止模拟器？</string>
     <string name="ask_if_stop_emu_description">为了更换用户，您必须先停止模拟器。\n\n要停止模拟器吗？</string>
 
+    <!-- SettingsScreen - controller/gamepad (new) -->
+    <string name="app_name">RPCSX</string>
+    <string name="automatic_mapping">自动映射</string>
+    <string name="automatic_mapping_applied">已为 %1$s 应用已知映射</string>
+    <string name="automatic_mapping_defaults">未找到 %1$s 的映射 — 已应用默认设置</string>
+    <string name="automatic_mapping_no_device">请先将手柄连接到此槽位</string>
+    <string name="connected_controllers">已连接的控制器</string>
+    <string name="controller_not_connected">未连接</string>
+    <string name="player_slot">玩家 %1$d</string>
+    <string name="resolution_scale">分辨率缩放</string>
+    <string name="search">搜索</string>
+    <string name="select_game_file">安装 PKG、ISO 或 RAP</string>
+    <string name="select_game_folder">安装文件夹</string>
+    <string name="touchpad">虚拟按键</string>
+
     <!-- Graphics and Language settings -->
     <string name="graphics">图形</string>
     <string name="graphics_description">输出缩放与 FSR 锐化</string>
