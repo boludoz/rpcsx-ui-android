@@ -909,7 +909,7 @@ fun ControllerSettings(
 }
 
 private const val OutputScalingPath = "Video@@Output Scaling Mode"
-private const val ResolutionScalePath = "Video@@Vulkan@@Resolution Scale"
+private const val VideoResolutionScalePath = "Video@@Resolution Scale"
 private const val FsrSharpeningPath = "Video@@Vulkan@@FidelityFX CAS Sharpening Intensity"
 private const val FsrScalingValue = "FidelityFX Super Resolution"
 
@@ -985,21 +985,21 @@ fun GraphicsSettings(
         if (sharpeningNode.has("max")) sharpeningNode.getString("max").toFloatOrNull() ?: 100f else 100f
     }
 
-    val resolutionScaleNode = remember {
+    val videoResolutionScaleNode = remember {
         try {
-            JSONObject(RPCSX.instance.settingsGet(ResolutionScalePath))
+            JSONObject(RPCSX.instance.settingsGet(VideoResolutionScalePath))
         } catch (e: Exception) {
             JSONObject()
         }
     }
-    var resolutionScaleValue by remember {
-        mutableFloatStateOf(if (resolutionScaleNode.has("value")) resolutionScaleNode.getString("value").toFloatOrNull() ?: 100f else 100f)
+    var videoResolutionScaleValue by remember {
+        mutableFloatStateOf(if (videoResolutionScaleNode.has("value")) videoResolutionScaleNode.getString("value").toFloatOrNull() ?: 100f else 100f)
     }
-    val resolutionScaleMin = remember(resolutionScaleNode) {
-        if (resolutionScaleNode.has("min")) resolutionScaleNode.getString("min").toFloatOrNull() ?: 25f else 25f
+    val videoResolutionScaleMin = remember(videoResolutionScaleNode) {
+        if (videoResolutionScaleNode.has("min")) videoResolutionScaleNode.getString("min").toFloatOrNull() ?: 25f else 25f
     }
-    val resolutionScaleMax = remember(resolutionScaleNode) {
-        if (resolutionScaleNode.has("max")) resolutionScaleNode.getString("max").toFloatOrNull() ?: 800f else 800f
+    val videoResolutionScaleMax = remember(videoResolutionScaleNode) {
+        if (videoResolutionScaleNode.has("max")) videoResolutionScaleNode.getString("max").toFloatOrNull() ?: 800f else 800f
     }
 
     val rendererPath = remember(rootSettingsJson) {
@@ -1161,24 +1161,24 @@ fun GraphicsSettings(
                 }
             }
 
-            // Resolution Scale
-            if (resolutionScaleNode.has("min")) item {
+            // Resolution Scale (Video@@Resolution Scale)
+            if (videoResolutionScaleNode.has("min")) item {
                 SliderPreference(
-                    value = resolutionScaleValue,
-                    valueRange = resolutionScaleMin..resolutionScaleMax,
+                    value = videoResolutionScaleValue,
+                    valueRange = videoResolutionScaleMin..videoResolutionScaleMax,
                     title = stringResource(R.string.resolution_scale),
-                    steps = maxOf(0, (resolutionScaleMax - resolutionScaleMin).toInt() - 1),
-                    valueContent = { PreferenceValue(text = "${resolutionScaleValue.toInt()}%") },
+                    steps = maxOf(0, (videoResolutionScaleMax - videoResolutionScaleMin).toInt() - 1),
+                    valueContent = { PreferenceValue(text = "${videoResolutionScaleValue.toInt()}%") },
                     onValueChange = { value ->
-                        if (RPCSX.instance.settingsSet(ResolutionScalePath, value.toLong().toString())) {
-                            resolutionScaleValue = value
+                        if (RPCSX.instance.settingsSet(VideoResolutionScalePath, value.toLong().toString())) {
+                            videoResolutionScaleValue = value
                         } else {
                             AlertDialogQueue.showDialog(
                                 context.getString(R.string.error),
                                 context.getString(
                                     R.string.failed_to_assign_value,
                                     value.toString(),
-                                    ResolutionScalePath
+                                    VideoResolutionScalePath
                                 )
                             )
                         }

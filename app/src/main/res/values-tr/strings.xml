@@ -160,5 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">Gelişmiş Grafikler</string>
     <string name="advanced_graphics_description">FSR ölçeklendirme, keskinleştirme ve diğer gelişmiş grafik ayarları</string>
-    <string name="resolution_scale">Resolution Scale</string>
+    <string name="resolution_scale">Çözünürlük Ölçeği</string>
 </resources>

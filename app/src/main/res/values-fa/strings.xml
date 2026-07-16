@@ -160,5 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">تنظیمات گرافیکی پیشرفته</string>
     <string name="advanced_graphics_description">مقیاس‌گذاری FSR، شفافیت و سایر تنظیمات پیشرفته گرافیک</string>
-    <string name="resolution_scale">Resolution Scale</string>
+    <string name="resolution_scale">مقیاس وضوح</string>
 </resources>

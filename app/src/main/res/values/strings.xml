@@ -114,7 +114,7 @@
     <string name="fsr_sharpening_requires_fsr">Only applies when Output Scaling is set to FSR</string>
     <string name="gamepad_overlay">Gamepad Overlay</string>
     <string name="graphics">Graphics</string>
-    <string name="graphics_description">Output scaling and FSR sharpening</string>
+    <string name="graphics_description">Resolution scale, output scaling and FSR sharpening</string>
     <string name="install_custom_rpcsx_lib">Install Custom RPCSX Library</string>
     <string name="key_mappings">Key Mappings</string>
     <string name="log_not_found">Log file not found!</string>

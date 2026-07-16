@@ -160,5 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">고급 그래픽 설정</string>
     <string name="advanced_graphics_description">FSR 스케일링, 선명도 및 기타 고급 그래픽 설정</string>
-    <string name="resolution_scale">Resolution Scale</string>
+    <string name="resolution_scale">해상도 배율</string>
 </resources>

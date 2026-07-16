@@ -160,5 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">Додаткові налаштування графіки</string>
     <string name="advanced_graphics_description">Масштабування FSR, різкість та інші розширені параметри</string>
-    <string name="resolution_scale">Resolution Scale</string>
+    <string name="resolution_scale">Масштаб роздільної здатності</string>
 </resources>

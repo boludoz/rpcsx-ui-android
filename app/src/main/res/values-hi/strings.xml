@@ -160,5 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">उन्नत ग्राफिक्स</string>
     <string name="advanced_graphics_description">FSR स्केलिंग, तीक्ष्णता और अन्य उन्नत सेटिंग्स</string>
-    <string name="resolution_scale">Resolution Scale</string>
+    <string name="resolution_scale">रिज़ॉल्यूशन स्केल</string>
 </resources>

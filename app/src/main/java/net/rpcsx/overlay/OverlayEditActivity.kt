@@ -145,7 +145,7 @@ fun OverlayEditScreen() {
             if (input != null) {
                 val info = (input as? PadOverlayDpad)?.getInfo() ?: (input as? PadOverlayButton)?.getInfo()
                 if (info != null) {
-                    currentButtonName = info.first.toString()
+                    currentButtonName = info.first
                     scaleValue = info.second.toFloat()
                     opacityValue = info.third.toFloat()
                 }

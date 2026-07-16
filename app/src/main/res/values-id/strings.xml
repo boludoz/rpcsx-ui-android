@@ -160,5 +160,5 @@
     <!-- Advanced Graphics strings -->
     <string name="advanced_graphics">Grafis Lanjutan</string>
     <string name="advanced_graphics_description">Penskalaan FSR, penajaman, dan pengaturan lanjutan lainnya</string>
-    <string name="resolution_scale">Resolution Scale</string>
+    <string name="resolution_scale">Skala Resolusi</string>
 </resources>
