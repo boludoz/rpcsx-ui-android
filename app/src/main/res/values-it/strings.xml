@@ -161,7 +161,7 @@
     <string name="advanced_graphics">Grafica avanzata</string>
     <string name="advanced_graphics_description">Riscalatura FSR, nitidezza e altre impostazioni grafiche avanzate</string>
     <string name="resolution_scale">Scala della risoluzione</string>
-    <string name="directory_not_resolvable">Questa cartella non può essere utilizzata sul posto. Scegli una cartella nella memoria locale del dispositivo e concedi \"Consenti l'accesso per gestire tutti i file\" quando richiesto.</string>
+    <string name="directory_not_resolvable">Questa cartella non può essere utilizzata sul posto. Scegli una cartella nella memoria locale del dispositivo e concedi \"Consenti l\'accesso per gestire tutti i file\" quando richiesto.</string>
     <string name="manage_directories">Gestisci cartelle</string>
     <string name="game_settings">Impostazioni gioco</string>
     <string name="per_game_overrides_note">Le modifiche qui si applicano solo a questo gioco. Tieni premuto un valore per ripristinarlo all\'impostazione globale.</string>

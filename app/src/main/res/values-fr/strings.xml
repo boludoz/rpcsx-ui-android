@@ -161,7 +161,7 @@
     <string name="advanced_graphics">Graphismes avancés</string>
     <string name="advanced_graphics_description">Mise à l\'échelle FSR, netteté et autres paramètres graphiques avancés</string>
     <string name="resolution_scale">Mise à l\'échelle de la résolution</string>
-    <string name="directory_not_resolvable">Ce dossier ne peut pas être utilisé sur place. Choisissez un dossier sur le stockage local de l'appareil et accordez \"Autoriser l'accès pour gérer tous les fichiers\" lorsque vous y êtes invité.</string>
+    <string name="directory_not_resolvable">Ce dossier ne peut pas être utilisé sur place. Choisissez un dossier sur le stockage local de l\'appareil et accordez \"Autoriser l\'accès pour gérer tous les fichiers\" lorsque vous y êtes invité.</string>
     <string name="manage_directories">Gérer les répertoires</string>
     <string name="game_settings">Paramètres du jeu</string>
     <string name="per_game_overrides_note">Les modifications apportées ici s\'appliquent uniquement à ce jeu. Appuyez longuement sur une valeur pour la rétablir au paramètre global.</string>
