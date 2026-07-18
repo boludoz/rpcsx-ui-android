@@ -652,6 +652,54 @@ fun AppNavHost() {
 
         unwrapSetting(settings.value)
     }
+
+        if (showDock) {
+            FloatingDock(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+                    .navigationBarsPadding(),
+                currentRoute = currentRoute ?: "games",
+                onNavigateToGames = {
+                    navController.navigate("games") {
+                        popUpTo("games") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToSettings = {
+                    navController.navigate("settings") {
+                        popUpTo("games") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToControls = {
+                    navController.navigate("controls") {
+                        popUpTo("games") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToDirectories = {
+                    navController.navigate("game_directories") {
+                        popUpTo("games") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToUsers = {
+                    navController.navigate("users") {
+                        popUpTo("games") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onAddGameFile = { installPkgLauncher.launch("*/*") },
+                onAddGameFolder = { gameFolderPickerLauncher.launch(null) }
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
