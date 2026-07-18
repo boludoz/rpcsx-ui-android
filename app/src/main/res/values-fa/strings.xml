@@ -19,7 +19,7 @@
     <string name="firmware">فت‌ور (فریمور)</string>
     <string name="rpcsx_download_channel">کانال دانلود RPCSX</string>
     <string name="select_game_file">نصب PKG، ISO یا RAP</string>
-    <string name="select_game_folder">نصب پوشه بازی</string>
+    <string name="select_game_folder">افزودن پوشه بازی</string>
     <string name="settings">تنظیمات</string>
     <string name="ui_update_channel">کانال بروزرسانی رابط کاربری RPCSX</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">تنظیمات گرافیکی پیشرفته</string>
     <string name="advanced_graphics_description">مقیاس‌گذاری FSR، شفافیت و سایر تنظیمات پیشرفته گرافیک</string>
     <string name="resolution_scale">مقیاس وضوح</string>
+    <string name="directory_not_resolvable">این پوشه نمی‌تواند در جای خود استفاده شود. یک پوشه در حافظه محلی دستگاه انتخاب کنید و در صورت درخواست، «اجازه دسترسی برای مدیریت همه فایل‌ها» را اعطا کنید.</string>
+    <string name="manage_directories">مدیریت پوشه‌ها</string>
+    <string name="game_settings">تنظیمات بازی</string>
+    <string name="per_game_overrides_note">تغییرات در اینجا فقط برای این بازی اعمال می‌شود. برای بازگرداندن یک مقدار به تنظیمات سراسری، آن را طولانی فشار دهید.</string>
+    <string name="custom_mapping">نگاشت سفارشی</string>
+    <string name="delete_cache">پاک کردن حافظه پنهان</string>
+    <string name="delete_cache_desc">حافظه پنهان سایه‌زن‌ها و PPU کامپایل شده این بازی را پاک می‌کند</string>
+    <string name="cache_deleted">حافظه پنهان پاک شد</string>
+    <string name="reset_game_settings">بازنشانی تنظیمات بازی</string>
+    <string name="reset_game_settings_desc">پیکربندی سفارشی و نگاشت کلیدهای این بازی را حذف می‌کند</string>
+    <string name="reset_game_settings_done">تنظیمات بازی بازنشانی شد</string>
+    <string name="ask_if_reset_game">بازنشانی همه تنظیمات سفارشی برای %1$s؟</string>
+    <string name="no_directories">هنوز پوشه‌ای اضافه نشده است. یک پوشه بازی یا پوشه ISO اضافه کنید تا در اینجا ببینید.</string>
+    <string name="rescan_directory">اسکن مجدد</string>
+    <string name="remove_directory">حذف</string>
+    <string name="directory_kind_games">پوشه بازی</string>
+    <string name="directory_kind_iso">پوشه ISO</string>
+    <string name="touchpad_port">درگاه صفحه‌لمسی</string>
+    <string name="touchpad_port_desc">صفحه لمسی مجازی کنترل کدام درگاه بازیکن را بر عهده دارد. این درگاه با هر کنترلر اختصاص داده شده مشترک است.</string>
+    <string name="touchpad_auto_hide">پنهان‌سازی خودکار صفحه لمسی</string>
+    <string name="touchpad_auto_hide_desc">پنهان کردن خودکار صفحه لمسی پس از مدتی غیرفعال بودن.</string>
+    <string name="never">هرگز</string>
+    <string name="seconds_2">۲ ثانیه</string>
+    <string name="seconds_5">۵ ثانیه</string>
+    <string name="seconds_10">۱۰ ثانیه</string>
+    <string name="seconds_15">۱۵ ثانیه</string>
+    <string name="seconds_30">۳۰ ثانیه</string>
+    <string name="controller_port">درگاه</string>
+    <string name="select_iso_folder">افزودن پوشه ISO</string>
 </resources>

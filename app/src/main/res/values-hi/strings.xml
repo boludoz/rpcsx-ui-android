@@ -19,7 +19,7 @@
     <string name="firmware">फर्मवेयर</string>
     <string name="rpcsx_download_channel">RPCSX डाउनलोड चैनल</string>
     <string name="select_game_file">PKG, ISO या RAP इंस्टॉल करें</string>
-    <string name="select_game_folder">फ़ोल्डर इंस्टॉल करें</string>
+    <string name="select_game_folder">गेम फ़ोल्डर जोड़ें</string>
     <string name="settings">सेटिंग्स</string>
     <string name="ui_update_channel">RPCSX UI Android अपडेट चैनल</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">उन्नत ग्राफिक्स</string>
     <string name="advanced_graphics_description">FSR स्केलिंग, तीक्ष्णता और अन्य उन्नत सेटिंग्स</string>
     <string name="resolution_scale">रिज़ॉल्यूशन स्केल</string>
+    <string name="directory_not_resolvable">इस फ़ोल्डर का उपयोग यथास्थान नहीं किया जा सकता है। स्थानीय डिवाइस स्टोरेज पर एक फ़ोल्डर चुनें, और संकेत दिए जाने पर \"सभी फ़ाइलों को प्रबंधित करने की अनुमति दें\" प्रदान करें।</string>
+    <string name="manage_directories">निर्देशिकाएँ प्रबंधित करें</string>
+    <string name="game_settings">गेम सेटिंग्स</string>
+    <string name="per_game_overrides_note">यहाँ किए गए बदलाव केवल इसी गेम पर लागू होते हैं। किसी मान को वैश्विक सेटिंग में बदलने के लिए उसे देर तक दबाएं।</string>
+    <string name="custom_mapping">कस्टम मैपिंग</string>
+    <string name="delete_cache">कैश हटाएं</string>
+    <string name="delete_cache_desc">इस गेम के संकलित शेडर और PPU कैश को हटाता है</string>
+    <string name="cache_deleted">कैश हटा दिया गया</string>
+    <string name="reset_game_settings">गेम सेटिंग्स रीसेट करें</string>
+    <string name="reset_game_settings_desc">इस गेम के कस्टम कॉन्फ़िगरेशन और कुंजी मैपिंग को हटाता है</string>
+    <string name="reset_game_settings_done">गेम सेटिंग्स रीसेट हो गईं</string>
+    <string name="ask_if_reset_game">क्या %1$s के लिए सभी कस्टम सेटिंग्स रीसेट करें?</string>
+    <string name="no_directories">अभी तक कोई निर्देशिका नहीं जोड़ी गई है। इसे यहाँ देखने के लिए एक गेम फ़ोल्डर या ISO निर्देशिका जोड़ें।</string>
+    <string name="rescan_directory">पुनः स्कैन करें</string>
+    <string name="remove_directory">हटाएं</string>
+    <string name="directory_kind_games">गेम फ़ोल्डर</string>
+    <string name="directory_kind_iso">ISO निर्देशिका</string>
+    <string name="touchpad_port">टचपैड पोर्ट</string>
+    <string name="touchpad_port_desc">टच ओवरले किस खिलाड़ी पोर्ट को नियंत्रित करता है। यह उस पोर्ट को उस पर असाइन किए गए किसी भी कंट्रोलर के साथ साझा करता है।</string>
+    <string name="touchpad_auto_hide">टचपैड स्वतः छिपाएं</string>
+    <string name="touchpad_auto_hide_desc">निष्क्रियता की अवधि के बाद टचपैड को स्वचालित रूप से छिपाएं।</string>
+    <string name="never">कभी नहीं</string>
+    <string name="seconds_2">2 सेकंड</string>
+    <string name="seconds_5">5 सेकंड</string>
+    <string name="seconds_10">10 सेकंड</string>
+    <string name="seconds_15">15 सेकंड</string>
+    <string name="seconds_30">30 सेकंड</string>
+    <string name="controller_port">पोर्ट</string>
+    <string name="select_iso_folder">ISO निर्देशिका जोड़ें</string>
 </resources>

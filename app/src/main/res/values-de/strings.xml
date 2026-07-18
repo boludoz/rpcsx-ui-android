@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">RPCSX-Downloadkanal</string>
     <string name="select_game_file">PKG, ISO oder RAP installieren</string>
-    <string name="select_game_folder">Ordner installieren</string>
+    <string name="select_game_folder">Spieleordner hinzufügen</string>
     <string name="settings">Einstellungen</string>
     <string name="ui_update_channel">RPCSX UI Android Update-Kanal</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Erweiterte Grafikeinstellungen</string>
     <string name="advanced_graphics_description">FSR-Skalierung, Schärfung und andere erweiterte Einstellungen</string>
     <string name="resolution_scale">Auflösungsskalierung</string>
+    <string name="directory_not_resolvable">Dieser Ordner kann nicht direkt verwendet werden. Wählen Sie einen Ordner im lokalen Gerätespeicher und gewähren Sie \"Zugriff zur Verwaltung aller Dateien\", wenn Sie dazu aufgefordert werden.</string>
+    <string name="manage_directories">Verzeichnisse verwalten</string>
+    <string name="game_settings">Spieleinstellungen</string>
+    <string name="per_game_overrides_note">Änderungen hier gelten nur für dieses Spiel. Halten Sie einen Wert gedrückt, um ihn auf die globale Einstellung zurückzusetzen.</string>
+    <string name="custom_mapping">Benutzerdefinierte Belegung</string>
+    <string name="delete_cache">Caches löschen</string>
+    <string name="delete_cache_desc">Löscht die kompilierten Shader- und PPU-Caches dieses Spiels</string>
+    <string name="cache_deleted">Caches gelöscht</string>
+    <string name="reset_game_settings">Spieleinstellungen zurücksetzen</string>
+    <string name="reset_game_settings_desc">Entfernt die benutzerdefinierte Konfiguration und Tastenbelegung dieses Spiels</string>
+    <string name="reset_game_settings_done">Spieleinstellungen zurückgesetzt</string>
+    <string name="ask_if_reset_game">Alle benutzerdefinierten Einstellungen für %1$s zurücksetzen?</string>
+    <string name="no_directories">Noch keine Verzeichnisse hinzugefügt. Fügen Sie einen Spieleordner oder ein ISO-Verzeichnis hinzu, um es hier zu sehen.</string>
+    <string name="rescan_directory">Neu scannen</string>
+    <string name="remove_directory">Entfernen</string>
+    <string name="directory_kind_games">Spieleordner</string>
+    <string name="directory_kind_iso">ISO-Verzeichnis</string>
+    <string name="touchpad_port">Touchpad-Anschluss</string>
+    <string name="touchpad_port_desc">Welchen Spieleranschluss das Touch-Overlay steuert. Es teilt sich den Anschluss mit jedem zugewiesenen Controller.</string>
+    <string name="touchpad_auto_hide">Touchpad automatisch ausblenden</string>
+    <string name="touchpad_auto_hide_desc">Blendet das Touchpad nach einer gewissen Zeit der Inaktivität automatisch aus.</string>
+    <string name="never">Nie</string>
+    <string name="seconds_2">2 Sekunden</string>
+    <string name="seconds_5">5 Sekunden</string>
+    <string name="seconds_10">10 Sekunden</string>
+    <string name="seconds_15">15 Sekunden</string>
+    <string name="seconds_30">30 Sekunden</string>
+    <string name="controller_port">Port</string>
+    <string name="select_iso_folder">ISO-Verzeichnis hinzufügen</string>
 </resources>

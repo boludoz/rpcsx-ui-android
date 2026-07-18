@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">Canale download RPCSX</string>
     <string name="select_game_file">Installa PKG, ISO o RAP</string>
-    <string name="select_game_folder">Installa cartella</string>
+    <string name="select_game_folder">Aggiungi cartella di gioco</string>
     <string name="settings">Impostazioni</string>
     <string name="ui_update_channel">Canale aggiornamento interfaccia RPCSX</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Grafica avanzata</string>
     <string name="advanced_graphics_description">Riscalatura FSR, nitidezza e altre impostazioni grafiche avanzate</string>
     <string name="resolution_scale">Scala della risoluzione</string>
+    <string name="directory_not_resolvable">Questa cartella non può essere utilizzata sul posto. Scegli una cartella nella memoria locale del dispositivo e concedi \"Consenti l'accesso per gestire tutti i file\" quando richiesto.</string>
+    <string name="manage_directories">Gestisci cartelle</string>
+    <string name="game_settings">Impostazioni gioco</string>
+    <string name="per_game_overrides_note">Le modifiche qui si applicano solo a questo gioco. Tieni premuto un valore per ripristinarlo all\'impostazione globale.</string>
+    <string name="custom_mapping">Mappatura personalizzata</string>
+    <string name="delete_cache">Elimina cache</string>
+    <string name="delete_cache_desc">Elimina la cache degli shader compilati e della PPU di questo gioco</string>
+    <string name="cache_deleted">Cache eliminate</string>
+    <string name="reset_game_settings">Ripristina impostazioni gioco</string>
+    <string name="reset_game_settings_desc">Rimuove la configurazione personalizzata e le mappature dei tasti di questo gioco</string>
+    <string name="reset_game_settings_done">Impostazioni gioco ripristinate</string>
+    <string name="ask_if_reset_game">Ripristinare tutte le impostazioni personalizzate per %1$s?</string>
+    <string name="no_directories">Nessuna cartella ancora aggiunta. Aggiungi una cartella di gioco o una cartella ISO per vederla qui.</string>
+    <string name="rescan_directory">Rianalizza</string>
+    <string name="remove_directory">Rimuovi</string>
+    <string name="directory_kind_games">Cartella di gioco</string>
+    <string name="directory_kind_iso">Cartella ISO</string>
+    <string name="touchpad_port">Porta del touchpad</string>
+    <string name="touchpad_port_desc">Quale porta giocatore controlla l\'overlay touch. Condivide la porta con qualsiasi controller assegnato ad essa.</string>
+    <string name="touchpad_auto_hide">Nascondi automaticamente touchpad</string>
+    <string name="touchpad_auto_hide_desc">Nascondi automaticamente il touchpad dopo un periodo di inattività.</string>
+    <string name="never">Mai</string>
+    <string name="seconds_2">2 secondi</string>
+    <string name="seconds_5">5 secondi</string>
+    <string name="seconds_10">10 secondi</string>
+    <string name="seconds_15">15 secondi</string>
+    <string name="seconds_30">30 secondi</string>
+    <string name="controller_port">Porta</string>
+    <string name="select_iso_folder">Aggiungi cartella ISO</string>
 </resources>

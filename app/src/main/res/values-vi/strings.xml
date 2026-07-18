@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">Kênh tải xuống RPCSX</string>
     <string name="select_game_file">Cài đặt file PKG, ISO hoặc RAP</string>
-    <string name="select_game_folder">Cài đặt thư mục trò chơi</string>
+    <string name="select_game_folder">Thêm thư mục trò chơi</string>
     <string name="settings">Cài đặt</string>
     <string name="ui_update_channel">Kênh cập nhật giao diện RPCSX Android</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Đồ họa nâng cao</string>
     <string name="advanced_graphics_description">Tỉ lệ FSR, độ sắc nét và các cài đặt đồ họa nâng cao khác</string>
     <string name="resolution_scale">Tỷ lệ độ phân giải</string>
+    <string name="directory_not_resolvable">Không thể sử dụng thư mục này tại chỗ. Chọn một thư mục trên bộ nhớ thiết bị cục bộ và cấp \"Cho phép quyền truy cập để quản lý tất cả các tệp\" khi được nhắc.</string>
+    <string name="manage_directories">Quản lý thư mục</string>
+    <string name="game_settings">Cài đặt trò chơi</string>
+    <string name="per_game_overrides_note">Các thay đổi ở đây chỉ áp dụng cho trò chơi này. Nhấn giữ một giá trị để hoàn tác về cài đặt chung.</string>
+    <string name="custom_mapping">Sơ đồ nút tùy chỉnh</string>
+    <string name="delete_cache">Xóa bộ nhớ đệm</string>
+    <string name="delete_cache_desc">Xóa bộ nhớ đệm shader đã biên dịch và bộ nhớ đệm PPU của trò chơi này</string>
+    <string name="cache_deleted">Đã xóa bộ nhớ đệm</string>
+    <string name="reset_game_settings">Đặt lại cài đặt trò chơi</string>
+    <string name="reset_game_settings_desc">Xóa cấu hình tùy chỉnh và sơ đồ phím của trò chơi này</string>
+    <string name="reset_game_settings_done">Đã đặt lại cài đặt trò chơi</string>
+    <string name="ask_if_reset_game">Đặt lại tất cả cài đặt tùy chỉnh cho %1$s?</string>
+    <string name="no_directories">Chưa có thư mục nào được thêm. Thêm thư mục trò chơi hoặc thư mục ISO để xem tại đây.</string>
+    <string name="rescan_directory">Quét lại</string>
+    <string name="remove_directory">Xóa</string>
+    <string name="directory_kind_games">Thư mục trò chơi</string>
+    <string name="directory_kind_iso">Thư mục ISO</string>
+    <string name="touchpad_port">Cổng bàn di chuột</string>
+    <string name="touchpad_port_desc">Cổng người chơi nào mà lớp phủ cảm ứng điều khiển. Nó chia sẻ cổng với bất kỳ tay cầm chơi game nào được chỉ định cho nó.</string>
+    <string name="touchpad_auto_hide">Tự động ẩn bàn di chuột</string>
+    <string name="touchpad_auto_hide_desc">Tự động ẩn bàn di chuột sau một khoảng thời gian không hoạt động.</string>
+    <string name="never">Không bao giờ</string>
+    <string name="seconds_2">2 giây</string>
+    <string name="seconds_5">5 giây</string>
+    <string name="seconds_10">10 giây</string>
+    <string name="seconds_15">15 giây</string>
+    <string name="seconds_30">30 giây</string>
+    <string name="controller_port">Cổng</string>
+    <string name="select_iso_folder">Thêm thư mục ISO</string>
 </resources>

@@ -19,7 +19,7 @@
     <string name="firmware">펌웨어</string>
     <string name="rpcsx_download_channel">RPCSX 다운로드 채널</string>
     <string name="select_game_file">PKG, ISO 또는 RAP 설치</string>
-    <string name="select_game_folder">폴더 설치</string>
+    <string name="select_game_folder">게임 폴더 추가</string>
     <string name="settings">설정</string>
     <string name="ui_update_channel">RPCSX UI Android 업데이트 채널</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">고급 그래픽 설정</string>
     <string name="advanced_graphics_description">FSR 스케일링, 선명도 및 기타 고급 그래픽 설정</string>
     <string name="resolution_scale">해상도 배율</string>
+    <string name="directory_not_resolvable">이 폴더는 제자리에서 사용할 수 없습니다. 로컬 기기 저장소에 있는 폴더를 선택하고 메시지가 표시되면 \"모든 파일 관리 액세스 허용\"을 부여하세요.</string>
+    <string name="manage_directories">디렉터리 관리</string>
+    <string name="game_settings">게임 설정</string>
+    <string name="per_game_overrides_note">여기서 변경한 사항은 이 게임에만 적용됩니다. 값을 길게 누르면 전역 설정으로 복원됩니다.</string>
+    <string name="custom_mapping">사용자 지정 매핑</string>
+    <string name="delete_cache">캐시 삭제</string>
+    <string name="delete_cache_desc">이 게임의 컴파일된 셰이더 및 PPU 캐시를 삭제합니다</string>
+    <string name="cache_deleted">캐시가 삭제됨</string>
+    <string name="reset_game_settings">게임 설정 초기화</string>
+    <string name="reset_game_settings_desc">이 게임의 맞춤 설정 및 키 매핑을 제거합니다</string>
+    <string name="reset_game_settings_done">게임 설정이 초기화됨</string>
+    <string name="ask_if_reset_game">%1$s의 모든 맞춤 설정을 초기화하시겠습니까?</string>
+    <string name="no_directories">추가된 디렉터리가 없습니다. 게임 폴더나 ISO 디렉터리를 추가하면 여기에 표시됩니다.</string>
+    <string name="rescan_directory">재스캔</string>
+    <string name="remove_directory">제거</string>
+    <string name="directory_kind_games">게임 폴더</string>
+    <string name="directory_kind_iso">ISO 디렉터리</string>
+    <string name="touchpad_port">터치패드 포트</string>
+    <string name="touchpad_port_desc">터치 오버레이가 제어하는 플레이어 포트입니다. 포트에 할당된 컨트롤러와 포트를 공유합니다.</string>
+    <string name="touchpad_auto_hide">터치패드 자동 숨기기</string>
+    <string name="touchpad_auto_hide_desc">비활성 상태가 일정 시간 지속되면 터치패드를 자동으로 숨깁니다.</string>
+    <string name="never">안 함</string>
+    <string name="seconds_2">2초</string>
+    <string name="seconds_5">5초</string>
+    <string name="seconds_10">10초</string>
+    <string name="seconds_15">15초</string>
+    <string name="seconds_30">30초</string>
+    <string name="controller_port">포트</string>
+    <string name="select_iso_folder">ISO 디렉터리 추가</string>
 </resources>

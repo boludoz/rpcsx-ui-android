@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">RPCSX Download Channel</string>
     <string name="select_game_file">I-install ang PKG, ISO o RAP</string>
-    <string name="select_game_folder">I-install ang Folder</string>
+    <string name="select_game_folder">Idagdag ang Folder ng Laro</string>
     <string name="settings">Mga Setting</string>
     <string name="ui_update_channel">RPCSX UI Android Update Channel</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Advanced na Grapiko</string>
     <string name="advanced_graphics_description">FSR scaling, sharpening, at iba pang advanced na setting ng grapiko</string>
     <string name="resolution_scale">Sukat ng Resolution</string>
+    <string name="directory_not_resolvable">Hindi magagamit ang folder na ito sa pwesto. Pumili ng folder sa lokal na storage ng device, at magbigay ng \"Payagan ang access upang pamahalaan ang lahat ng file\" kapag sinenyasan.</string>
+    <string name="manage_directories">Pamahalaan ang mga Directory</string>
+    <string name="game_settings">Mga Setting ng Laro</string>
+    <string name="per_game_overrides_note">Nalalapat lang ang mga pagbabago rito sa larong ito. Pindutin nang matagal ang isang value para ibalik ito sa global na setting.</string>
+    <string name="custom_mapping">Custom na pag-map</string>
+    <string name="delete_cache">Burahin ang mga cache</string>
+    <string name="delete_cache_desc">Bura ang mga na-compile na shader at PPU cache ng larong ito</string>
+    <string name="cache_deleted">Nabura na ang mga cache</string>
+    <string name="reset_game_settings">I-reset ang mga setting ng laro</string>
+    <string name="reset_game_settings_desc">Tinatanggal ang custom na config at key mapping ng larong ito</string>
+    <string name="reset_game_settings_done">Na-reset na ang mga setting ng laro</string>
+    <string name="ask_if_reset_game">I-reset ang lahat ng custom na setting para sa %1$s?</string>
+    <string name="no_directories">Wala pang idinagdag na directory. Magdagdag ng folder ng laro o ISO directory para makita ito rito.</string>
+    <string name="rescan_directory">I-scan muli</string>
+    <string name="remove_directory">Alisin</string>
+    <string name="directory_kind_games">Folder ng laro</string>
+    <string name="directory_kind_iso">Directory ng ISO</string>
+    <string name="touchpad_port">Touchpad port</string>
+    <string name="touchpad_port_desc">Aling player port ang kinokontrol ng touch overlay. Ibinabahagi nito ang port sa anumang controller na nakatalaga rito.</string>
+    <string name="touchpad_auto_hide">Awtomatikong itago ang Touchpad</string>
+    <string name="touchpad_auto_hide_desc">Awtomatikong itago ang touchpad pagkatapos ng panahon ng kawalan ng aktibidad.</string>
+    <string name="never">Hindi kailanman</string>
+    <string name="seconds_2">2 segundo</string>
+    <string name="seconds_5">5 segundo</string>
+    <string name="seconds_10">10 segundo</string>
+    <string name="seconds_15">15 segundo</string>
+    <string name="seconds_30">30 segundo</string>
+    <string name="controller_port">Port</string>
+    <string name="select_iso_folder">Magdagdag ng ISO Directory</string>
 </resources>

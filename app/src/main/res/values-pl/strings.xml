@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">Kanał pobierania RPCSX</string>
     <string name="select_game_file">Zainstaluj PKG, ISO lub RAP</string>
-    <string name="select_game_folder">Zainstaluj folder</string>
+    <string name="select_game_folder">Dodaj folder gry</string>
     <string name="settings">Ustawienia</string>
     <string name="ui_update_channel">Kanał aktualizacji interfejsu RPCSX</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Zaawansowane ustawienia graficzne</string>
     <string name="advanced_graphics_description">Skalowanie FSR, ostrość i inne zaawansowane ustawienia</string>
     <string name="resolution_scale">Skala rozdzielczości</string>
+    <string name="directory_not_resolvable">Tego folderu nie można użyć w miejscu. Wybierz folder w pamięci lokalnej urządzenia i przyznaj „Zezwalaj na dostęp do zarządzania wszystkimi plikami”, gdy zostaniesz o to poproszony.</string>
+    <string name="manage_directories">Zarządzaj katalogami</string>
+    <string name="game_settings">Ustawienia gry</string>
+    <string name="per_game_overrides_note">Zmiany tutaj dotyczą tylko tej gry. Naciśnij i przytrzymaj wartość, aby przywrócić ustawienie globalne.</string>
+    <string name="custom_mapping">Własne mapowanie</string>
+    <string name="delete_cache">Usuń pamięć podręczną</string>
+    <string name="delete_cache_desc">Usuwa skompilowaną pamięć podręczną shaderów i PPU tej gry</string>
+    <string name="cache_deleted">Pamięć podręczna usunięta</string>
+    <string name="reset_game_settings">Resetuj ustawienia gry</string>
+    <string name="reset_game_settings_desc">Usuwa niestandardową konfigurację i mapowanie klawiszy tej gry</string>
+    <string name="reset_game_settings_done">Zresetowano ustawienia gry</string>
+    <string name="ask_if_reset_game">Resetować wszystkie niestandardowe ustawienia dla %1$s?</string>
+    <string name="no_directories">Nie dodano jeszcze żadnych katalogów. Dodaj folder gry lub katalog ISO, aby zobaczyć go tutaj.</string>
+    <string name="rescan_directory">Skanuj ponownie</string>
+    <string name="remove_directory">Usuń</string>
+    <string name="directory_kind_games">Folder gry</string>
+    <string name="directory_kind_iso">Katalog ISO</string>
+    <string name="touchpad_port">Port touchpadu</string>
+    <string name="touchpad_port_desc">Który port gracza kontroluje nakładka dotykowa. Dzieli port z dowolnym przypisanym do niego kontrolerem.</string>
+    <string name="touchpad_auto_hide">Autoukrywanie touchpadu</string>
+    <string name="touchpad_auto_hide_desc">Automatycznie ukryj touchpad po okresie braku aktywności.</string>
+    <string name="never">Nigdy</string>
+    <string name="seconds_2">2 sekundy</string>
+    <string name="seconds_5">5 sekund</string>
+    <string name="seconds_10">10 sekund</string>
+    <string name="seconds_15">15 sekund</string>
+    <string name="seconds_30">30 sekund</string>
+    <string name="controller_port">Port</string>
+    <string name="select_iso_folder">Dodaj katalog ISO</string>
 </resources>

@@ -19,7 +19,7 @@
     <string name="firmware">البرنامج الثابت</string>
     <string name="rpcsx_download_channel">قناة تنزيل RPCSX</string>
     <string name="select_game_file">تثبيت PKG أو ISO أو RAP</string>
-    <string name="select_game_folder">تثبيت مجلد</string>
+    <string name="select_game_folder">إضافة مجلد اللعبة</string>
     <string name="settings">الإعدادات</string>
     <string name="ui_update_channel">قناة تحديث واجهة RPCSX للـ Android</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">رسوميات متقدمة</string>
     <string name="advanced_graphics_description">قياس FSR، الحدة، وإعدادات رسومية متقدمة أخرى</string>
     <string name="resolution_scale">مقياس الدقة</string>
+    <string name="directory_not_resolvable">لا يمكن استخدام هذا المجلد في مكانه. اختر مجلدًا في وحدة التخزين المحلية للجهاز، وامنح \"السماح بالوصول لإدارة جميع الملفات\" عند مطالبتك بذلك.</string>
+    <string name="manage_directories">إدارة المجلدات</string>
+    <string name="game_settings">إعدادات اللعبة</string>
+    <string name="per_game_overrides_note">التغييرات هنا تنطبق فقط على هذه اللعبة. اضغط مطولاً على قيمة لإعادتها إلى الإعداد العام.</string>
+    <string name="custom_mapping">تخطيط مخصص</string>
+    <string name="delete_cache">حذف الذاكرة المؤقتة</string>
+    <string name="delete_cache_desc">يحذف الذاكرة المؤقتة للمظلل المترجم (shader) و PPU لهذه اللعبة</string>
+    <string name="cache_deleted">تم حذف الذاكرة المؤقتة</string>
+    <string name="reset_game_settings">إعادة تعيين إعدادات اللعبة</string>
+    <string name="reset_game_settings_desc">يزيل التكوين المخصص وتخطيط المفاتيح لهذه اللعبة</string>
+    <string name="reset_game_settings_done">تم إعادة تعيين إعدادات اللعبة</string>
+    <string name="ask_if_reset_game">إعادة تعيين جميع الإعدادات المخصصة لـ %1$s؟</string>
+    <string name="no_directories">لم يتم إضافة مجلدات بعد. أضف مجلد لعبة أو مجلد ISO لرؤيته هنا.</string>
+    <string name="rescan_directory">إعادة فحص</string>
+    <string name="remove_directory">إزالة</string>
+    <string name="directory_kind_games">مجلد اللعبة</string>
+    <string name="directory_kind_iso">مجلد ISO</string>
+    <string name="touchpad_port">منفذ لوحة اللمس</string>
+    <string name="touchpad_port_desc">منفذ اللاعب الذي تتحكم فيه لوحة اللمس على الشاشة. وتشارك المنفذ مع أي وحدة تحكم مخصصة لها.</string>
+    <string name="touchpad_auto_hide">إخفاء لوحة اللمس تلقائيًا</string>
+    <string name="touchpad_auto_hide_desc">إخفاء لوحة اللمس تلقائيًا بعد فترة من عدم النشاط.</string>
+    <string name="never">أبدًا</string>
+    <string name="seconds_2">ثانيتان</string>
+    <string name="seconds_5">5 ثوانٍ</string>
+    <string name="seconds_10">10 ثوانٍ</string>
+    <string name="seconds_15">15 ثانية</string>
+    <string name="seconds_30">30 ثانية</string>
+    <string name="controller_port">المنفذ</string>
+    <string name="select_iso_folder">إضافة مجلد ISO</string>
 </resources>

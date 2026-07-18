@@ -19,7 +19,7 @@
     <string name="firmware">ファームウェア</string>
     <string name="rpcsx_download_channel">RPCSXのダウンロードチャンネル</string>
     <string name="select_game_file">PKG、ISOまたはRAPをインストール</string>
-    <string name="select_game_folder">フォルダーをインストール</string>
+    <string name="select_game_folder">ゲームフォルダーを追加</string>
     <string name="settings">設定</string>
     <string name="ui_update_channel">RPCSX UI Androidのアップデートチャンネル</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">高度なグラフィックス設定</string>
     <string name="advanced_graphics_description">FSRスケーリング、シャープネス、およびその他の高度なグラフィックス設定</string>
     <string name="resolution_scale">解像度スケール</string>
+    <string name="directory_not_resolvable">このフォルダーはそのまま使用することはできません。デバイスのローカルストレージ上のフォルダーを選択し、プロンプトが表示されたら「すべてのファイルを管理するアクセス権を許可する」を付与してください。</string>
+    <string name="manage_directories">ディレクトリの管理</string>
+    <string name="game_settings">ゲーム設定</string>
+    <string name="per_game_overrides_note">ここでの変更はこのゲームにのみ適用されます。値を長押しすると、グローバル設定に戻ります。</string>
+    <string name="custom_mapping">カスタムマッピング</string>
+    <string name="delete_cache">キャッシュを削除</string>
+    <string name="delete_cache_desc">このゲームのコンパイル済みシェーダーとPPUキャッシュを削除します</string>
+    <string name="cache_deleted">キャッシュが削除されました</string>
+    <string name="reset_game_settings">ゲーム設定をリセット</string>
+    <string name="reset_game_settings_desc">このゲームのカスタム設定とキーマッピングを削除します</string>
+    <string name="reset_game_settings_done">ゲーム設定がリセットされました</string>
+    <string name="ask_if_reset_game">%1$s のすべてのカスタム設定をリセットしますか？</string>
+    <string name="no_directories">ディレクトリがまだ追加されていません。ゲームフォルダーまたはISOディレクトリを追加すると、ここに表示されます。</string>
+    <string name="rescan_directory">再スキャン</string>
+    <string name="remove_directory">削除</string>
+    <string name="directory_kind_games">ゲームフォルダー</string>
+    <string name="directory_kind_iso">ISOディレクトリ</string>
+    <string name="touchpad_port">タッチパッドポート</string>
+    <string name="touchpad_port_desc">タッチオーバーレイが制御するプレイヤーポート。割り当てられたコントローラーとポートを共有します。</string>
+    <string name="touchpad_auto_hide">タッチパッドを自動非表示</string>
+    <string name="touchpad_auto_hide_desc">一定時間操作がない場合、自動的にタッチパッドを非表示にします。</string>
+    <string name="never">しない</string>
+    <string name="seconds_2">2秒</string>
+    <string name="seconds_5">5秒</string>
+    <string name="seconds_10">10秒</string>
+    <string name="seconds_15">15秒</string>
+    <string name="seconds_30">30秒</string>
+    <string name="controller_port">ポート</string>
+    <string name="select_iso_folder">ISOディレクトリを追加</string>
 </resources>

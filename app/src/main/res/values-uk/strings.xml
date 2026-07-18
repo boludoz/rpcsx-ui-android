@@ -19,7 +19,7 @@
     <string name="firmware">Прошивка</string>
     <string name="rpcsx_download_channel">Канал завантаження RPCSX</string>
     <string name="select_game_file">Встановити PKG, ISO або RAP</string>
-    <string name="select_game_folder">Вибрати папку з грою</string>
+    <string name="select_game_folder">Додати папку з грою</string>
     <string name="settings">Налаштування</string>
     <string name="ui_update_channel">Канал оновлень RPCSX UI Android</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Додаткові налаштування графіки</string>
     <string name="advanced_graphics_description">Масштабування FSR, різкість та інші розширені параметри</string>
     <string name="resolution_scale">Масштаб роздільної здатності</string>
+    <string name="directory_not_resolvable">Цю папку не можна використовувати на місці. Виберіть папку в локальному сховищі пристрою та надайте «Дозволити доступ для керування всіма файлами», коли з’явиться запит.</string>
+    <string name="manage_directories">Керування каталогами</string>
+    <string name="game_settings">Налаштування гри</string>
+    <string name="per_game_overrides_note">Зміни тут застосовуються лише до цієї гри. Тривале натискання на значення поверне його до глобального налаштування.</string>
+    <string name="custom_mapping">Власна розкладка</string>
+    <string name="delete_cache">Видалити кеш</string>
+    <string name="delete_cache_desc">Видаляє скомпільований кеш шейдерів та PPU для цієї гри</string>
+    <string name="cache_deleted">Кеш видалено</string>
+    <string name="reset_game_settings">Скинути налаштування гри</string>
+    <string name="reset_game_settings_desc">Видаляє користувацьку конфігурацію та розкладку клавіш для цієї гри</string>
+    <string name="reset_game_settings_done">Налаштування гри скинуто</string>
+    <string name="ask_if_reset_game">Скинути всі користувацькі налаштування для %1$s?</string>
+    <string name="no_directories">Каталоги ще не додано. Додайте папку з грою або каталог ISO, щоб побачити їх тут.</string>
+    <string name="rescan_directory">Пересканувати</string>
+    <string name="remove_directory">Видалити</string>
+    <string name="directory_kind_games">Папка з грою</string>
+    <string name="directory_kind_iso">Каталог ISO</string>
+    <string name="touchpad_port">Порт тачпада</string>
+    <string name="touchpad_port_desc">Яким портом гравця керує екранний тачпад. Він ділить порт із будь-яким призначеним йому контролером.</string>
+    <string name="touchpad_auto_hide">Автоматично ховати тачпад</string>
+    <string name="touchpad_auto_hide_desc">Автоматично ховає тачпад після періоду неактивності.</string>
+    <string name="never">Ніколи</string>
+    <string name="seconds_2">2 секунди</string>
+    <string name="seconds_5">5 секунд</string>
+    <string name="seconds_10">10 секунд</string>
+    <string name="seconds_15">15 секунд</string>
+    <string name="seconds_30">30 секунд</string>
+    <string name="controller_port">Порт</string>
+    <string name="select_iso_folder">Додати каталог ISO</string>
 </resources>

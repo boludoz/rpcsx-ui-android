@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">RPCSX İndirme Kanalı</string>
     <string name="select_game_file">PKG, ISO veya RAP Yükle</string>
-    <string name="select_game_folder">Klasör Yükle</string>
+    <string name="select_game_folder">Oyun Klasörü Ekle</string>
     <string name="settings">Ayarlar</string>
     <string name="ui_update_channel">RPCSX UI Android Güncelleme Kanalı</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Gelişmiş Grafikler</string>
     <string name="advanced_graphics_description">FSR ölçeklendirme, keskinleştirme ve diğer gelişmiş grafik ayarları</string>
     <string name="resolution_scale">Çözünürlük Ölçeği</string>
+    <string name="directory_not_resolvable">Bu klasör yerinde kullanılamaz. Yerel cihaz depolama alanında bir klasör seçin ve istendiğinde \"Tüm dosyaları yönetme erişimine izin ver\" seçeneğini onaylayın.</string>
+    <string name="manage_directories">Dizinleri Yönet</string>
+    <string name="game_settings">Oyun Ayarları</string>
+    <string name="per_game_overrides_note">Buradaki değişiklikler yalnızca bu oyun için geçerlidir. Değeri genel ayara döndürmek için üzerine uzun basın.</string>
+    <string name="custom_mapping">Özel eşleştirme</string>
+    <string name="delete_cache">Önbellekleri sil</string>
+    <string name="delete_cache_desc">Bu oyunun derlenmiş gölgelendirici (shader) ve PPU önbelleklerini siler</string>
+    <string name="cache_deleted">Önbellekler silindi</string>
+    <string name="reset_game_settings">Oyun ayarlarını sıfırla</string>
+    <string name="reset_game_settings_desc">Bu oyunun özel yapılandırmasını ve tuş eşleştirmelerini kaldırır</string>
+    <string name="reset_game_settings_done">Oyun ayarları sıfırlandı</string>
+    <string name="ask_if_reset_game">%1$s için tüm özel ayarları sıfırla?</string>
+    <string name="no_directories">Henüz dizin eklenmedi. Burada görmek için bir oyun klasörü veya bir ISO dizini ekleyin.</string>
+    <string name="rescan_directory">Yeniden tara</string>
+    <string name="remove_directory">Kaldır</string>
+    <string name="directory_kind_games">Oyun klasörü</string>
+    <string name="directory_kind_iso">ISO dizini</string>
+    <string name="touchpad_port">Dokunmatik yüzey portu</string>
+    <string name="touchpad_port_desc">Dokunmatik arayüzün hangi oyuncu portunu kontrol edeceği. Portu, kendisine atanan herhangi bir oyun koluyla paylaşır.</string>
+    <string name="touchpad_auto_hide">Dokunmatik yüzeyi otomatik gizle</string>
+    <string name="touchpad_auto_hide_desc">Belirli bir süre işlem yapılmadığında dokunmatik yüzeyi otomatik olarak gizler.</string>
+    <string name="never">Asla</string>
+    <string name="seconds_2">2 saniye</string>
+    <string name="seconds_5">5 saniye</string>
+    <string name="seconds_10">10 saniye</string>
+    <string name="seconds_15">15 saniye</string>
+    <string name="seconds_30">30 saniye</string>
+    <string name="controller_port">Bağlantı noktası</string>
+    <string name="select_iso_folder">ISO Dizini Ekle</string>
 </resources>

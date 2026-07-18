@@ -19,7 +19,7 @@
     <string name="firmware">Прошивка</string>
     <string name="rpcsx_download_channel">Канал загрузки RPCSX</string>
     <string name="select_game_file">Установить PKG, ISO или RAP</string>
-    <string name="select_game_folder">Выбрать папку с игрой</string>
+    <string name="select_game_folder">Добавить папку с игрой</string>
     <string name="settings">Настройки</string>
     <string name="ui_update_channel">Канал обновлений RPCSX UI Android</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Дополнительные настройки графики</string>
     <string name="advanced_graphics_description">Масштабирование FSR, резкость и другие расширенные параметры</string>
     <string name="resolution_scale">Масштаб разрешения</string>
+    <string name="directory_not_resolvable">Эту папку нельзя использовать на месте. Выберите папку в локальном хранилище устройства и предоставьте «Разрешить доступ для управления всеми файлами» при появлении запроса.</string>
+    <string name="manage_directories">Управление каталогами</string>
+    <string name="game_settings">Настройки игры</string>
+    <string name="per_game_overrides_note">Изменения здесь применяются только к этой игре. Долгое нажатие на значение вернет его к глобальной настройке.</string>
+    <string name="custom_mapping">Пользовательская раскладка</string>
+    <string name="delete_cache">Удалить кэши</string>
+    <string name="delete_cache_desc">Удаляет скомпилированные кэши шейдеров и PPU этой игры</string>
+    <string name="cache_deleted">Кэши удалены</string>
+    <string name="reset_game_settings">Сбросить настройки игры</string>
+    <string name="reset_game_settings_desc">Удаляет пользовательскую конфигурацию и раскладку клавиш этой игры</string>
+    <string name="reset_game_settings_done">Настройки игры сброшены</string>
+    <string name="ask_if_reset_game">Сбросить все пользовательские настройки для %1$s?</string>
+    <string name="no_directories">Каталоги еще не добавлены. Добавьте папку с игрой или каталог ISO, чтобы увидеть их здесь.</string>
+    <string name="rescan_directory">Пересканировать</string>
+    <string name="remove_directory">Удалить</string>
+    <string name="directory_kind_games">Папка с игрой</string>
+    <string name="directory_kind_iso">Каталог ISO</string>
+    <string name="touchpad_port">Порт тачпада</string>
+    <string name="touchpad_port_desc">Каким портом игрока управляет наэкранный тачпад. Он делит порт с любым назначенным ему контроллером.</string>
+    <string name="touchpad_auto_hide">Автоматически скрывать тачпад</string>
+    <string name="touchpad_auto_hide_desc">Автоматически скрывает тачпад после периода неактивности.</string>
+    <string name="never">Никогда</string>
+    <string name="seconds_2">2 секунды</string>
+    <string name="seconds_5">5 секунд</string>
+    <string name="seconds_10">10 секунд</string>
+    <string name="seconds_15">15 секунд</string>
+    <string name="seconds_30">30 секунд</string>
+    <string name="controller_port">Порт</string>
+    <string name="select_iso_folder">Добавить каталог ISO</string>
 </resources>

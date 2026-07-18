@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">Canal de téléchargement RPCSX</string>
     <string name="select_game_file">Installer un PKG, ISO ou RAP</string>
-    <string name="select_game_folder">Installer un dossier</string>
+    <string name="select_game_folder">Ajouter un dossier de jeu</string>
     <string name="settings">Paramètres</string>
     <string name="ui_update_channel">Canal de mise à jour de l\'interface RPCSX Android</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Graphismes avancés</string>
     <string name="advanced_graphics_description">Mise à l\'échelle FSR, netteté et autres paramètres graphiques avancés</string>
     <string name="resolution_scale">Mise à l\'échelle de la résolution</string>
+    <string name="directory_not_resolvable">Ce dossier ne peut pas être utilisé sur place. Choisissez un dossier sur le stockage local de l'appareil et accordez \"Autoriser l'accès pour gérer tous les fichiers\" lorsque vous y êtes invité.</string>
+    <string name="manage_directories">Gérer les répertoires</string>
+    <string name="game_settings">Paramètres du jeu</string>
+    <string name="per_game_overrides_note">Les modifications apportées ici s\'appliquent uniquement à ce jeu. Appuyez longuement sur une valeur pour la rétablir au paramètre global.</string>
+    <string name="custom_mapping">Mappage personnalisé</string>
+    <string name="delete_cache">Supprimer les caches</string>
+    <string name="delete_cache_desc">Supprime les caches shaders et PPU compilés de ce jeu</string>
+    <string name="cache_deleted">Caches supprimés</string>
+    <string name="reset_game_settings">Réinitialiser les paramètres du jeu</string>
+    <string name="reset_game_settings_desc">Supprime la configuration personnalisée et les mappages de touches de ce jeu</string>
+    <string name="reset_game_settings_done">Paramètres du jeu réinitialisés</string>
+    <string name="ask_if_reset_game">Réinitialiser tous les paramètres personnalisés pour %1$s ?</string>
+    <string name="no_directories">Aucun répertoire ajouté pour le moment. Ajoutez un dossier de jeu ou un répertoire ISO pour le voir ici.</string>
+    <string name="rescan_directory">Analyser de nouveau</string>
+    <string name="remove_directory">Supprimer</string>
+    <string name="directory_kind_games">Dossier de jeu</string>
+    <string name="directory_kind_iso">Répertoire ISO</string>
+    <string name="touchpad_port">Port du pavé tactile</string>
+    <string name="touchpad_port_desc">Quel port de joueur le pavé tactile à l\'écran contrôle. Il partage le port avec n\'importe quelle manette qui lui est assignée.</string>
+    <string name="touchpad_auto_hide">Masquer automatiquement le pavé tactile</string>
+    <string name="touchpad_auto_hide_desc">Masque automatiquement le pavé tactile après une période d\'inactivité.</string>
+    <string name="never">Jamais</string>
+    <string name="seconds_2">2 secondes</string>
+    <string name="seconds_5">5 secondes</string>
+    <string name="seconds_10">10 secondes</string>
+    <string name="seconds_15">15 secondes</string>
+    <string name="seconds_30">30 secondes</string>
+    <string name="controller_port">Port</string>
+    <string name="select_iso_folder">Ajouter un répertoire ISO</string>
 </resources>

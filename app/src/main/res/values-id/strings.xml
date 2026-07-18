@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">Saluran Unduhan RPCSX</string>
     <string name="select_game_file">Instal PKG, ISO, atau RAP</string>
-    <string name="select_game_folder">Instal Folder</string>
+    <string name="select_game_folder">Tambahkan Folder Game</string>
     <string name="settings">Pengaturan</string>
     <string name="ui_update_channel">Saluran Pembaruan RPCSX UI Android</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Grafis Lanjutan</string>
     <string name="advanced_graphics_description">Penskalaan FSR, penajaman, dan pengaturan lanjutan lainnya</string>
     <string name="resolution_scale">Skala Resolusi</string>
+    <string name="directory_not_resolvable">Folder ini tidak dapat digunakan di tempat. Pilih folder di penyimpanan perangkat lokal, dan berikan \"Izinkan akses untuk mengelola semua file\" saat diminta.</string>
+    <string name="manage_directories">Kelola Direktori</string>
+    <string name="game_settings">Pengaturan Game</string>
+    <string name="per_game_overrides_note">Perubahan di sini hanya berlaku untuk game ini. Tekan lama pada nilai untuk mengembalikannya ke pengaturan global.</string>
+    <string name="custom_mapping">Pemetaan kustom</string>
+    <string name="delete_cache">Hapus cache</string>
+    <string name="delete_cache_desc">Menghapus shader terkompilasi dan cache PPU game ini</string>
+    <string name="cache_deleted">Cache dihapus</string>
+    <string name="reset_game_settings">Atur ulang pengaturan game</string>
+    <string name="reset_game_settings_desc">Menghapus konfigurasi kustom dan pemetaan tombol game ini</string>
+    <string name="reset_game_settings_done">Pengaturan game diatur ulang</string>
+    <string name="ask_if_reset_game">Atur ulang semua pengaturan kustom untuk %1$s?</string>
+    <string name="no_directories">Belum ada direktori yang ditambahkan. Tambahkan folder game atau direktori ISO untuk melihatnya di sini.</string>
+    <string name="rescan_directory">Pindai ulang</string>
+    <string name="remove_directory">Hapus</string>
+    <string name="directory_kind_games">Folder game</string>
+    <string name="directory_kind_iso">Direktori ISO</string>
+    <string name="touchpad_port">Port touchpad</string>
+    <string name="touchpad_port_desc">Port pemain mana yang dikendalikan oleh overlay sentuh. Ini berbagi port dengan pengontrol apa pun yang ditetapkan untuknya.</string>
+    <string name="touchpad_auto_hide">Sembunyikan Touchpad otomatis</string>
+    <string name="touchpad_auto_hide_desc">Sembunyikan touchpad secara otomatis setelah beberapa saat tidak ada aktivitas.</string>
+    <string name="never">Jangan pernah</string>
+    <string name="seconds_2">2 detik</string>
+    <string name="seconds_5">5 detik</string>
+    <string name="seconds_10">10 detik</string>
+    <string name="seconds_15">15 detik</string>
+    <string name="seconds_30">30 detik</string>
+    <string name="controller_port">Port</string>
+    <string name="select_iso_folder">Tambah Direktori ISO</string>
 </resources>

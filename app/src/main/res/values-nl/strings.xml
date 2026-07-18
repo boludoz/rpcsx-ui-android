@@ -19,7 +19,7 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">RPCSX-downloadkanaal</string>
     <string name="select_game_file">PKG, ISO of RAP installeren</string>
-    <string name="select_game_folder">Map installeren</string>
+    <string name="select_game_folder">Gamemap toevoegen</string>
     <string name="settings">Instellingen</string>
     <string name="ui_update_channel">RPCSX UI Android updatekanaal</string>
 
@@ -161,4 +161,33 @@
     <string name="advanced_graphics">Geavanceerde grafische instellingen</string>
     <string name="advanced_graphics_description">FSR-schaling, scherpte en andere geavanceerde grafische instellingen</string>
     <string name="resolution_scale">Resolutieschaal</string>
+    <string name="directory_not_resolvable">Deze map kan niet op deze locatie worden gebruikt. Kies een map op de lokale apparaatopslag en verleen \"Toegang tot beheer van alle bestanden toestaan\" wanneer daarom wordt gevraagd.</string>
+    <string name="manage_directories">Mappen beheren</string>
+    <string name="game_settings">Spelinstellingen</string>
+    <string name="per_game_overrides_note">Wijzigingen hier zijn alleen van toepassing op dit spel. Druk lang op een waarde om deze terug te zetten naar de globale instelling.</string>
+    <string name="custom_mapping">Aangepaste toewijzing</string>
+    <string name="delete_cache">Caches verwijderen</string>
+    <string name="delete_cache_desc">Verwijdert de gecompileerde shader- en PPU-caches van dit spel</string>
+    <string name="cache_deleted">Caches verwijderd</string>
+    <string name="reset_game_settings">Spelinstellingen herstellen</string>
+    <string name="reset_game_settings_desc">Verwijdert de aangepaste configuratie en knoptoewijzingen van dit spel</string>
+    <string name="reset_game_settings_done">Spelinstellingen hersteld</string>
+    <string name="ask_if_reset_game">Alle aangepaste instellingen voor %1$s herstellen?</string>
+    <string name="no_directories">Nog geen mappen toegevoegd. Voeg een gamemap of ISO-map toe om deze hier te zien.</string>
+    <string name="rescan_directory">Opnieuw scannen</string>
+    <string name="remove_directory">Verwijderen</string>
+    <string name="directory_kind_games">Gamemap</string>
+    <string name="directory_kind_iso">ISO-map</string>
+    <string name="touchpad_port">Touchpad-poort</string>
+    <string name="touchpad_port_desc">Welke spelerspoort de touch-overlay bestuurt. Deze deelt de poort met eventuele controllers die eraan zijn toegewezen.</string>
+    <string name="touchpad_auto_hide">Touchpad automatisch verbergen</string>
+    <string name="touchpad_auto_hide_desc">Verberg het touchpad automatisch na een periode van inactiviteit.</string>
+    <string name="never">Nooit</string>
+    <string name="seconds_2">2 seconden</string>
+    <string name="seconds_5">5 seconden</string>
+    <string name="seconds_10">10 seconden</string>
+    <string name="seconds_15">15 seconden</string>
+    <string name="seconds_30">30 seconden</string>
+    <string name="controller_port">Poort</string>
+    <string name="select_iso_folder">ISO-map toevoegen</string>
 </resources>
