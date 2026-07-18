@@ -608,6 +608,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
+            contentPadding = PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -1165,6 +1166,7 @@ fun GraphicsSettings(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
+            contentPadding = PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -1378,6 +1380,7 @@ fun PlayerControllerSettings(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
+            contentPadding = PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
