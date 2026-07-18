@@ -73,13 +73,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
 import net.rpcsx.BuildConfig
 import net.rpcsx.EmulatorState
 import net.rpcsx.FirmwareRepository
+import net.rpcsx.GameDirectoryRepository
 import net.rpcsx.PrecompilerService
 import net.rpcsx.PrecompilerServiceAction
 import net.rpcsx.ProgressRepository
@@ -100,14 +103,17 @@ import net.rpcsx.ui.channels.channelsToUiText
 import net.rpcsx.ui.channels.uiTextToChannel
 import net.rpcsx.ui.channels.uiTextToChannels
 import net.rpcsx.ui.drivers.GpuDriversScreen
+import net.rpcsx.ui.games.GameDirectoriesScreen
 import net.rpcsx.ui.games.GamesScreen
 import net.rpcsx.ui.settings.AdvancedSettingsScreen
+import net.rpcsx.ui.settings.GameSettingsScreen
 import net.rpcsx.ui.settings.ControllerSettings
 import net.rpcsx.ui.settings.GraphicsSettings
 import net.rpcsx.ui.settings.PlayerControllerSettings
 import net.rpcsx.ui.settings.SettingsScreen
 import net.rpcsx.ui.user.UsersScreen
 import net.rpcsx.utils.FileUtil
+import net.rpcsx.utils.GameConfig
 import net.rpcsx.utils.RpcsxUpdater
 import org.json.JSONObject
 
@@ -205,7 +211,11 @@ fun AppNavHost() {
             GamesDestination(
                 navigateToSettings = { navigateTo("settings") },
                 navigateToControls = { navigateTo("controls") },
-                drawerState
+                drawerState = drawerState,
+                navigateToDirectories = { navigateTo("game_directories") },
+                navigateToGameSettings = { path ->
+                    navigateTo("game_settings/${Uri.encode(path)}")
+                }
             )
         }
 
@@ -274,6 +284,73 @@ fun AppNavHost() {
                 navigateTo = navigateTo
             )
         }
+
+        composable(
+            route = "game_directories"
+        ) {
+            GameDirectoriesScreen(
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
+            route = "game_settings/{gamePath}",
+            arguments = listOf(navArgument("gamePath") { type = NavType.StringType })
+        ) { entry ->
+            GameSettingsScreen(
+                gamePath = entry.arguments?.getString("gamePath") ?: "",
+                navigateBack = navController::navigateUp,
+                navigateTo = navigateTo
+            )
+        }
+
+        composable(
+            route = "game_controls/{titleId}/{slot}",
+            arguments = listOf(
+                navArgument("titleId") { type = NavType.StringType },
+                navArgument("slot") { type = NavType.IntType }
+            )
+        ) { entry ->
+            PlayerControllerSettings(
+                playerSlot = entry.arguments?.getInt("slot") ?: 0,
+                navigateBack = navController::navigateUp,
+                titleId = entry.arguments?.getString("titleId")
+            )
+        }
+
+        // Per-game advanced settings: same dynamic tree as the global
+        // "settings" routes, but values are merged with (and written to) the
+        // title's custom config overrides instead of the emulator's global
+        // config. Registered per settings-tree node, parameterized by title.
+        fun registerGameAdvanced(obj: JSONObject, path: String) {
+            composable(
+                route = "game_adv/{titleId}$path${if (path.isEmpty()) "@@$" else ""}",
+                arguments = listOf(navArgument("titleId") { type = NavType.StringType })
+            ) { entry ->
+                val titleId = entry.arguments?.getString("titleId") ?: ""
+                val merged = remember(titleId) {
+                    GameConfig.mergedSettings(titleId, settings.value)
+                }
+                AdvancedSettingsScreen(
+                    navigateBack = navController::navigateUp,
+                    navigateTo = navigateTo,
+                    settings = GameConfig.subtree(merged, path) ?: JSONObject(),
+                    path = path,
+                    routePrefix = "game_adv/$titleId",
+                    applySetting = { p, v -> GameConfig.setScalarJson(titleId, p, v) },
+                    showInstallRpcsx = false
+                )
+            }
+
+            obj.keys().forEach self@{ key ->
+                val elemObject = obj[key] as? JSONObject ?: return@self
+                if (elemObject.has("type")) {
+                    return@self
+                }
+                registerGameAdvanced(elemObject, "$path@@$key")
+            }
+        }
+        registerGameAdvanced(settings.value, "")
 
         composable(
             route = "controls"
@@ -503,7 +580,9 @@ fun AppNavHost() {
 fun GamesDestination(
     navigateToSettings: () -> Unit,
     navigateToControls: () -> Unit,
-    drawerState: androidx.compose.material3.DrawerState
+    drawerState: androidx.compose.material3.DrawerState,
+    navigateToDirectories: () -> Unit = {},
+    navigateToGameSettings: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -548,9 +627,11 @@ fun GamesDestination(
         contract = ActivityResultContracts.OpenDocumentTree(),
         onResult = { uri: Uri? ->
             uri?.let {
-                // TODO: FileUtil.saveGameFolderUri(prefs, it)
                 val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 context.contentResolver.takePersistableUriPermission(it, takeFlags)
+                // Remember the folder so it can be re-scanned or removed later
+                // from the "Manage directories" screen.
+                GameDirectoryRepository.add(it)
                 FileUtil.installPackages(context, it)
             }
         }
@@ -680,6 +761,13 @@ fun GamesDestination(
                     )
 
                     NavigationDrawerItem(
+                        label = { Text(stringResource(R.string.manage_directories)) },
+                        selected = false,
+                        icon = { Icon(painterResource(id = R.drawable.hard_drive), contentDescription = null) },
+                        onClick = navigateToDirectories
+                    )
+
+                    NavigationDrawerItem(
                         label = { Text(stringResource(R.string.device_info)) },
                         selected = false,
                         icon = { Icon(painterResource(R.drawable.perm_device_information), contentDescription = null) },
@@ -791,7 +879,7 @@ fun GamesDestination(
             floatingActionButton = {
                 DropUpFloatingActionButton(installPkgLauncher, gameFolderPickerLauncher)
             },
-        ) { innerPadding -> Column(modifier = Modifier.padding(innerPadding)) { GamesScreen() } }
+        ) { innerPadding -> Column(modifier = Modifier.padding(innerPadding)) { GamesScreen(navigateToGameSettings) } }
     }
 }
 

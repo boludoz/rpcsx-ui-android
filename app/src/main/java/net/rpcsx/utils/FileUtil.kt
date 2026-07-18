@@ -38,6 +38,11 @@ private data class InstallableFolder(
 )
 
 object FileUtil {
+    // The folder scanner only picks up .iso images as loose files; game
+    // folders are detected separately by their PARAM.SFO.
+    private fun isInstallableFileName(name: String): Boolean =
+        name.substringAfterLast('.', "").equals("iso", ignoreCase = true)
+
     fun installPackages(context: Context, rootFolderUri: Uri) {
         thread {
             val workList = mutableListOf<Uri>()
@@ -71,7 +76,9 @@ object FileUtil {
                 listFiles(currentFolderUri, context).forEach { item ->
                     if (item.isDirectory) {
                         workList.add(item.uri)
-                    } else {
+                    } else if (isInstallableFileName(item.filename)) {
+                        // Pick up loose installable files anywhere in the tree,
+                        // including .iso images, instead of every stray file.
                         batchFiles += item.uri
                     }
                 }

@@ -125,6 +125,14 @@ class PrecompilerService : Service() {
 
         if (isFwInstall) {
             FirmwareRepository.progressChannel.value = installProgress
+        } else {
+            // Show a "processing" placeholder card in the game grid while the
+            // file (ISO/PKG) is copied/installed, mirroring the folder-add flow
+            // (FileUtil.installPackages). The placeholder is keyed to this
+            // progress and removed once it finishes (ProgressRepository.cancel
+            // -> GameRepository.clearProgress); the real game is added by the
+            // native collectGameInfo call inside install().
+            GameRepository.createGameInstallEntry(installProgress)
         }
 
         try {

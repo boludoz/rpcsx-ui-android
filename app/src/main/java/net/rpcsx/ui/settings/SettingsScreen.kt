@@ -110,6 +110,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import net.rpcsx.utils.FileUtil
 import net.rpcsx.utils.GamepadAutoMapper
+import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.InputBindingPrefs
 import net.rpcsx.utils.RpcsxUpdater
 import org.json.JSONObject
@@ -123,7 +124,14 @@ fun AdvancedSettingsScreen(
     navigateBack: () -> Unit,
     navigateTo: (path: String) -> Unit,
     settings: JSONObject,
-    path: String = ""
+    path: String = "",
+    // Route prefix for sub-node navigation and value sink. The defaults edit
+    // the global config through the emulator; the per-game settings screen
+    // passes "game_adv/<titleId>" and a lambda that writes the title's
+    // custom-config overrides instead.
+    routePrefix: String = "settings",
+    applySetting: (String, String) -> Boolean = { p, v -> RPCSX.instance.settingsSet(p, v) },
+    showInstallRpcsx: Boolean = true
 ) {
     val context = LocalContext.current
     val settingValue = remember { mutableStateOf(settings) }
@@ -280,9 +288,9 @@ fun AdvancedSettingsScreen(
                                 title = key, leadingIcon = null, onClick = {
                                     Log.e(
                                         "Main",
-                                        "Navigate to settings$itemPath, object $itemObject"
+                                        "Navigate to $routePrefix$itemPath, object $itemObject"
                                     )
-                                    navigateTo("settings$itemPath")
+                                    navigateTo("$routePrefix$itemPath")
                                 }
                             )
                         }
@@ -295,7 +303,7 @@ fun AdvancedSettingsScreen(
                                 title = key + if (itemValue == def) "" else " *",
                                 leadingIcon = null,
                                 onClick = { value ->
-                                    if (!RPCSX.instance.settingsSet(
+                                    if (!applySetting(
                                             itemPath, if (value) "true" else "false"
                                         )
                                     ) {
@@ -317,7 +325,7 @@ fun AdvancedSettingsScreen(
                                         title = context.getString(R.string.reset_setting),
                                         message = context.getString(R.string.ask_if_reset_key, key),
                                         onConfirm = {
-                                            if (RPCSX.instance.settingsSet(
+                                            if (applySetting(
                                                     itemPath, def.toString()
                                                 )
                                             ) {
@@ -351,7 +359,7 @@ fun AdvancedSettingsScreen(
                                 icon = null,
                                 title = key + if (itemValue == def) "" else " *",
                                 onValueChange = { value ->
-                                    if (!RPCSX.instance.settingsSet(
+                                    if (!applySetting(
                                             itemPath, "\"" + value + "\""
                                         )
                                     ) {
@@ -373,7 +381,7 @@ fun AdvancedSettingsScreen(
                                         title = context.getString(R.string.reset_setting),
                                         message = context.getString(R.string.ask_if_reset_key, key),
                                         onConfirm = {
-                                            if (RPCSX.instance.settingsSet(
+                                            if (applySetting(
                                                     itemPath, "\"" + def + "\""
                                                 )
                                             ) {
@@ -413,7 +421,7 @@ fun AdvancedSettingsScreen(
                                     title = key + if (itemValue == def) "" else " *",
                                     steps = (max - min).toInt() - 1,
                                     onValueChange = { value ->
-                                        if (!RPCSX.instance.settingsSet(
+                                        if (!applySetting(
                                                 itemPath, value.toLong().toString()
                                             )
                                         ) {
@@ -441,7 +449,7 @@ fun AdvancedSettingsScreen(
                                                 key
                                             ),
                                             onConfirm = {
-                                                if (RPCSX.instance.settingsSet(
+                                                if (applySetting(
                                                         itemPath, def.toString()
                                                     )
                                                 ) {
@@ -484,7 +492,7 @@ fun AdvancedSettingsScreen(
                                     title = key + if (itemValue == def) "" else " *",
                                     steps = ceil(max - min).toInt() - 1,
                                     onValueChange = { value ->
-                                        if (!RPCSX.instance.settingsSet(
+                                        if (!applySetting(
                                                 itemPath, value.toString()
                                             )
                                         ) {
@@ -510,7 +518,7 @@ fun AdvancedSettingsScreen(
                                                 key
                                             ),
                                             onConfirm = {
-                                                if (RPCSX.instance.settingsSet(
+                                                if (applySetting(
                                                         itemPath, def.toString()
                                                     )
                                                 ) {
@@ -537,7 +545,7 @@ fun AdvancedSettingsScreen(
                 }
             }
 
-            if (path.isEmpty()) {
+            if (showInstallRpcsx && path.isEmpty()) {
                 item(key = "install_dev_rpcsx") {
                     RegularPreference(
                         title = stringResource(R.string.install_custom_rpcsx_lib),
@@ -887,6 +895,28 @@ fun ControllerSettings(
                     },
                     onClick = { navigateToPlayer(playerIndex) }
                 )
+
+                // Port selector for the controller occupying this slot.
+                // Picking an occupied port swaps the two controllers; the
+                // choice is persisted per device and restored on reconnect.
+                if (slot != null) {
+                    val portLabels = (0 until MaxGamepadPlayers).map {
+                        stringResource(R.string.player_slot, it + 1)
+                    }
+                    SingleSelectionDialog(
+                        title = stringResource(R.string.controller_port),
+                        subtitle = { Text(slot.deviceName) },
+                        icon = null,
+                        currentValue = portLabels[playerIndex],
+                        values = portLabels,
+                        onValueChange = { value ->
+                            val idx = portLabels.indexOf(value)
+                            if (idx >= 0) {
+                                GamepadRepository.reassign(slot.deviceId, idx)
+                            }
+                        }
+                    )
+                }
             }
 
             item {
@@ -904,17 +934,42 @@ fun ControllerSettings(
                     onClick = navigateToTouchpad
                 )
             }
+
+            item {
+                val context = LocalContext.current
+                var forcedSlot by remember {
+                    mutableStateOf(
+                        ((GeneralSettings["overlay_forced_slot"] as? Int) ?: 0)
+                            .coerceIn(0, MaxGamepadPlayers - 1)
+                    )
+                }
+                val labels = (0 until MaxGamepadPlayers).map {
+                    context.getString(R.string.player_slot, it + 1)
+                }
+                SingleSelectionDialog(
+                    title = stringResource(R.string.touchpad_port),
+                    subtitle = { Text(stringResource(R.string.touchpad_port_desc)) },
+                    icon = null,
+                    currentValue = labels[forcedSlot],
+                    values = labels,
+                    onValueChange = { value ->
+                        val idx = labels.indexOf(value).coerceIn(0, MaxGamepadPlayers - 1)
+                        forcedSlot = idx
+                        GeneralSettings["overlay_forced_slot"] = idx
+                    }
+                )
+            }
         }
     }
 }
 
-private const val OutputScalingPath = "Video@@Output Scaling Mode"
-private const val VideoResolutionScalePath = "Video@@Resolution Scale"
-private const val FsrSharpeningPath = "Video@@Vulkan@@FidelityFX CAS Sharpening Intensity"
-private const val FsrScalingValue = "FidelityFX Super Resolution"
+internal const val OutputScalingPath = "Video@@Output Scaling Mode"
+internal const val VideoResolutionScalePath = "Video@@Resolution Scale"
+internal const val FsrSharpeningPath = "Video@@Vulkan@@FidelityFX CAS Sharpening Intensity"
+internal const val FsrScalingValue = "FidelityFX Super Resolution"
 
 // Helper function to search the settings schema JSON dynamically for matching keys
-private fun findVideoSettingPath(settings: JSONObject, searchKeyword: String, defaultKey: String, ignoreKeyword: String? = null): String {
+internal fun findVideoSettingPath(settings: JSONObject, searchKeyword: String, defaultKey: String, ignoreKeyword: String? = null): String {
     val videoGroup = settings.optJSONObject("Video") ?: return "Video@@$defaultKey"
     for (key in videoGroup.keys()) {
         if (key.contains(searchKeyword, ignoreCase = true) && (ignoreKeyword == null || !key.contains(ignoreKeyword, ignoreCase = true))) {
@@ -1249,7 +1304,10 @@ fun GraphicsSettings(
 fun PlayerControllerSettings(
     playerSlot: Int,
     modifier: Modifier = Modifier,
-    navigateBack: () -> Unit
+    navigateBack: () -> Unit,
+    // When set, edits this title's private key mappings instead of the
+    // global ones (used from the per-game settings screen).
+    titleId: String? = null
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
@@ -1271,9 +1329,9 @@ fun PlayerControllerSettings(
         }
     ) { contentPadding ->
         val context = LocalContext.current
-        val inputBindings = remember(playerSlot) {
+        val inputBindings = remember(playerSlot, titleId) {
             mutableStateMapOf<Int, Pair<Int, Int>>().apply {
-                putAll(InputBindingPrefs.loadBindings(playerSlot))
+                putAll(InputBindingPrefs.loadBindings(playerSlot, titleId))
             }
         }
 
@@ -1304,7 +1362,9 @@ fun PlayerControllerSettings(
                 )
             }
 
-            item {
+            // Automatic mapping writes the global per-slot bindings, so it is
+            // only offered when editing those (not a title's private mapping).
+            if (titleId == null) item {
                 RegularPreference(
                     title = stringResource(R.string.automatic_mapping),
                     leadingIcon = null,
@@ -1386,7 +1446,7 @@ fun PlayerControllerSettings(
                                 inputBindings.remove(currentInput)
                                 inputBindings[it.key] = value
                             }
-                            InputBindingPrefs.saveBindings(playerSlot, inputBindings.toMap())
+                            InputBindingPrefs.saveBindings(playerSlot, inputBindings.toMap(), titleId)
                         }
                     }
                 },
@@ -1405,7 +1465,7 @@ fun PlayerControllerSettings(
                                     inputBindings.remove(currentInput)
                                     inputBindings[keyEvent.nativeKeyEvent.keyCode] = value
                                 }
-                                InputBindingPrefs.saveBindings(playerSlot, inputBindings.toMap())
+                                InputBindingPrefs.saveBindings(playerSlot, inputBindings.toMap(), titleId)
                                 showDialog = false
                                 true
                             } else false

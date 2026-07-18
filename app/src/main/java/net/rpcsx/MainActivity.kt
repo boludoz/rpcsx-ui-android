@@ -25,9 +25,12 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        unregisterGamepadEventListener = listenGamepadEvents(this)
-
+        // GeneralSettings must be ready before the gamepad listener runs:
+        // GamepadRepository.attach reads persisted port preferences from it.
         GeneralSettings.init(this)
+        GameDirectoryRepository.load()
+
+        unregisterGamepadEventListener = listenGamepadEvents(this)
 
         if (!RPCSX.initialized) {
             Permission.PostNotifications.requestPermission(this)

@@ -20,6 +20,8 @@ import androidx.core.view.updateLayoutParams
 import net.rpcsx.databinding.ActivityRpcs3Binding
 import net.rpcsx.dialogs.AlertDialogQueue
 import net.rpcsx.overlay.State
+import net.rpcsx.utils.GameConfig
+import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.InputBindingPrefs
 import kotlin.concurrent.thread
 import kotlin.math.abs
@@ -43,11 +45,24 @@ class RPCSXActivity : Activity() {
     private var bootThread: Thread? = null
     // Each player slot has its own independent button mapping; cache lazily
     // since it's read on every key event but only changes via Settings.
+    // Per-game mappings (saved from the game's settings screen) take
+    // precedence over the global ones when present.
     private val inputBindingsBySlot = mutableMapOf<Int, Map<Int, Pair<Int, Int>>>()
+    private val activeTitleId by lazy {
+        GameConfig.titleIdForPath(intent.getStringExtra("path") ?: "")
+    }
     private fun bindingsForSlot(slot: Int) =
-        inputBindingsBySlot.getOrPut(slot) { InputBindingPrefs.loadBindings(slot) }
+        inputBindingsBySlot.getOrPut(slot) { InputBindingPrefs.loadBindings(slot, activeTitleId) }
     private val maxVirtualPads by lazy {
         RPCSX.instance.getMaxVirtualPads().coerceIn(1, MaxGamepadPlayers)
+    }
+
+    // Player port the on-screen touch overlay drives (default 0). The overlay
+    // always coexists with whatever physical controller is assigned to the
+    // same port — their inputs are merged in mergedOverlayState — so e.g. the
+    // touchpad can act as player 2 alongside a controller on player 1.
+    private val overlaySlot by lazy {
+        ((GeneralSettings["overlay_forced_slot"] as? Int) ?: 0).coerceIn(0, maxVirtualPads - 1)
     }
 
     private val inputDeviceListener = object : InputManager.InputDeviceListener {
@@ -91,9 +106,11 @@ class RPCSXActivity : Activity() {
         // too instead of it calling into native directly — otherwise
         // whichever side last sent a full State() would silently drop the
         // other's currently-held buttons.
-        binding.padOverlay.onPadStateChanged = { sendPadData(0, binding.padOverlay.currentState) }
+        binding.padOverlay.onPadStateChanged = {
+            sendPadData(overlaySlot, binding.padOverlay.currentState)
+        }
 
-        applyOverlayAutoVisibility(connectedGamepadCount() > 0)
+        applyOverlayAutoVisibility(connectedGamepadCount() > 0 && overlaySlot == 0)
 
         val gamePath = intent.getStringExtra("path")!!
         RPCSX.lastPlayedGame = gamePath
@@ -182,7 +199,10 @@ class RPCSXActivity : Activity() {
     private fun connectedGamepadCount() = GamepadRepository.slots.size
 
     private fun onGamepadConnectionChanged() {
-        applyOverlayAutoVisibility(connectedGamepadCount() > 0)
+        // Auto-hide on controller connect only applies when the overlay shares
+        // port 1 with the controller. On a custom port the user deliberately
+        // set the touchpad up as a separate player, so it stays visible.
+        applyOverlayAutoVisibility(connectedGamepadCount() > 0 && overlaySlot == 0)
     }
 
     // Skyline-style behavior: hide the touch overlay the moment a real
@@ -318,20 +338,35 @@ class RPCSXActivity : Activity() {
     }
 
     private fun sendPadData(slot: Int, state: State) {
-        if (slot == 0 || maxVirtualPads <= 1) {
-            // Slot 0's native pad is shared by the on-screen overlay and a
-            // physical controller, so combine both sources here rather than
+        if (slot == overlaySlot || maxVirtualPads <= 1) {
+            // The overlay's port is shared with whatever physical controller
+            // is assigned to it, so combine both sources here rather than
             // sending `state` alone and clobbering whichever one didn't
             // trigger this particular call.
-            val merged = mergedSlot0State(if (slot != 0) state else null)
-            RPCSX.instance.overlayPadData(
-                merged.digital[0],
-                merged.digital[1],
-                merged.leftStickX,
-                merged.leftStickY,
-                merged.rightStickX,
-                merged.rightStickY
-            )
+            val merged = mergedOverlayState(if (slot != overlaySlot) state else null)
+            // overlayPadData targets slot 0 and exists on every engine build;
+            // multiPadData is needed for any other overlay port.
+            val target = if (maxVirtualPads <= 1) 0 else overlaySlot
+            if (target == 0) {
+                RPCSX.instance.overlayPadData(
+                    merged.digital[0],
+                    merged.digital[1],
+                    merged.leftStickX,
+                    merged.leftStickY,
+                    merged.rightStickX,
+                    merged.rightStickY
+                )
+            } else {
+                RPCSX.instance.multiPadData(
+                    target,
+                    merged.digital[0],
+                    merged.digital[1],
+                    merged.leftStickX,
+                    merged.leftStickY,
+                    merged.rightStickX,
+                    merged.rightStickY
+                )
+            }
         } else {
             RPCSX.instance.multiPadData(
                 slot,
@@ -345,16 +380,16 @@ class RPCSXActivity : Activity() {
         }
     }
 
-    // Combines the overlay's touch state with slot 0's physical controller
-    // (if any), so both can be held/pressed at once instead of one input
-    // source overwriting the other. Digital buttons are OR'd together;
-    // sticks prefer whichever source is actually deflected from center,
-    // falling back to `extra` (a non-zero-slot controller being funneled
-    // into slot 0 on engine builds that only support one virtual pad) and
-    // finally to the physical slot-0 gamepad.
-    private fun mergedSlot0State(extra: State?): State {
-        val slot0DeviceId = GamepadRepository.slots[0]?.deviceId
-        val gamepadState = slot0DeviceId?.let { gamepadStates[it] } ?: State()
+    // Combines the overlay's touch state with the physical controller on the
+    // overlay's port (if any), so both can be held/pressed at once instead of
+    // one input source overwriting the other. Digital buttons are OR'd
+    // together; sticks prefer whichever source is actually deflected from
+    // center, falling back to `extra` (a controller from another slot being
+    // funneled into slot 0 on engine builds that only support one virtual
+    // pad) and finally to the port's physical gamepad.
+    private fun mergedOverlayState(extra: State?): State {
+        val overlayPadDeviceId = GamepadRepository.slots[overlaySlot]?.deviceId
+        val gamepadState = overlayPadDeviceId?.let { gamepadStates[it] } ?: State()
         val overlayState = binding.padOverlay.currentState
 
         fun isCentered(s: State) =
