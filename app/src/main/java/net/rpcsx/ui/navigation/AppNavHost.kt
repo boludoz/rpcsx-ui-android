@@ -62,6 +62,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,6 +85,7 @@ import androidx.core.content.edit
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.launch
@@ -184,6 +188,45 @@ fun AppNavHost() {
         }
     }
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val showDock = currentRoute in listOf("games", "settings", "controls", "game_directories", "users")
+
+    val installPkgLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            if (uri != null) PrecompilerService.start(
+                context,
+                PrecompilerServiceAction.Install,
+                uri
+            )
+        }
+    )
+
+    val installFwLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            if (uri != null) PrecompilerService.start(
+                context,
+                PrecompilerServiceAction.InstallFirmware,
+                uri
+            )
+        }
+    )
+
+    val gameFolderPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                context.contentResolver.takePersistableUriPermission(it, takeFlags)
+                GameDirectoryRepository.add(it)
+                FileUtil.installPackages(context, it)
+            }
+        }
+    )
+
     BackHandler(enabled = drawerState.isOpen) {
         scope.launch {
             drawerState.close()
@@ -197,7 +240,8 @@ fun AppNavHost() {
             navigateToSettings = { },
             navigateToControls = { },
             drawerState = drawerState,
-            navigateToUsers = { }
+            navigateToUsers = { },
+            installFwLauncher = installFwLauncher
         )
 
         return
@@ -208,24 +252,51 @@ fun AppNavHost() {
         settings.value = JSONObject(RPCSX.instance.settingsGet(""))
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = "games"
-    ) {
-        composable(
-            route = "games"
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            startDestination = "games",
+            modifier = Modifier.fillMaxSize()
         ) {
-            GamesDestination(
-                navigateToSettings = { navigateTo("settings") },
-                navigateToControls = { navigateTo("controls") },
-                drawerState = drawerState,
-                navigateToDirectories = { navigateTo("game_directories") },
-                navigateToGameSettings = { path ->
-                    navigateTo("game_settings/${Uri.encode(path)}")
-                },
-                navigateToUsers = { navigateTo("users") }
-            )
-        }
+            composable(
+                route = "games"
+            ) {
+                GamesDestination(
+                    navigateToSettings = {
+                        navController.navigate("settings") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    navigateToControls = {
+                        navController.navigate("controls") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    drawerState = drawerState,
+                    navigateToDirectories = {
+                        navController.navigate("game_directories") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    navigateToGameSettings = { path ->
+                        navController.navigate("game_settings/${Uri.encode(path)}")
+                    },
+                    navigateToUsers = {
+                        navController.navigate("users") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    installFwLauncher = installFwLauncher
+                )
+            }
 
         composable(
             route = "users"
@@ -591,7 +662,8 @@ fun GamesDestination(
     drawerState: androidx.compose.material3.DrawerState,
     navigateToDirectories: () -> Unit = {},
     navigateToGameSettings: (String) -> Unit = {},
-    navigateToUsers: () -> Unit = {}
+    navigateToUsers: () -> Unit = {},
+    installFwLauncher: ActivityResultLauncher<String>
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -610,41 +682,8 @@ fun GamesDestination(
         UserRepository.load()
     }
 
-    val installPkgLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            if (uri != null) PrecompilerService.start(
-                context,
-                PrecompilerServiceAction.Install,
-                uri
-            )
-        }
-    )
+    // Remove launchers from here as they are at AppNavHost level
 
-    val installFwLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            if (uri != null) PrecompilerService.start(
-                context,
-                PrecompilerServiceAction.InstallFirmware,
-                uri
-            )
-        }
-    )
-
-    val gameFolderPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocumentTree(),
-        onResult = { uri: Uri? ->
-            uri?.let {
-                val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                context.contentResolver.takePersistableUriPermission(it, takeFlags)
-                // Remember the folder so it can be re-scanned or removed later
-                // from the "Manage directories" screen.
-                GameDirectoryRepository.add(it)
-                FileUtil.installPackages(context, it)
-            }
-        }
-    )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -882,19 +921,6 @@ fun GamesDestination(
                     .padding(innerPadding)
             ) {
                 GamesScreen(navigateToGameSettings)
-
-                FloatingDock(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 16.dp)
-                        .navigationBarsPadding(),
-                    onNavigateToSettings = navigateToSettings,
-                    onNavigateToControls = navigateToControls,
-                    onNavigateToDirectories = navigateToDirectories,
-                    onNavigateToUsers = navigateToUsers,
-                    onAddGameFile = { installPkgLauncher.launch("*/*") },
-                    onAddGameFolder = { gameFolderPickerLauncher.launch(null) }
-                )
             }
         }
     }
@@ -904,6 +930,8 @@ fun GamesDestination(
 @Composable
 fun FloatingDock(
     modifier: Modifier = Modifier,
+    currentRoute: String,
+    onNavigateToGames: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToControls: () -> Unit,
     onNavigateToDirectories: () -> Unit,
@@ -926,25 +954,32 @@ fun FloatingDock(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Games (Selected item since we are on the main Games list)
+            // Games
             IconButton(
-                onClick = { /* Already here */ },
-                modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                onClick = onNavigateToGames,
+                modifier = if (currentRoute == "games") {
+                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                } else Modifier
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.hard_drive),
                     contentDescription = "Games",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = if (currentRoute == "games") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
 
             // Controls
-            IconButton(onClick = onNavigateToControls) {
+            IconButton(
+                onClick = onNavigateToControls,
+                modifier = if (currentRoute == "controls") {
+                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                } else Modifier
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.gamepad),
                     contentDescription = "Controls",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (currentRoute == "controls") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -963,31 +998,46 @@ fun FloatingDock(
             }
 
             // Directories
-            IconButton(onClick = onNavigateToDirectories) {
+            IconButton(
+                onClick = onNavigateToDirectories,
+                modifier = if (currentRoute == "game_directories") {
+                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                } else Modifier
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_folder),
                     contentDescription = "Directories",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (currentRoute == "game_directories") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
 
             // Users
-            IconButton(onClick = onNavigateToUsers) {
+            IconButton(
+                onClick = onNavigateToUsers,
+                modifier = if (currentRoute == "users") {
+                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                } else Modifier
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_person),
                     contentDescription = "Users",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (currentRoute == "users") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
 
             // Settings
-            IconButton(onClick = onNavigateToSettings) {
+            IconButton(
+                onClick = onNavigateToSettings,
+                modifier = if (currentRoute.startsWith("settings")) {
+                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                } else Modifier
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_settings),
                     contentDescription = "Settings",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (currentRoute.startsWith("settings")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }

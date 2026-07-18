@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -277,6 +278,7 @@ fun AdvancedSettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
+            contentPadding = PaddingValues(bottom = 100.dp)
         ) {
             items(filteredKeys, key = { it.first }) { (itemPath, itemObject) ->
                 val key = itemPath.substringAfterLast("@@")
@@ -874,6 +876,7 @@ fun ControllerSettings(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
+            contentPadding = PaddingValues(bottom = 100.dp)
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))

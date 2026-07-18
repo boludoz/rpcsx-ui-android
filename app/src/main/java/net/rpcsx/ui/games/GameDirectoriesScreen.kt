@@ -89,7 +89,8 @@ fun GameDirectoriesScreen(
                 .fillMaxSize()
                 .padding(contentPadding)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 100.dp)
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
 
