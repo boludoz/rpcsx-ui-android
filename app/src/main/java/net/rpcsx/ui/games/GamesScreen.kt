@@ -677,7 +677,7 @@ fun GamesScreen(navigateToGameSettings: (String) -> Unit = {}) {
         } else {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 160.dp),
-                contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 100.dp),
+                contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = net.rpcsx.ui.navigation.LocalDockPadding.current),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxSize()

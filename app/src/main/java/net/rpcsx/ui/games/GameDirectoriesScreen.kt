@@ -90,7 +90,7 @@ fun GameDirectoriesScreen(
                 .padding(contentPadding)
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 100.dp)
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
 

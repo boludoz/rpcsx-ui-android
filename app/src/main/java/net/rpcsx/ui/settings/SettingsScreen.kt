@@ -278,7 +278,7 @@ fun AdvancedSettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
-            contentPadding = PaddingValues(bottom = 100.dp)
+            contentPadding = PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
             items(filteredKeys, key = { it.first }) { (itemPath, itemObject) ->
                 val key = itemPath.substringAfterLast("@@")
@@ -876,7 +876,7 @@ fun ControllerSettings(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
-            contentPadding = PaddingValues(bottom = 100.dp)
+            contentPadding = PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))

@@ -69,6 +69,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -126,6 +131,8 @@ import net.rpcsx.utils.FileUtil
 import net.rpcsx.utils.GameConfig
 import net.rpcsx.utils.RpcsxUpdater
 import org.json.JSONObject
+
+val LocalDockPadding = compositionLocalOf { 0.dp }
 
 @Preview
 @Composable
@@ -252,12 +259,16 @@ fun AppNavHost() {
         settings.value = JSONObject(RPCSX.instance.settingsGet(""))
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        NavHost(
-            navController = navController,
-            startDestination = "games",
-            modifier = Modifier.fillMaxSize()
-        ) {
+    var dockHeight by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
+
+    CompositionLocalProvider(LocalDockPadding provides dockHeight) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            NavHost(
+                navController = navController,
+                startDestination = "games",
+                modifier = Modifier.fillMaxSize()
+            ) {
             composable(
                 route = "games"
             ) {
@@ -653,51 +664,57 @@ fun AppNavHost() {
         unwrapSetting(settings.value)
     }
 
-        if (showDock) {
-            FloatingDock(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-                    .navigationBarsPadding(),
-                currentRoute = currentRoute ?: "games",
-                onNavigateToGames = {
-                    navController.navigate("games") {
-                        popUpTo("games") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onNavigateToSettings = {
-                    navController.navigate("settings") {
-                        popUpTo("games") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onNavigateToControls = {
-                    navController.navigate("controls") {
-                        popUpTo("games") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onNavigateToDirectories = {
-                    navController.navigate("game_directories") {
-                        popUpTo("games") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onNavigateToUsers = {
-                    navController.navigate("users") {
-                        popUpTo("games") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onAddGameFile = { installPkgLauncher.launch("*/*") },
-                onAddGameFolder = { gameFolderPickerLauncher.launch(null) }
-            )
+            if (showDock) {
+                FloatingDock(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp)
+                        .navigationBarsPadding()
+                        .onGloballyPositioned { coordinates ->
+                            with(density) {
+                                dockHeight = coordinates.size.height.toDp() + 16.dp
+                            }
+                        },
+                    currentRoute = currentRoute ?: "games",
+                    onNavigateToGames = {
+                        navController.navigate("games") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToSettings = {
+                        navController.navigate("settings") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToControls = {
+                        navController.navigate("controls") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToDirectories = {
+                        navController.navigate("game_directories") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToUsers = {
+                        navController.navigate("users") {
+                            popUpTo("games") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onAddGameFile = { installPkgLauncher.launch("*/*") },
+                    onAddGameFolder = { gameFolderPickerLauncher.launch(null) }
+                )
+            }
         }
     }
 }
