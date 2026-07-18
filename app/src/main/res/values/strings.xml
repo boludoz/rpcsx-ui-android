@@ -145,6 +145,14 @@
     <string name="touchpad">Touchpad</string>
     <string name="touchpad_port">Touchpad port</string>
     <string name="touchpad_port_desc">Which player port the touch overlay controls. It shares the port with any controller assigned to it.</string>
+    <string name="touchpad_auto_hide">Auto-hide Touchpad</string>
+    <string name="touchpad_auto_hide_desc">Automatically hide the touchpad after a period of inactivity.</string>
+    <string name="never">Never</string>
+    <string name="seconds_2">2 seconds</string>
+    <string name="seconds_5">5 seconds</string>
+    <string name="seconds_10">10 seconds</string>
+    <string name="seconds_15">15 seconds</string>
+    <string name="seconds_30">30 seconds</string>
     <string name="controller_port">Port</string>
     <string name="users">Users</string>
     <string name="view_internal_dir">View Internal Directory</string>

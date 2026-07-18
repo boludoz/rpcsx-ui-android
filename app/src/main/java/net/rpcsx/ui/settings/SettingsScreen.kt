@@ -957,6 +957,38 @@ fun ControllerSettings(
                     }
                 )
             }
+
+            item {
+                val context = LocalContext.current
+                var autoHideSeconds by remember {
+                    mutableStateOf(
+                        ((GeneralSettings["touchpad_auto_hide_seconds"] as? Int) ?: 5)
+                    )
+                }
+                val values = listOf(
+                    context.getString(R.string.never),
+                    context.getString(R.string.seconds_2),
+                    context.getString(R.string.seconds_5),
+                    context.getString(R.string.seconds_10),
+                    context.getString(R.string.seconds_15),
+                    context.getString(R.string.seconds_30)
+                )
+                val secondsMap = listOf(0, 2, 5, 10, 15, 30)
+                val currentLabel = values[secondsMap.indexOf(autoHideSeconds).coerceIn(0, secondsMap.size - 1)]
+                SingleSelectionDialog(
+                    title = stringResource(R.string.touchpad_auto_hide),
+                    subtitle = { Text(stringResource(R.string.touchpad_auto_hide_desc)) },
+                    icon = null,
+                    currentValue = currentLabel,
+                    values = values,
+                    onValueChange = { value ->
+                        val idx = values.indexOf(value).coerceIn(0, values.size - 1)
+                        val secs = secondsMap[idx]
+                        autoHideSeconds = secs
+                        GeneralSettings["touchpad_auto_hide_seconds"] = secs
+                    }
+                )
+            }
         }
     }
 }

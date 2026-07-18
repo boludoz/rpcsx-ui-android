@@ -44,6 +44,50 @@ class RPCSXActivity : Activity() {
     private val usesAxisR2 = mutableMapOf<Int, Boolean>()
 
     private var overlayAutoHidden = false
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val hideOverlayRunnable = Runnable {
+        binding.padOverlay.animate()
+            .alpha(0f)
+            .setDuration(300)
+            .withEndAction {
+                binding.padOverlay.isInvisible = true
+            }
+            .start()
+    }
+
+    private fun showOverlayAndResetTimer() {
+        val autoHideSecs = (GeneralSettings["touchpad_auto_hide_seconds"] as? Int) ?: 5
+
+        if (binding.padOverlay.isInvisible || binding.padOverlay.alpha < 1f) {
+            binding.padOverlay.isInvisible = false
+            binding.padOverlay.animate()
+                .alpha(1f)
+                .setDuration(150)
+                .start()
+        }
+
+        handler.removeCallbacks(hideOverlayRunnable)
+
+        if (autoHideSecs > 0) {
+            handler.postDelayed(hideOverlayRunnable, autoHideSecs * 1000L)
+        }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        showOverlayAndResetTimer()
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        showOverlayAndResetTimer()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        handler.removeCallbacks(hideOverlayRunnable)
+    }
+
     private var bootThread: Thread? = null
     // Each player slot has its own independent button mapping; cache lazily
     // since it's read on every key event but only changes via Settings.
@@ -97,11 +141,6 @@ class RPCSXActivity : Activity() {
         registerGamepadListener()
         updateOrientationForWindowMode()
 
-        binding.oscToggle.setOnClickListener {
-            binding.padOverlay.isInvisible = !binding.padOverlay.isInvisible
-            overlayAutoHidden = false
-            binding.oscToggle.setImageResource(if (binding.padOverlay.isInvisible) R.drawable.ic_osc_off else R.drawable.ic_show_osc)
-        }
 
         // The overlay and a physical slot-0 controller both target the same
         // native pad, so route the overlay's touches through sendPadData
@@ -239,12 +278,11 @@ class RPCSXActivity : Activity() {
     private fun applyOverlayAutoVisibility(hasGamepad: Boolean) {
         if (hasGamepad && !binding.padOverlay.isInvisible) {
             binding.padOverlay.isInvisible = true
-            binding.oscToggle.setImageResource(R.drawable.ic_osc_off)
             overlayAutoHidden = true
         } else if (!hasGamepad && overlayAutoHidden) {
             binding.padOverlay.isInvisible = false
-            binding.oscToggle.setImageResource(R.drawable.ic_show_osc)
             overlayAutoHidden = false
+            showOverlayAndResetTimer()
         }
     }
 

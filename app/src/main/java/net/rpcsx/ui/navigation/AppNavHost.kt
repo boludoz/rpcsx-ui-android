@@ -27,14 +27,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -190,7 +193,8 @@ fun AppNavHost() {
         GamesDestination(
             navigateToSettings = { },
             navigateToControls = { },
-            drawerState = drawerState
+            drawerState = drawerState,
+            navigateToUsers = { }
         )
 
         return
@@ -215,7 +219,8 @@ fun AppNavHost() {
                 navigateToDirectories = { navigateTo("game_directories") },
                 navigateToGameSettings = { path ->
                     navigateTo("game_settings/${Uri.encode(path)}")
-                }
+                },
+                navigateToUsers = { navigateTo("users") }
             )
         }
 
@@ -582,7 +587,8 @@ fun GamesDestination(
     navigateToControls: () -> Unit,
     drawerState: androidx.compose.material3.DrawerState,
     navigateToDirectories: () -> Unit = {},
-    navigateToGameSettings: (String) -> Unit = {}
+    navigateToGameSettings: (String) -> Unit = {},
+    navigateToUsers: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -747,27 +753,6 @@ fun GamesDestination(
                     )
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.settings)) },
-                        selected = false,
-                        icon = { Icon(painter = painterResource(id = R.drawable.ic_settings), null) },
-                        onClick = navigateToSettings
-                    )
-
-                    NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.controls)) },
-                        selected = false,
-                        icon = { Icon(painterResource(id = R.drawable.gamepad), null) },
-                        onClick = navigateToControls
-                    )
-
-                    NavigationDrawerItem(
-                        label = { Text(stringResource(R.string.manage_directories)) },
-                        selected = false,
-                        icon = { Icon(painterResource(id = R.drawable.hard_drive), contentDescription = null) },
-                        onClick = navigateToDirectories
-                    )
-
-                    NavigationDrawerItem(
                         label = { Text(stringResource(R.string.device_info)) },
                         selected = false,
                         icon = { Icon(painterResource(R.drawable.perm_device_information), contentDescription = null) },
@@ -831,7 +816,6 @@ fun GamesDestination(
         }
     ) {
         Scaffold(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
             topBar = {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -855,10 +839,22 @@ fun GamesDestination(
                                 }
                             }
                         }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_menu),
-                                contentDescription = "Open menu"
-                            )
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    val firstChar = UserRepository.getUsername(activeUser)?.firstOrNull()?.uppercase() ?: "U"
+                                    Text(
+                                        text = firstChar,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    )
+                                }
+                            }
                         }
                     },
                     actions = {
@@ -879,7 +875,26 @@ fun GamesDestination(
             floatingActionButton = {
                 DropUpFloatingActionButton(installPkgLauncher, gameFolderPickerLauncher)
             },
-        ) { innerPadding -> Column(modifier = Modifier.padding(innerPadding)) { GamesScreen(navigateToGameSettings) } }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                GamesScreen(navigateToGameSettings)
+
+                FloatingDock(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp)
+                        .navigationBarsPadding(),
+                    onNavigateToSettings = navigateToSettings,
+                    onNavigateToControls = navigateToControls,
+                    onNavigateToDirectories = navigateToDirectories,
+                    onNavigateToUsers = navigateToUsers
+                )
+            }
+        }
     }
 }
 
@@ -958,3 +973,81 @@ private fun LabeledFabAction(
         }
     }
 }
+
+@Composable
+fun FloatingDock(
+    modifier: Modifier = Modifier,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToControls: () -> Unit,
+    onNavigateToDirectories: () -> Unit,
+    onNavigateToUsers: () -> Unit
+) {
+    Surface(
+        modifier = modifier
+            .shadow(12.dp, RoundedCornerShape(28.dp)),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
+        tonalElevation = 8.dp,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Games (Selected item since we are on the main Games list)
+            IconButton(
+                onClick = { /* Already here */ },
+                modifier = Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.hard_drive),
+                    contentDescription = "Games",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Controls
+            IconButton(onClick = onNavigateToControls) {
+                Icon(
+                    painter = painterResource(id = R.drawable.gamepad),
+                    contentDescription = "Controls",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Directories
+            IconButton(onClick = onNavigateToDirectories) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_folder),
+                    contentDescription = "Directories",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Users
+            IconButton(onClick = onNavigateToUsers) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_person),
+                    contentDescription = "Users",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Settings
+            IconButton(onClick = onNavigateToSettings) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_settings),
+                    contentDescription = "Settings",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
