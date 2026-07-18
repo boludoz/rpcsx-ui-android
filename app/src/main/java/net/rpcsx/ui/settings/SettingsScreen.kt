@@ -280,8 +280,7 @@ fun AdvancedSettingsScreen(
         ) {
             items(filteredKeys, key = { it.first }) { (itemPath, itemObject) ->
                 val key = itemPath.substringAfterLast("@@")
-                if (itemObject != null) {
-                    when (val type =
+                when (val type =
                         if (itemObject.has("type")) itemObject.getString("type") else null) {
                         null -> {
                             RegularPreference(
@@ -542,7 +541,6 @@ fun AdvancedSettingsScreen(
                             Log.e("Main", "Unimplemented setting type $type")
                         }
                     }
-                }
             }
 
             if (showInstallRpcsx && path.isEmpty()) {

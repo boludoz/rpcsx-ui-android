@@ -77,10 +77,10 @@ class PadOverlayDpad(
 
     override fun contains(x: Int, y: Int) = area.contains(x, y)
 
-    override fun startDragging(x: Int, y: Int) {
+    override fun startDragging(startX: Int, startY: Int) {
         dragging = true
-        offsetX = x - area.left
-        offsetY = y - area.top
+        offsetX = startX - area.left
+        offsetY = startY - area.top
     }
 
     override fun updatePosition(x: Int, y: Int, force: Boolean) {
