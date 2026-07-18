@@ -191,7 +191,7 @@ fun AppNavHost() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showDock = currentRoute in listOf("games", "settings", "controls", "game_directories", "users")
+    val showDock = currentRoute in listOf("games", "settings", "controls", "game_directories")
 
     val installPkgLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -1060,20 +1060,6 @@ fun FloatingDock(
                 )
             }
 
-            // Users
-            IconButton(
-                onClick = onNavigateToUsers,
-                modifier = if (currentRoute == "users") {
-                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
-                } else Modifier
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_person),
-                    contentDescription = "Users",
-                    tint = if (currentRoute == "users") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
 
             // Settings
             IconButton(
