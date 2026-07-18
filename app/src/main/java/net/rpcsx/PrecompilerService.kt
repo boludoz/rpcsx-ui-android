@@ -79,7 +79,7 @@ class PrecompilerService : Service() {
             if (isFw)
                 RPCSX.instance.installFw(fd, installProgress)
             else
-                RPCSX.instance.install(fd, installProgress)
+                RPCSX.instance.install(fd, installProgress, uri.toString())
 
         if (!installResult) {
             try {

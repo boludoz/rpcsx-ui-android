@@ -26,14 +26,16 @@ data class GameInfo @Keep constructor(
     val path: String,
     var name: String? = null,
     var iconPath: String? = null,
-    var gameFlags: Int = 0
+    var gameFlags: Int = 0,
+    var sourceUri: String? = null
 )
 
 data class GameInfoStore(
     val path: String,
     val name: MutableState<String?> = mutableStateOf(null),
     val iconPath: MutableState<String?> = mutableStateOf(null),
-    val gameFlags: MutableIntState = mutableIntStateOf(0)
+    val gameFlags: MutableIntState = mutableIntStateOf(0),
+    val sourceUri: MutableState<String?> = mutableStateOf(null)
 )
 
 enum class GameProgressType {
@@ -73,11 +75,12 @@ private fun toStore(info: GameInfo) =
         info.path,
         mutableStateOf(info.name),
         mutableStateOf(info.iconPath),
-        mutableIntStateOf(info.gameFlags)
+        mutableIntStateOf(info.gameFlags),
+        mutableStateOf(info.sourceUri)
     )
 
 private fun toInfo(store: GameInfoStore) =
-    GameInfo(store.path, store.name.value, store.iconPath.value, store.gameFlags.intValue)
+    GameInfo(store.path, store.name.value, store.iconPath.value, store.gameFlags.intValue, store.sourceUri.value)
 
 class GameRepository {
     private val games = mutableStateListOf<Game>()

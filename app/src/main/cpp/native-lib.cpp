@@ -39,7 +39,7 @@ struct RPCSXApi {
   bool (*installFw)(JNIEnv *env, int fd, long progressId);
   bool (*isInstallableFile)(jint fd);
   jstring (*getDirInstallPath)(JNIEnv *env, jint fd);
-  bool (*install)(JNIEnv *env, int fd, long progressId);
+  bool (*install)(JNIEnv *env, int fd, long progressId, std::string_view gamePath);
   bool (*installKey)(JNIEnv *env, int fd, long progressId,
                      std::string_view gamePath);
   std::string (*systemInfo)();
@@ -266,8 +266,8 @@ Java_net_rpcsx_RPCSX_getDirInstallPath(JNIEnv *env, jobject, jint fd) {
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_net_rpcsx_RPCSX_install(JNIEnv *env, jobject, jint fd, jlong progressId) {
-  return rpcsxLib.install(env, fd, progressId);
+Java_net_rpcsx_RPCSX_install(JNIEnv *env, jobject, jint fd, jlong progressId, jstring jgamePath) {
+  return rpcsxLib.install(env, fd, progressId, unwrap(env, jgamePath));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_installKey(

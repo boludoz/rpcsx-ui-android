@@ -23,6 +23,8 @@ import net.rpcsx.overlay.State
 import net.rpcsx.utils.GameConfig
 import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.InputBindingPrefs
+import android.net.Uri
+import java.io.File
 import kotlin.concurrent.thread
 import kotlin.math.abs
 
@@ -140,13 +142,39 @@ class RPCSXActivity : Activity() {
             Log.w("RPCSX State", RPCSX.getState().name)
             RPCSX.activeGame.value = gamePath
 
-            val bootResult = RPCSX.boot(gamePath)
-            if (bootResult != BootResult.NoErrors) {
-                AlertDialogQueue.showDialog(
-                    getString(R.string.failed_to_boot),
-                    getString(R.string.error_with_msg, bootResult.name)
-                )
-                finish()
+            val sourceUri = GameRepository.find(gamePath)?.info?.sourceUri?.value
+            var pfd: android.os.ParcelFileDescriptor? = null
+            val finalBootPath = if (sourceUri != null) {
+                try {
+                    pfd = contentResolver.openFileDescriptor(Uri.parse(sourceUri), "r")
+                    if (pfd != null) {
+                        "/proc/self/fd/${pfd.fd}"
+                    } else {
+                        gamePath
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    gamePath
+                }
+            } else {
+                gamePath
+            }
+
+            try {
+                val bootResult = RPCSX.boot(finalBootPath)
+                if (bootResult != BootResult.NoErrors) {
+                    AlertDialogQueue.showDialog(
+                        getString(R.string.failed_to_boot),
+                        getString(R.string.error_with_msg, bootResult.name)
+                    )
+                    finish()
+                }
+            } finally {
+                try {
+                    pfd?.close()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
