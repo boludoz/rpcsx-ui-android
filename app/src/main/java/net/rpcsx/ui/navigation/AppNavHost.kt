@@ -29,10 +29,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -872,10 +874,7 @@ fun GamesDestination(
                         }
                     }
                 )
-            },
-            floatingActionButton = {
-                DropUpFloatingActionButton(installPkgLauncher, gameFolderPickerLauncher)
-            },
+            }
         ) { innerPadding ->
             Box(
                 modifier = Modifier
@@ -892,108 +891,39 @@ fun GamesDestination(
                     onNavigateToSettings = navigateToSettings,
                     onNavigateToControls = navigateToControls,
                     onNavigateToDirectories = navigateToDirectories,
-                    onNavigateToUsers = navigateToUsers
+                    onNavigateToUsers = navigateToUsers,
+                    onAddGameFile = { installPkgLauncher.launch("*/*") },
+                    onAddGameFolder = { gameFolderPickerLauncher.launch(null) }
                 )
             }
         }
     }
 }
 
-@Composable
-fun DropUpFloatingActionButton(
-    installPkgLauncher: ActivityResultLauncher<String>,
-    gameFolderPickerLauncher: ActivityResultLauncher<Uri?>
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier.padding(16.dp),
-        contentAlignment = androidx.compose.ui.Alignment.BottomEnd
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = androidx.compose.ui.Alignment.End
-        ) {
-            AnimatedVisibility(
-                visible = expanded,
-                enter = androidx.compose.animation.expandVertically(
-                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                ),
-                exit = androidx.compose.animation.shrinkVertically(
-                    animationSpec = tween(200, easing = FastOutSlowInEasing)
-                )
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    LabeledFabAction(
-                        label = stringResource(R.string.select_game_file),
-                        icon = painterResource(id = R.drawable.ic_description),
-                        onClick = { installPkgLauncher.launch("*/*"); expanded = false }
-                    )
-                    LabeledFabAction(
-                        label = stringResource(R.string.select_game_folder),
-                        icon = painterResource(id = R.drawable.ic_folder),
-                        onClick = { gameFolderPickerLauncher.launch(null); expanded = false }
-                    )
-                }
-            }
-
-            FloatingActionButton(
-                onClick = { expanded = !expanded }
-            ) {
-                Icon(painter = painterResource(id = R.drawable.ic_add), contentDescription = "Add")
-            }
-        }
-    }
-}
-
-@Composable
-private fun LabeledFabAction(
-    label: String,
-    icon: androidx.compose.ui.graphics.painter.Painter,
-    onClick: () -> Unit
-) {
-    Row(
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = MaterialTheme.colorScheme.secondaryContainer
-        ) {
-            Text(
-                text = label,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-            )
-        }
-        FloatingActionButton(
-            onClick = onClick,
-            containerColor = MaterialTheme.colorScheme.secondary
-        ) {
-            Icon(painter = icon, contentDescription = label)
-        }
-    }
-}
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FloatingDock(
     modifier: Modifier = Modifier,
     onNavigateToSettings: () -> Unit,
     onNavigateToControls: () -> Unit,
     onNavigateToDirectories: () -> Unit,
-    onNavigateToUsers: () -> Unit
+    onNavigateToUsers: () -> Unit,
+    onAddGameFile: () -> Unit,
+    onAddGameFolder: () -> Unit
 ) {
+    var showBottomSheet by remember { mutableStateOf(false) }
+
     Surface(
         modifier = modifier
-            .shadow(12.dp, RoundedCornerShape(28.dp)),
-        shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
-        tonalElevation = 8.dp,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f))
+            .shadow(16.dp, RoundedCornerShape(32.dp)),
+        shape = RoundedCornerShape(32.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
+        tonalElevation = 0.dp,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Games (Selected item since we are on the main Games list)
@@ -1015,6 +945,19 @@ fun FloatingDock(
                     painter = painterResource(id = R.drawable.gamepad),
                     contentDescription = "Controls",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // Add Game (Integrated directly into the dock)
+            IconButton(
+                onClick = { showBottomSheet = true },
+                modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_add),
+                    contentDescription = "Add Game",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -1047,6 +990,50 @@ fun FloatingDock(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
+            }
+        }
+    }
+
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = rememberModalBottomSheetState(),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp)
+                    .navigationBarsPadding(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.add),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.select_game_file)) },
+                    leadingContent = { Icon(painterResource(id = R.drawable.ic_description), null) },
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            showBottomSheet = false
+                            onAddGameFile()
+                        }
+                )
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.select_game_folder)) },
+                    leadingContent = { Icon(painterResource(id = R.drawable.ic_folder), null) },
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            showBottomSheet = false
+                            onAddGameFolder()
+                        }
+                )
+                Spacer(Modifier.height(16.dp))
             }
         }
     }
