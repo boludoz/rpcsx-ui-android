@@ -97,6 +97,7 @@ import kotlinx.coroutines.launch
 import net.rpcsx.BuildConfig
 import net.rpcsx.EmulatorState
 import net.rpcsx.FirmwareRepository
+import net.rpcsx.GameDirectoryKind
 import net.rpcsx.GameDirectoryRepository
 import net.rpcsx.PrecompilerService
 import net.rpcsx.PrecompilerServiceAction
@@ -127,7 +128,6 @@ import net.rpcsx.ui.settings.GraphicsSettings
 import net.rpcsx.ui.settings.PlayerControllerSettings
 import net.rpcsx.ui.settings.SettingsScreen
 import net.rpcsx.ui.user.UsersScreen
-import net.rpcsx.utils.FileUtil
 import net.rpcsx.utils.GameConfig
 import net.rpcsx.utils.RpcsxUpdater
 import org.json.JSONObject
@@ -228,8 +228,20 @@ fun AppNavHost() {
             uri?.let {
                 val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 context.contentResolver.takePersistableUriPermission(it, takeFlags)
-                GameDirectoryRepository.add(it)
-                FileUtil.installPackages(context, it)
+                GameDirectoryRepository.add(it, GameDirectoryKind.Games)
+                GameDirectoryRepository.scanGameDirectory(context, it)
+            }
+        }
+    )
+
+    val isoDirPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree(),
+        onResult = { uri: Uri? ->
+            uri?.let {
+                val takeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                context.contentResolver.takePersistableUriPermission(it, takeFlags)
+                GameDirectoryRepository.add(it, GameDirectoryKind.Iso)
+                GameDirectoryRepository.scanIsoDirectory(context, it)
             }
         }
     )
@@ -712,7 +724,8 @@ fun AppNavHost() {
                         }
                     },
                     onAddGameFile = { installPkgLauncher.launch("*/*") },
-                    onAddGameFolder = { gameFolderPickerLauncher.launch(null) }
+                    onAddGameFolder = { gameFolderPickerLauncher.launch(null) },
+                    onAddIsoFolder = { isoDirPickerLauncher.launch(null) }
                 )
             }
         }
@@ -815,11 +828,37 @@ fun GamesDestination(
 
                     NavigationDrawerItem(
                         label = {
-                            Text(
-                                "${stringResource(R.string.firmware)}: ${
-                                    FirmwareRepository.version.value ?: stringResource(R.string.none)
-                                }"
-                            )
+                            val progressChannel = FirmwareRepository.progressChannel
+                            val progress = ProgressRepository.getItem(progressChannel.value)
+                            val progressValue = progress?.value?.value
+                            val maxValue = progress?.value?.max
+                            val progressMessage = progress?.value?.message?.value
+
+                            Column {
+                                Text(
+                                    "${stringResource(R.string.firmware)}: ${
+                                        FirmwareRepository.version.value ?: stringResource(R.string.none)
+                                    }"
+                                )
+                                // A long PUP install shows only a small spinner
+                                // badge otherwise, which can look like the app
+                                // froze - surface the actual percentage/message.
+                                if (progressValue != null && maxValue != null) {
+                                    val statusText = if (maxValue.longValue > 0L) {
+                                        val percent = (progressValue.longValue * 100 / maxValue.longValue).coerceIn(0, 100)
+                                        progressMessage ?: "$percent%"
+                                    } else {
+                                        progressMessage ?: stringResource(R.string.installing_dir)
+                                    }
+                                    Text(
+                                        text = statusText,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
                         },
                         selected = false,
                         icon = { Icon(painterResource(R.drawable.hard_drive), contentDescription = null) },
@@ -828,7 +867,6 @@ fun GamesDestination(
                             val progress = ProgressRepository.getItem(progressChannel.value)
                             val progressValue = progress?.value?.value
                             val maxValue = progress?.value?.max
-                            Log.e("Main", "Update $progressChannel, $progress")
                             if (progressValue != null && maxValue != null) {
                                 if (maxValue.longValue != 0L) {
                                     CircularProgressIndicator(
@@ -1002,7 +1040,8 @@ fun FloatingDock(
     onNavigateToDirectories: () -> Unit,
     onNavigateToUsers: () -> Unit,
     onAddGameFile: () -> Unit,
-    onAddGameFolder: () -> Unit
+    onAddGameFolder: () -> Unit,
+    onAddIsoFolder: () -> Unit
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -1132,6 +1171,17 @@ fun FloatingDock(
                         .clickable {
                             showBottomSheet = false
                             onAddGameFolder()
+                        }
+                )
+
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.select_iso_folder)) },
+                    leadingContent = { Icon(painterResource(id = R.drawable.ic_folder), null) },
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            showBottomSheet = false
+                            onAddIsoFolder()
                         }
                 )
                 Spacer(Modifier.height(16.dp))

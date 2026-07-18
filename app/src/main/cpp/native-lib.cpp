@@ -27,6 +27,11 @@ struct RPCSXApi {
   bool (*startMainThreadProcessor)(JNIEnv *env);
   bool (*collectGameInfo)(JNIEnv *env, std::string_view rootDir,
                           long progressId);
+  bool (*collectGameInfoFromUri)(JNIEnv *env, std::string_view treeUri,
+                                 long progressId);
+  bool (*collectIsoInfoFromUri)(JNIEnv *env, std::string_view treeUri,
+                                long progressId);
+  jstring (*resolveTreeUriToPath)(JNIEnv *env, std::string_view treeUri);
   void (*shutdown)();
   int (*boot)(std::string_view path_);
   int (*getState)();
@@ -92,6 +97,9 @@ struct RPCSXLibrary : RPCSXApi {
     result.processCompilationQueue = reinterpret_cast<decltype(processCompilationQueue)>(dlsym(handle, "_rpcsx_processCompilationQueue"));
     result.startMainThreadProcessor = reinterpret_cast<decltype(startMainThreadProcessor)>(dlsym(handle, "_rpcsx_startMainThreadProcessor"));
     result.collectGameInfo = reinterpret_cast<decltype(collectGameInfo)>(dlsym(handle, "_rpcsx_collectGameInfo"));
+    result.collectGameInfoFromUri = reinterpret_cast<decltype(collectGameInfoFromUri)>(dlsym(handle, "_rpcsx_collectGameInfoFromUri"));
+    result.collectIsoInfoFromUri = reinterpret_cast<decltype(collectIsoInfoFromUri)>(dlsym(handle, "_rpcsx_collectIsoInfoFromUri"));
+    result.resolveTreeUriToPath = reinterpret_cast<decltype(resolveTreeUriToPath)>(dlsym(handle, "_rpcsx_resolveTreeUriToPath"));
     result.shutdown = reinterpret_cast<decltype(shutdown)>(dlsym(handle, "_rpcsx_shutdown"));
     result.boot = reinterpret_cast<decltype(boot)>(dlsym(handle, "_rpcsx_boot"));
     result.getState = reinterpret_cast<decltype(getState)>(dlsym(handle, "_rpcsx_getState"));
@@ -202,6 +210,37 @@ Java_net_rpcsx_RPCSX_startMainThreadProcessor(JNIEnv *env, jobject) {
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_collectGameInfo(
     JNIEnv *env, jobject, jstring jrootDir, jlong progressId) {
   return rpcsxLib.collectGameInfo(env, unwrap(env, jrootDir), progressId);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_net_rpcsx_RPCSX_collectGameInfoFromUri(JNIEnv *env, jobject,
+                                            jstring jtreeUri,
+                                            jlong progressId) {
+  if (rpcsxLib.collectGameInfoFromUri == nullptr) {
+    return false;
+  }
+  return rpcsxLib.collectGameInfoFromUri(env, unwrap(env, jtreeUri),
+                                         progressId);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_net_rpcsx_RPCSX_collectIsoInfoFromUri(JNIEnv *env, jobject,
+                                           jstring jtreeUri,
+                                           jlong progressId) {
+  if (rpcsxLib.collectIsoInfoFromUri == nullptr) {
+    return false;
+  }
+  return rpcsxLib.collectIsoInfoFromUri(env, unwrap(env, jtreeUri),
+                                        progressId);
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_net_rpcsx_RPCSX_resolveTreeUriToPath(JNIEnv *env, jobject,
+                                          jstring jtreeUri) {
+  if (rpcsxLib.resolveTreeUriToPath == nullptr) {
+    return nullptr;
+  }
+  return rpcsxLib.resolveTreeUriToPath(env, unwrap(env, jtreeUri));
 }
 
 extern "C" JNIEXPORT void JNICALL Java_net_rpcsx_RPCSX_shutdown(JNIEnv *env,

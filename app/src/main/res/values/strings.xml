@@ -19,12 +19,14 @@
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">RPCSX Download Channel</string>
     <string name="select_game_file">Install PKG, ISO or RAP</string>
-    <string name="select_game_folder">Install Folder</string>
+    <string name="select_game_folder">Add Game Folder</string>
+    <string name="select_iso_folder">Add ISO Directory</string>
     <string name="settings">Settings</string>
     <string name="ui_update_channel">RPCSX UI Android Update Channel</string>
 
     <!-- FileUtil -->
-    <string name="installing_dir">Installing directory</string>
+    <string name="installing_dir">Scanning directory</string>
+    <string name="directory_not_resolvable">This folder cannot be used in place. Pick a folder on local device storage, and grant \"Allow access to manage all files\" when prompted.</string>
 
     <!-- GamesScreen -->
     <string name="current_and_new_version">Current version: %1$s\nNew version: %2$s</string>
@@ -130,9 +132,11 @@
     <string name="reset_game_settings_desc">Removes this game\'s custom config and key mappings</string>
     <string name="reset_game_settings_done">Game settings reset</string>
     <string name="ask_if_reset_game">Reset all custom settings for %1$s?</string>
-    <string name="no_directories">No directories added yet. Add a game folder to see it here.</string>
+    <string name="no_directories">No directories added yet. Add a game folder or an ISO directory to see it here.</string>
     <string name="rescan_directory">Rescan</string>
     <string name="remove_directory">Remove</string>
+    <string name="directory_kind_games">Game folder</string>
+    <string name="directory_kind_iso">ISO directory</string>
     <string name="no_activity_to_handle_action">No activity found to handle this action</string>
     <string name="output_scaling">Output Scaling</string>
     <string name="perform_input">Perform Input</string>

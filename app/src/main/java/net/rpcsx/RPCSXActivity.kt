@@ -183,7 +183,9 @@ class RPCSXActivity : Activity() {
 
             val sourceUri = GameRepository.find(gamePath)?.info?.sourceUri?.value
             var pfd: android.os.ParcelFileDescriptor? = null
-            val finalBootPath = if (sourceUri != null) {
+            val finalBootPath = if (sourceUri != null && Uri.parse(sourceUri).scheme == "content") {
+                // SAF-backed source (picked via file picker): boot from the fd,
+                // since the content:// URI itself is not a bootable path.
                 try {
                     pfd = contentResolver.openFileDescriptor(Uri.parse(sourceUri), "r")
                     if (pfd != null) {
@@ -195,6 +197,10 @@ class RPCSXActivity : Activity() {
                     e.printStackTrace()
                     gamePath
                 }
+            } else if (!sourceUri.isNullOrEmpty()) {
+                // Real filesystem path (in-place ISO directory scan): boot
+                // directly, no fd indirection needed.
+                sourceUri
             } else {
                 gamePath
             }

@@ -35,9 +35,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
 import net.rpcsx.GameDirectory
+import net.rpcsx.GameDirectoryKind
 import net.rpcsx.GameDirectoryRepository
 import net.rpcsx.R
-import net.rpcsx.utils.FileUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,7 +97,13 @@ fun GameDirectoriesScreen(
             items(directories, key = { it.uri }) { dir ->
                 GameDirectoryRow(
                     dir = dir,
-                    onRescan = { FileUtil.installPackages(context, Uri.parse(dir.uri)) },
+                    onRescan = {
+                        val uri = Uri.parse(dir.uri)
+                        when (dir.kind) {
+                            GameDirectoryKind.Games -> GameDirectoryRepository.scanGameDirectory(context, uri)
+                            GameDirectoryKind.Iso -> GameDirectoryRepository.scanIsoDirectory(context, uri)
+                        }
+                    },
                     onRemove = {
                         try {
                             context.contentResolver.releasePersistableUriPermission(
@@ -106,7 +112,7 @@ fun GameDirectoriesScreen(
                             )
                         } catch (_: Exception) {
                         }
-                        GameDirectoryRepository.remove(dir)
+                        GameDirectoryRepository.removeAndForget(dir)
                     }
                 )
             }
@@ -153,6 +159,16 @@ private fun GameDirectoryRow(
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stringResource(
+                        when (dir.kind) {
+                            GameDirectoryKind.Games -> R.string.directory_kind_games
+                            GameDirectoryKind.Iso -> R.string.directory_kind_iso
+                        }
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             IconButton(onClick = onRescan) {

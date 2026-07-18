@@ -85,6 +85,13 @@ class RPCSX {
     external fun multiPadData(playerIndex: Int, digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
     external fun getMaxVirtualPads(): Int
     external fun collectGameInfo(rootDir: String, progressId: Long): Boolean
+    // Resolves a SAF tree URI to a real filesystem path natively and scans it
+    // in place (no copy). Returns false if the URI cannot be resolved to a
+    // real, readable path (e.g. cloud storage) so the caller can show an
+    // explicit error instead of silently copying.
+    external fun collectGameInfoFromUri(treeUri: String, progressId: Long): Boolean
+    external fun collectIsoInfoFromUri(treeUri: String, progressId: Long): Boolean
+    external fun resolveTreeUriToPath(treeUri: String): String?
     external fun systemInfo(): String
     external fun settingsGet(path: String): String
     external fun settingsSet(path: String, value: String): Boolean

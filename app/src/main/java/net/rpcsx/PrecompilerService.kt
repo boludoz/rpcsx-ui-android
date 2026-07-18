@@ -7,6 +7,7 @@ import android.content.pm.ServiceInfo
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.IntentCompat
@@ -62,40 +63,55 @@ class PrecompilerService : Service() {
     }
 
     fun install(isFw: Boolean, uri: Uri, installProgress: Long): Boolean {
-        val descriptor = contentResolver.openAssetFileDescriptor(uri, "r")
-        val fd = descriptor?.parcelFileDescriptor?.fd
-
-        if (fd == null) {
-            try {
-                descriptor?.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
+        val descriptor = try {
+            contentResolver.openAssetFileDescriptor(uri, "r")
+        } catch (e: Throwable) {
+            Log.e("PrecompilerService", "openAssetFileDescriptor failed", e)
+            reportFailure(installProgress, e.message ?: "Cannot open file")
             return false
         }
 
-        val installResult =
-            if (isFw)
-                RPCSX.instance.installFw(fd, installProgress)
-            else
-                RPCSX.instance.install(fd, installProgress, uri.toString())
+        val fd = descriptor?.parcelFileDescriptor?.fd
 
-        if (!installResult) {
+        if (fd == null) {
+            try { descriptor?.close() } catch (e: Exception) { e.printStackTrace() }
+            reportFailure(installProgress, "Cannot open file descriptor")
+            return false
+        }
+
+        try {
+            val installResult =
+                if (isFw)
+                    RPCSX.instance.installFw(fd, installProgress)
+                else
+                    RPCSX.instance.install(fd, installProgress, uri.toString())
+
+            if (!installResult) {
+                reportFailure(installProgress, "Installation failed")
+            }
+
+            return installResult
+        } catch (e: Throwable) {
+            // Any Throwable across the JNI boundary here would otherwise kill
+            // the whole process. Report failure to the UI and return.
+            Log.e("PrecompilerService", "Native install threw", e)
+            reportFailure(installProgress, e.message ?: "Native install failed")
+            return false
+        } finally {
             try {
-                ProgressRepository.onProgressEvent(installProgress, -1, 0)
+                descriptor.close()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+    }
 
+    private fun reportFailure(installProgress: Long, message: String) {
         try {
-            descriptor.close()
-        } catch (e: Exception) {
+            ProgressRepository.onProgressEvent(installProgress, -1, 0, message)
+        } catch (e: Throwable) {
             e.printStackTrace()
         }
-
-        return true
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -127,8 +143,7 @@ class PrecompilerService : Service() {
             FirmwareRepository.progressChannel.value = installProgress
         } else {
             // Show a "processing" placeholder card in the game grid while the
-            // file (ISO/PKG) is copied/installed, mirroring the folder-add flow
-            // (FileUtil.installPackages). The placeholder is keyed to this
+            // file (ISO/PKG) is installed. The placeholder is keyed to this
             // progress and removed once it finishes (ProgressRepository.cancel
             // -> GameRepository.clearProgress); the real game is added by the
             // native collectGameInfo call inside install().
@@ -152,17 +167,26 @@ class PrecompilerService : Service() {
 
         thread {
             var installResult = false
-            if (uri != null) {
-                installResult = install(isFwInstall, uri, installProgress)
-            } else batch?.forEach { uri ->
-                // FIXME: create child progress
-                if (install(isFwInstall, uri, installProgress)) {
-                    installResult = true
+            try {
+                if (uri != null) {
+                    installResult = install(isFwInstall, uri, installProgress)
+                } else batch?.forEach { uri ->
+                    // FIXME: create child progress
+                    if (install(isFwInstall, uri, installProgress)) {
+                        installResult = true
+                    }
                 }
-            }
-
-            if (!installResult) {
-                stopSelf(startId)
+            } catch (e: Throwable) {
+                // Uncaught throwable on this service thread would otherwise
+                // kill the whole process even if the native install already
+                // succeeded (looks like a crash right at the end of the PUP
+                // install).
+                Log.e("PrecompilerService", "Install thread threw", e)
+                reportFailure(installProgress, e.message ?: "Install failed")
+            } finally {
+                if (!installResult) {
+                    stopSelf(startId)
+                }
             }
         }
 

@@ -116,6 +116,18 @@ class MainActivity : AppCompatActivity() {
                     RPCSX.instance.processCompilationQueue()
                 }
 
+                thread {
+                    // Persisted game/ISO directories are registered in place
+                    // (no copy), so re-scanning them at every launch is cheap.
+                    GameDirectoryRepository.directories.forEach { dir ->
+                        val uri = android.net.Uri.parse(dir.uri)
+                        when (dir.kind) {
+                            GameDirectoryKind.Games -> GameDirectoryRepository.scanGameDirectory(this, uri)
+                            GameDirectoryKind.Iso -> GameDirectoryRepository.scanIsoDirectory(this, uri)
+                        }
+                    }
+                }
+
                 GeneralSettings["rpcsx_update_status"] = true
                 if (rpcsxPrevLibrary != null) {
                     if (rpcsxLibrary != rpcsxPrevLibrary) {

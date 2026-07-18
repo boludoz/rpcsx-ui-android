@@ -225,6 +225,24 @@ class GameRepository {
             }
         }
 
+        // Drops games whose path or sourceUri falls under `directoryPath` from
+        // the list only (does not touch any files on disk). Used when a
+        // user-managed game/ISO directory is removed from Manage Directories.
+        fun removeByDirectory(directoryPath: String) {
+            synchronized(instance) {
+                val prefix = if (directoryPath.endsWith("/")) directoryPath else "$directoryPath/"
+                val removed = instance.games.removeIf { game ->
+                    val path = game.info.path
+                    val source = game.info.sourceUri.value
+                    (path.startsWith(prefix) || path == directoryPath) ||
+                        (source != null && (source.startsWith(prefix) || source == directoryPath))
+                }
+                if (removed) {
+                    save()
+                }
+            }
+        }
+
         fun find(path: String): Game? {
             synchronized(instance) {
                 return instance.games.find { game -> game.info.path == path }
