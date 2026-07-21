@@ -38,6 +38,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -604,10 +609,29 @@ fun SettingsScreen(
             }
         )
         
+        val lazyListState = rememberLazyListState()
+        val coroutineScope = rememberCoroutineScope()
+
         LazyColumn(
+            state = lazyListState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding),
+                .padding(contentPadding)
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (event.type == PointerEventType.Scroll) {
+                                val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+                                if (delta != 0f) {
+                                    coroutineScope.launch {
+                                        lazyListState.scrollBy(delta * 120f)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
             contentPadding = PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
             item {

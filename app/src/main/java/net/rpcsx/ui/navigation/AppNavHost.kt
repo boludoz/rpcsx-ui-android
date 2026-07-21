@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import net.rpcsx.GamepadRepository
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -27,8 +28,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.focusGroup
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.draw.shadow
@@ -1016,15 +1020,23 @@ fun GamesDestination(
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                if (drawerState.isClosed) {
-                                    drawerState.open()
-                                } else {
-                                    drawerState.close()
+                        val isGamepadConnected = GamepadRepository.slots.isNotEmpty() && FrameNavigationManager.isGamepadInputActive
+                        val isHeaderActive = isGamepadConnected && FrameNavigationManager.activeFrame == NavigationFrame.HEADER
+                        val isFrameFocused = isHeaderActive && FrameNavigationManager.focusLevel == FocusLevel.FRAME_LEVEL
+                        val isItemFocused = isHeaderActive && FrameNavigationManager.focusLevel == FocusLevel.ITEM_LEVEL
+
+                        IconButton(
+                            onClick = {
+                                scope.launch {
+                                    if (drawerState.isClosed) drawerState.open() else drawerState.close()
                                 }
-                            }
-                        }) {
+                            },
+                            modifier = Modifier
+                                .then(
+                                    if (isFrameFocused || isItemFocused) Modifier.border(3.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                    else Modifier
+                                )
+                        ) {
                             Surface(
                                 shape = CircleShape,
                                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -1086,53 +1098,85 @@ fun FloatingDock(
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        FrameNavigationManager.onPerformDockAction = { index ->
+            when (index) {
+                0 -> onNavigateToGames()
+                1 -> onNavigateToControls()
+                2 -> showBottomSheet = true
+                3 -> onNavigateToDirectories()
+                4 -> onNavigateToSettings()
+            }
+        }
+    }
+
+    val isGamepadConnected = GamepadRepository.slots.isNotEmpty() && FrameNavigationManager.isGamepadInputActive
+    val isDockActive = isGamepadConnected && FrameNavigationManager.activeFrame == NavigationFrame.BOTTOM_DOCK
+    val isDockFrameFocused = isDockActive && FrameNavigationManager.focusLevel == FocusLevel.FRAME_LEVEL
+    val isDockItemFocused = isDockActive && FrameNavigationManager.focusLevel == FocusLevel.ITEM_LEVEL
+
     Surface(
         modifier = modifier
             .shadow(16.dp, RoundedCornerShape(32.dp)),
         shape = RoundedCornerShape(32.dp),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
         tonalElevation = 0.dp,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
+        border = if (isDockFrameFocused) BorderStroke(3.5.dp, MaterialTheme.colorScheme.primary)
+                 else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Games
+            // Games (Index 0)
+            val isGamesFocused = isDockItemFocused && FrameNavigationManager.activeDockIndex == 0
             IconButton(
                 onClick = onNavigateToGames,
-                modifier = if (currentRoute == "games") {
-                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
-                } else Modifier
+                modifier = Modifier
+                    .then(
+                        if (isGamesFocused) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        else if (currentRoute == "games") Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                        else Modifier
+                    )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.hard_drive),
                     contentDescription = "Games",
-                    tint = if (currentRoute == "games") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (currentRoute == "games" || isGamesFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
 
-            // Controls
+            // Controls (Index 1)
+            val isControlsFocused = isDockItemFocused && FrameNavigationManager.activeDockIndex == 1
             IconButton(
                 onClick = onNavigateToControls,
-                modifier = if (currentRoute == "controls") {
-                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
-                } else Modifier
+                modifier = Modifier
+                    .then(
+                        if (isControlsFocused) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        else if (currentRoute == "controls") Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                        else Modifier
+                    )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.gamepad),
                     contentDescription = "Controls",
-                    tint = if (currentRoute == "controls") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (currentRoute == "controls" || isControlsFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
 
-            // Add Game (Integrated directly into the dock)
+            // Add Game (Index 2)
+            val isAddFocused = isDockItemFocused && FrameNavigationManager.activeDockIndex == 2
             IconButton(
                 onClick = { showBottomSheet = true },
-                modifier = Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+                modifier = Modifier
+                    .then(
+                        if (isAddFocused) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        else Modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+                    )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_add),
@@ -1142,33 +1186,40 @@ fun FloatingDock(
                 )
             }
 
-            // Directories
+            // Directories (Index 3)
+            val isDirFocused = isDockItemFocused && FrameNavigationManager.activeDockIndex == 3
             IconButton(
                 onClick = onNavigateToDirectories,
-                modifier = if (currentRoute == "game_directories") {
-                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
-                } else Modifier
+                modifier = Modifier
+                    .then(
+                        if (isDirFocused) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        else if (currentRoute == "game_directories") Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                        else Modifier
+                    )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_folder),
                     contentDescription = "Directories",
-                    tint = if (currentRoute == "game_directories") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (currentRoute == "game_directories" || isDirFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }
 
-
-            // Settings
+            // Settings (Index 4)
+            val isSettingsFocused = isDockItemFocused && FrameNavigationManager.activeDockIndex == 4
             IconButton(
                 onClick = onNavigateToSettings,
-                modifier = if (currentRoute.startsWith("settings")) {
-                    Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
-                } else Modifier
+                modifier = Modifier
+                    .then(
+                        if (isSettingsFocused) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                        else if (currentRoute.startsWith("settings")) Modifier.background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f), CircleShape)
+                        else Modifier
+                    )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_settings),
                     contentDescription = "Settings",
-                    tint = if (currentRoute.startsWith("settings")) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (currentRoute.startsWith("settings") || isSettingsFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(24.dp)
                 )
             }

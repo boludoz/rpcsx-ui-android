@@ -362,17 +362,20 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                 return@setOnTouchListener true
             }
             
+            val isDown = action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN
+            var newlyPressed = false
+
             val force =
                 action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP || action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_MOVE
 
             editables.forEach { editable ->
                 if (force || (!hit && editable.contains(x, y) && editable.enabled)) {
-                    hit = editable.onTouch(motionEvent, pointerIndex, state)
+                    val onTouchHit = editable.onTouch(motionEvent, pointerIndex, state)
+                    if (onTouchHit) {
+                        if (isDown) newlyPressed = true
+                        hit = true
+                    }
                 }
-            }
-        
-            if (hit && GeneralSettings["haptic_feedback"] as Boolean? ?: true) {
-                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
             }
 
             if (force || !hit) {
@@ -382,10 +385,9 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                     }
 
                     val touchResult = sticks[i].onTouchResult(motionEvent, pointerIndex, state)
-                    hit = if (touchResult < 0) {
-                        true
-                    } else {
-                        touchResult == 1
+                    if (touchResult != 0) {
+                        if (isDown && touchResult == 1) newlyPressed = true
+                        hit = touchResult < 0 || touchResult == 1
                     }
                 }
             }
@@ -397,10 +399,15 @@ class PadOverlay(context: Context?, attrs: AttributeSet?) : SurfaceView(context,
                     if (touchResult < 0) {
                         floatingSticks[i] = null
                         hit = true
-                    } else {
-                        hit = touchResult == 1
+                    } else if (touchResult == 1) {
+                        if (isDown) newlyPressed = true
+                        hit = true
                     }
                 }
+            }
+
+            if (newlyPressed && (GeneralSettings["haptic_feedback"] as Boolean? ?: true)) {
+                vibrator?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
             }
 
             onPadStateChanged?.invoke()

@@ -16,7 +16,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.security.InvalidParameterException
 import kotlin.concurrent.thread
 
 enum class GameFlag {
@@ -61,7 +60,7 @@ data class Game(
 ) {
     fun addProgress(progress: GameProgress) {
         if (findProgress(progress.type) != null) {
-            throw InvalidParameterException()
+            return
         }
 
         progressList += progress
@@ -191,7 +190,13 @@ class GameRepository {
                         // after the user re-adds the ISO.
                         existsGame.info.sourceUri.value =
                             info.sourceUri ?: existsGame.info.sourceUri.value
-                        if (progressId >= 0) {
+                        // The same game can be reported by more than one scan
+                        // (nested registered directories, or a rescan while an
+                        // install is still pending). addProgress() throws on a
+                        // duplicate type, so only attach one Install progress.
+                        if (progressId >= 0 &&
+                            existsGame.findProgress(GameProgressType.Install) == null
+                        ) {
                             existsGame.addProgress(
                                 GameProgress(
                                     progressId,

@@ -5,6 +5,14 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -90,7 +98,7 @@ private fun withAlpha(color: Color, alpha: Float): Color {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun GameItem(game: Game, onOpenSettings: () -> Unit = {}) {
+fun GameItem(game: Game, isCardFocused: Boolean = false, onOpenSettings: () -> Unit = {}) {
     val context = LocalContext.current
     val menuExpanded = remember { mutableStateOf(false) }
     val iconExists = remember { mutableStateOf(false) }
@@ -153,24 +161,20 @@ fun GameItem(game: Game, onOpenSettings: () -> Unit = {}) {
                         val deleteProgress = ProgressRepository.create(context, context.getString(R.string.deleting_game))
                         game.addProgress(GameProgress(deleteProgress, GameProgressType.Compile))
                         ProgressRepository.onProgressEvent(deleteProgress, 1, 0L)
-                        val path = File(game.info.path)
-                        if (path.exists()) {
-                            path.deleteRecursively()
-                            FileUtil.deleteCache(
-                                context,
-                                game.info.path.substringAfterLast("/")
-                            ) { success ->
-                                if (!success) {
-                                    AlertDialogQueue.showDialog(
-                                        title = context.getString(R.string.unexpected_error),
-                                        message = context.getString(R.string.failed_to_delete_game_cache),
-                                        confirmText = context.getString(R.string.close),
-                                        dismissText = ""
-                                    )
-                                }
-                                ProgressRepository.onProgressEvent(deleteProgress, 100, 100)
-                                GameRepository.remove(game)
+                        FileUtil.deleteCache(
+                            context,
+                            game.info.path.substringAfterLast("/")
+                        ) { success ->
+                            if (!success) {
+                                AlertDialogQueue.showDialog(
+                                    title = context.getString(R.string.unexpected_error),
+                                    message = context.getString(R.string.failed_to_delete_game_cache),
+                                    confirmText = context.getString(R.string.close),
+                                    dismissText = ""
+                                )
                             }
+                            ProgressRepository.onProgressEvent(deleteProgress, 100, 100)
+                            GameRepository.remove(game)
                         }
                     }
                 )
@@ -182,6 +186,11 @@ fun GameItem(game: Game, onOpenSettings: () -> Unit = {}) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(160.dp)
+                .then(
+                    if (isCardFocused) Modifier.border(
+                        3.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp)
+                    ) else Modifier
+                )
                 .combinedClickable(onClick = click@{
                     if (game.hasFlag(GameFlag.Locked)) {
                         AlertDialogQueue.showDialog(
@@ -675,16 +684,70 @@ fun GamesScreen(navigateToGameSettings: (String) -> Unit = {}) {
                 }
             }
         } else {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 160.dp),
-                contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = net.rpcsx.ui.navigation.LocalDockPadding.current),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxSize()
+            val lazyGridState = rememberLazyGridState()
+
+            LaunchedEffect(games.size) {
+                net.rpcsx.ui.navigation.FrameNavigationManager.totalGamesCount = games.size
+                net.rpcsx.ui.navigation.FrameNavigationManager.onPerformGameBoot = { gameIndex ->
+                    if (gameIndex in games.indices) {
+                        val targetGame = games[gameIndex]
+                        if (!targetGame.hasFlag(GameFlag.Locked) && targetGame.findProgress(GameProgressType.Compile) == null) {
+                            GameRepository.onBoot(targetGame)
+                            val emulatorWindow = Intent(context, RPCSXActivity::class.java)
+                            emulatorWindow.putExtra("path", targetGame.info.path)
+                            context.startActivity(emulatorWindow)
+                        }
+                    }
+                }
+            }
+
+            val isGamepadConnected = net.rpcsx.GamepadRepository.slots.isNotEmpty() && net.rpcsx.ui.navigation.FrameNavigationManager.isGamepadInputActive
+            val isGridActive = isGamepadConnected && net.rpcsx.ui.navigation.FrameNavigationManager.activeFrame == net.rpcsx.ui.navigation.NavigationFrame.GAMES_GRID
+            val isGridFrameFocused = isGridActive && net.rpcsx.ui.navigation.FrameNavigationManager.focusLevel == net.rpcsx.ui.navigation.FocusLevel.FRAME_LEVEL
+            val isGridItemFocused = isGridActive && net.rpcsx.ui.navigation.FrameNavigationManager.focusLevel == net.rpcsx.ui.navigation.FocusLevel.ITEM_LEVEL
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+                    .then(
+                        if (isGridFrameFocused) Modifier.border(3.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(24.dp))
+                        else Modifier
+                    )
             ) {
-                items(count = games.size, key = { index -> games[index].info.path }) { index ->
-                    val game = games[index]
-                    GameItem(game, onOpenSettings = { navigateToGameSettings(game.info.path) })
+                LazyVerticalGrid(
+                    state = lazyGridState,
+                    columns = GridCells.Adaptive(minSize = 160.dp),
+                    contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = net.rpcsx.ui.navigation.LocalDockPadding.current),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            awaitPointerEventScope {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    if (event.type == PointerEventType.Scroll) {
+                                        val delta = event.changes.firstOrNull()?.scrollDelta?.y ?: 0f
+                                        if (delta != 0f) {
+                                            coroutineScope.launch {
+                                                lazyGridState.scrollBy(delta * 120f)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                ) {
+                    items(count = games.size, key = { index -> games[index].info.path }) { index ->
+                        val game = games[index]
+                        val isFocused = isGridItemFocused && index == net.rpcsx.ui.navigation.FrameNavigationManager.activeGameIndex
+                        GameItem(
+                            game = game,
+                            isCardFocused = isFocused,
+                            onOpenSettings = { navigateToGameSettings(game.info.path) }
+                        )
+                    }
                 }
             }
         }

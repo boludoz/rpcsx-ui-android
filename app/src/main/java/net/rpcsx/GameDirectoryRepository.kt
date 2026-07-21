@@ -84,13 +84,23 @@ object GameDirectoryRepository {
 
         thread {
             val progress = ProgressRepository.create(context, context.getString(R.string.installing_dir))
-            val ok = RPCSX.instance.collectGameInfoFromUri(uri.toString(), progress)
-            if (!ok) {
+            // A bare thread lets any exception reach the default handler and
+            // kill the process. This runs on every launch for each persisted
+            // directory, so an unhandled throw here is a boot crash loop.
+            try {
+                val ok = RPCSX.instance.collectGameInfoFromUri(uri.toString(), progress)
+                if (!ok) {
+                    ProgressRepository.onProgressEvent(
+                        progress, -1, 0, context.getString(R.string.directory_not_resolvable)
+                    )
+                } else {
+                    ProgressRepository.onProgressEvent(progress, 1, 1)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
                 ProgressRepository.onProgressEvent(
                     progress, -1, 0, context.getString(R.string.directory_not_resolvable)
                 )
-            } else {
-                ProgressRepository.onProgressEvent(progress, 1, 1)
             }
         }
     }
