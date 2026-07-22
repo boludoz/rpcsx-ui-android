@@ -27,7 +27,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.wrapContentHeight
+import net.rpcsx.PrecompilerService
+import net.rpcsx.PrecompilerServiceAction
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,7 +101,12 @@ private fun withAlpha(color: Color, alpha: Float): Color {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun GameItem(game: Game, isCardFocused: Boolean = false, onOpenSettings: () -> Unit = {}) {
+fun GameItem(
+    game: Game,
+    isCardFocused: Boolean = false,
+    onOpenSettings: () -> Unit = {},
+    onCheckSonyUpdates: () -> Unit = {}
+) {
     val context = LocalContext.current
     val menuExpanded = remember { mutableStateOf(false) }
     val iconExists = remember { mutableStateOf(false) }
@@ -151,6 +159,14 @@ fun GameItem(game: Game, isCardFocused: Boolean = false, onOpenSettings: () -> U
                     onClick = {
                         menuExpanded.value = false
                         onOpenSettings()
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Buscar Actualizaciones de Sony (PSN)") },
+                    leadingIcon = { Icon(painter = painterResource(id = R.drawable.ic_cloud_download), contentDescription = null) },
+                    onClick = {
+                        menuExpanded.value = false
+                        onCheckSonyUpdates()
                     }
                 )
                 DropdownMenuItem(
@@ -393,13 +409,27 @@ fun GameItem(game: Game, isCardFocused: Boolean = false, onOpenSettings: () -> U
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = game.info.path.substringAfterLast("/").substringBeforeLast("."),
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = game.info.path.substringAfterLast("/").substringBeforeLast("."),
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "v${game.info.version.value ?: "1.00"}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
                 }
             }
         }
@@ -413,6 +443,7 @@ fun GamesScreen(navigateToGameSettings: (String) -> Unit = {}) {
     val games = remember { GameRepository.list() }
     val isRefreshing by remember { GameRepository.isRefreshing }
     val state = rememberPullToRefreshState()
+    var selectedGameForSonyUpdates by remember { mutableStateOf<Game?>(null) }
     var uiUpdateVersion by remember { mutableStateOf<String?>(null) }
     var uiUpdate by remember { mutableStateOf(false) }
     var uiUpdateProgressValue by remember { mutableLongStateOf(0) }
@@ -745,13 +776,165 @@ fun GamesScreen(navigateToGameSettings: (String) -> Unit = {}) {
                         GameItem(
                             game = game,
                             isCardFocused = isFocused,
-                            onOpenSettings = { navigateToGameSettings(game.info.path) }
+                            onOpenSettings = { navigateToGameSettings(game.info.path) },
+                            onCheckSonyUpdates = { selectedGameForSonyUpdates = game }
                         )
                     }
                 }
             }
         }
+
+        if (selectedGameForSonyUpdates != null) {
+            SonyUpdateDialog(
+                game = selectedGameForSonyUpdates!!,
+                onDismiss = { selectedGameForSonyUpdates = null }
+            )
+        }
     }
+}
+
+@Composable
+fun SonyUpdateDialog(
+    game: Game,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(true) }
+    var updates by remember { mutableStateOf<List<net.rpcsx.utils.SonyGameUpdatePkg>>(emptyList()) }
+    var downloadingPkg by remember { mutableStateOf<net.rpcsx.utils.SonyGameUpdatePkg?>(null) }
+    var downloadProgressValue by remember { mutableLongStateOf(0L) }
+    var downloadProgressMax by remember { mutableLongStateOf(0L) }
+    var statusText by remember { mutableStateOf("Conectando con el servidor de Sony...") }
+
+    val serial = remember(game) {
+        val pathSegment = game.info.path.substringAfterLast("/").substringBeforeLast(".")
+        net.rpcsx.utils.SonyGameUpdateDownloader.cleanTitleId(pathSegment)
+    }
+
+    LaunchedEffect(serial) {
+        isLoading = true
+        statusText = "Buscando actualizaciones para $serial..."
+        val list = net.rpcsx.utils.SonyGameUpdateDownloader.fetchGameUpdates(serial)
+        updates = list
+        isLoading = false
+        if (list.isEmpty()) {
+            statusText = "No se encontraron actualizaciones oficiales para $serial en los servidores de Sony."
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = { if (downloadingPkg == null) onDismiss() },
+        title = { Text("Actualizaciones de Sony (PSN) - $serial") },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                if (isLoading) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(statusText, style = MaterialTheme.typography.bodySmall)
+                    }
+                } else if (downloadingPkg != null) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    ) {
+                        Text("Descargando actualización v${downloadingPkg!!.version}...", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        if (downloadProgressMax > 0) {
+                            LinearProgressIndicator(
+                                progress = { downloadProgressValue / downloadProgressMax.toFloat() },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            val mbDone = downloadProgressValue / (1024.0 * 1024.0)
+                            val mbTotal = downloadProgressMax / (1024.0 * 1024.0)
+                            Text(String.format("%.1f MB / %.1f MB", mbDone, mbTotal), style = MaterialTheme.typography.bodySmall)
+                        } else {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                } else if (updates.isEmpty()) {
+                    Text(statusText, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    Text("Actualizaciones oficiales disponibles (${updates.size}):", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    androidx.compose.foundation.lazy.LazyColumn(modifier = Modifier.heightIn(max = 240.dp)) {
+                        items(updates.size) { index ->
+                            val pkg = updates[index]
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Versión ${pkg.version}", fontWeight = FontWeight.Bold)
+                                    Text("Tamaño: ${pkg.sizeFormatted}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                androidx.compose.material3.Button(
+                                    onClick = {
+                                        downloadingPkg = pkg
+                                        scope.launch {
+                                            val file = net.rpcsx.utils.SonyGameUpdateDownloader.downloadUpdatePkg(context, pkg) { done, max ->
+                                                downloadProgressValue = done
+                                                downloadProgressMax = max
+                                            }
+                                            downloadingPkg = null
+                                            if (file != null) {
+                                                // Uri.fromFile() produce un file:// URI que ContentResolver
+                                                // rechaza en Android 7+ (FileUriExposedException / fd null).
+                                                // Usamos ParcelFileDescriptor.open() para obtener el fd
+                                                // nativo directamente del File, sin pasar por ContentResolver.
+                                                val installProgress = ProgressRepository.create(
+                                                    context,
+                                                    context.getString(R.string.package_installation)
+                                                )
+                                                GameRepository.createGameInstallEntry(installProgress)
+                                                kotlin.concurrent.thread(isDaemon = true) {
+                                                    val pfd = try {
+                                                        android.os.ParcelFileDescriptor.open(
+                                                            file,
+                                                            android.os.ParcelFileDescriptor.MODE_READ_ONLY
+                                                        )
+                                                    } catch (e: Exception) {
+                                                        e.printStackTrace()
+                                                        try { ProgressRepository.onProgressEvent(installProgress, -1, 0) } catch (_: Exception) {}
+                                                        return@thread
+                                                    }
+                                                    pfd.use {
+                                                        if (!RPCSX.instance.install(it.fd, installProgress, file.absolutePath)) {
+                                                            try { ProgressRepository.onProgressEvent(installProgress, -1, 0) } catch (_: Exception) {}
+                                                        }
+                                                    }
+                                                }
+                                                android.widget.Toast.makeText(context, "Instalando actualización v${pkg.version}...", android.widget.Toast.LENGTH_LONG).show()
+                                                onDismiss()
+                                            } else {
+                                                android.widget.Toast.makeText(context, "Error al descargar la actualización", android.widget.Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    Text("Descargar")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            if (downloadingPkg == null) {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    Text("Cerrar")
+                }
+            }
+        }
+    )
 }
 
 @Preview

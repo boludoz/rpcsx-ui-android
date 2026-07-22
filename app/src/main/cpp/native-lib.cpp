@@ -3,6 +3,7 @@
 #include <android/log.h>
 #include <dlfcn.h>
 #include <jni.h>
+#include <malloc.h>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -15,6 +16,23 @@
 #include <adrenotools/priv.h>
 #endif
 
+// Aggressive Scudo allocation tuning (disables quarantines, zeroing, mismatch checks)
+extern "C" const char* __scudo_default_options() {
+    return "DeallocTypeMismatch=false:DeleteSizeMismatch=false:ZeroContents=false:QuarantineSizeKb=0:ThreadLocalQuarantineSizeKb=0:AllocationTraceRingBufferKb=0";
+}
+
+extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
+#if defined(__BIONIC__)
+#ifdef M_DISABLE_DECOMMIT
+    mallopt(M_DISABLE_DECOMMIT, 1);
+#endif
+#ifdef M_PURGE
+    mallopt(M_PURGE, 0);
+#endif
+#endif
+    return JNI_VERSION_1_6;
+}
+
 struct RPCSXApi {
   bool (*overlayPadData)(int digital1, int digital2, int leftStickX,
                          int leftStickY, int rightStickX, int rightStickY);
@@ -22,6 +40,7 @@ struct RPCSXApi {
                        int leftStickX, int leftStickY, int rightStickX,
                        int rightStickY);
   int (*getMaxVirtualPads)();
+  int (*getPadVibration)(int playerIndex);
   bool (*initialize)(std::string_view rootDir, std::string_view user);
   bool (*processCompilationQueue)(JNIEnv *env);
   bool (*startMainThreadProcessor)(JNIEnv *env);
@@ -97,6 +116,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.overlayPadData = reinterpret_cast<decltype(overlayPadData)>(dlsym(handle, "_rpcsx_overlayPadData"));
     result.multiPadData = reinterpret_cast<decltype(multiPadData)>(dlsym(handle, "_rpcsx_multiPadData"));
     result.getMaxVirtualPads = reinterpret_cast<decltype(getMaxVirtualPads)>(dlsym(handle, "_rpcsx_getMaxVirtualPads"));
+    result.getPadVibration = reinterpret_cast<decltype(getPadVibration)>(dlsym(handle, "_rpcsx_getPadVibration"));
     result.initialize = reinterpret_cast<decltype(initialize)>(dlsym(handle, "_rpcsx_initialize"));
     result.processCompilationQueue = reinterpret_cast<decltype(processCompilationQueue)>(dlsym(handle, "_rpcsx_processCompilationQueue"));
     result.startMainThreadProcessor = reinterpret_cast<decltype(startMainThreadProcessor)>(dlsym(handle, "_rpcsx_startMainThreadProcessor"));
@@ -197,6 +217,15 @@ Java_net_rpcsx_RPCSX_getMaxVirtualPads(JNIEnv *, jobject) {
   }
 
   return rpcsxLib.getMaxVirtualPads();
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_net_rpcsx_RPCSX_getPadVibration(JNIEnv *, jobject, jint playerIndex) {
+  if (rpcsxLib.getPadVibration == nullptr) {
+    return 0;
+  }
+
+  return rpcsxLib.getPadVibration(playerIndex);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_initialize(

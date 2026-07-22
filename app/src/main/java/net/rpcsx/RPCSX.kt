@@ -92,6 +92,9 @@ class RPCSX {
     external fun overlayPadData(digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
     external fun multiPadData(playerIndex: Int, digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
     external fun getMaxVirtualPads(): Int
+    // Backend rumble strength for a virtual pad: (large << 8) | small, each
+    // 0-255. 0 when idle. Polled by RPCSXActivity to drive the vibrator.
+    external fun getPadVibration(playerIndex: Int): Int
     external fun collectGameInfo(rootDir: String, progressId: Long): Boolean
     // Resolves a SAF tree URI to a real filesystem path natively and scans it
     // in place (no copy). Returns false if the URI cannot be resolved to a

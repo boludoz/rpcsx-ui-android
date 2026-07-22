@@ -1,6 +1,9 @@
 package net.rpcsx.ui.games
 
+import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +49,30 @@ fun GameDirectoriesScreen(
     val context = LocalContext.current
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+    val gameDirLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+            GameDirectoryRepository.add(uri, GameDirectoryKind.Games)
+            GameDirectoryRepository.scanGameDirectory(context, uri)
+        }
+    }
+
+    val isoDirLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+            GameDirectoryRepository.add(uri, GameDirectoryKind.Iso)
+            GameDirectoryRepository.scanIsoDirectory(context, uri)
+        }
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
         topBar = {
@@ -67,22 +94,6 @@ fun GameDirectoriesScreen(
     ) { contentPadding ->
         val directories = GameDirectoryRepository.directories
 
-        if (directories.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding)
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.no_directories),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            return@Scaffold
-        }
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -91,22 +102,58 @@ fun GameDirectoriesScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            items(directories, key = { it.uri }) { dir ->
-                GameDirectoryRow(
-                    dir = dir,
-                    onRescan = {
-                        val uri = Uri.parse(dir.uri)
-                        when (dir.kind) {
-                            GameDirectoryKind.Games -> GameDirectoryRepository.scanGameDirectory(context, uri)
-                            GameDirectoryKind.Iso -> GameDirectoryRepository.scanIsoDirectory(context, uri)
-                        }
-                    },
-                    onRemove = {
-                        GameDirectoryRepository.removeAndForget(context, dir)
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    androidx.compose.material3.Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = { gameDirLauncher.launch(null) }
+                    ) {
+                        Text("+ Carpeta de Juegos")
                     }
-                )
+                    androidx.compose.material3.OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = { isoDirLauncher.launch(null) }
+                    ) {
+                        Text("+ Carpeta ISOs")
+                    }
+                }
+            }
+
+            if (directories.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_directories),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                items(directories, key = { it.uri }) { dir ->
+                    GameDirectoryRow(
+                        dir = dir,
+                        onRescan = {
+                            val uri = Uri.parse(dir.uri)
+                            when (dir.kind) {
+                                GameDirectoryKind.Games -> GameDirectoryRepository.scanGameDirectory(context, uri)
+                                GameDirectoryKind.Iso -> GameDirectoryRepository.scanIsoDirectory(context, uri)
+                            }
+                        },
+                        onRemove = {
+                            GameDirectoryRepository.removeAndForget(context, dir)
+                        }
+                    )
+                }
             }
         }
     }

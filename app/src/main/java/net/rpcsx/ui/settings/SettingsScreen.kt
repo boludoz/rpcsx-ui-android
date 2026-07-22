@@ -682,6 +682,43 @@ fun SettingsScreen(
                 )
             }
 
+            item(key = "auto_download_updates") {
+                val autoDownload = (GeneralSettings["auto_download_updates"] as? Boolean) ?: true
+                SwitchPreference(
+                    checked = autoDownload,
+                    title = { Text("Descarga automática de actualizaciones") },
+                    leadingIcon = { PreferenceIcon(icon = painterResource(R.drawable.ic_cloud_download)) },
+                    subtitle = { Text("Descargar e instalar automáticamente actualizaciones de emulador y parches al iniciar") },
+                    onClick = { value -> GeneralSettings["auto_download_updates"] = value }
+                )
+            }
+
+            item(key = "custom_root_directory") {
+                val currentRoot = (GeneralSettings["custom_root_directory"] as? String)
+                    ?: context.getExternalFilesDir(null)?.toString() ?: ""
+                val customRootLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+                    if (uri != null) {
+                        try {
+                            context.contentResolver.takePersistableUriPermission(
+                                uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            )
+                        } catch (_: Exception) {}
+                        val resolvedPath = try {
+                            RPCSX.instance.resolveTreeUriToPath(uri.toString())
+                        } catch (_: Exception) { null }
+                        val pathToSave = if (!resolvedPath.isNullOrEmpty()) resolvedPath else uri.toString()
+                        GeneralSettings["custom_root_directory"] = pathToSave
+                        RPCSX.rootDirectory = if (pathToSave.endsWith("/")) pathToSave else "$pathToSave/"
+                    }
+                }
+                RegularPreference(
+                    title = { Text("Directorio de datos del emulador") },
+                    leadingIcon = { PreferenceIcon(icon = painterResource(R.drawable.ic_folder)) },
+                    value = { PreferenceValue(currentRoot) },
+                    onClick = { customRootLauncher.launch(null) }
+                )
+            }
+
             item(key = "advanced_settings") {
                 HomePreference(
                     title = stringResource(R.string.advanced_settings),
@@ -917,9 +954,14 @@ fun ControllerSettings(
                     title = stringResource(R.string.player_slot, playerIndex + 1),
                     leadingIcon = null,
                     value = {
-                        PreferenceValue(slot?.deviceName ?: stringResource(R.string.controller_not_connected))
+                        PreferenceValue(slot?.displayTitle ?: stringResource(R.string.controller_not_connected))
                     },
-                    onClick = { navigateToPlayer(playerIndex) }
+                    onClick = {
+                        if (slot != null) {
+                            GamepadRepository.identifySlot(playerIndex)
+                        }
+                        navigateToPlayer(playerIndex)
+                    }
                 )
 
                 // Port selector for the controller occupying this slot.

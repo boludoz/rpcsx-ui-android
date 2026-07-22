@@ -105,39 +105,34 @@ object GameDirectoryRepository {
         }
     }
 
-    // "Add ISO directory" flow: enumerate the tree through SAF (works for any
-    // DocumentsProvider, no storage permission needed - the picker's
-    // persisted grant is enough) and register each .iso through the normal
-    // fd-based install path.
+    // "Add ISO directory" flow: resolve the SAF tree URI to a real filesystem
+    // path natively and register each .iso in place (booted directly from its
+    // real path). This is the same path-based protocol scanGameDirectory uses,
+    // and it is what makes ISO folders survive an APK reinstall: a content://
+    // grant is revoked on reinstall, but a /storage/ path is not. The old
+    // SAF-walk that installed each file by content URI broke on reinstall
+    // (InvalidFileOrFolder). Requires all-files access, same as game folders.
     fun scanIsoDirectory(context: Context, uri: Uri) {
+        if (!StorageAccess.isGranted()) {
+            StorageAccess.requestAccess(context)
+        }
+
         thread {
             val progress = ProgressRepository.create(context, context.getString(R.string.installing_dir))
-
-            val tree = DocumentFile.fromTreeUri(context, uri)
-            if (tree == null || !tree.isDirectory) {
+            try {
+                val ok = RPCSX.instance.collectIsoInfoFromUri(uri.toString(), progress)
+                if (!ok) {
+                    ProgressRepository.onProgressEvent(
+                        progress, -1, 0, context.getString(R.string.directory_not_resolvable)
+                    )
+                } else {
+                    ProgressRepository.onProgressEvent(progress, 1, 1)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
                 ProgressRepository.onProgressEvent(
                     progress, -1, 0, context.getString(R.string.directory_not_resolvable)
                 )
-                return@thread
-            }
-
-            val isos = ArrayList<Uri>()
-
-            fun walk(dir: DocumentFile) {
-                dir.listFiles().forEach { entry ->
-                    if (entry.isDirectory) {
-                        walk(entry)
-                    } else if (entry.name?.endsWith(".iso", ignoreCase = true) == true) {
-                        isos.add(entry.uri)
-                    }
-                }
-            }
-            walk(tree)
-
-            ProgressRepository.onProgressEvent(progress, 1, 1)
-
-            if (isos.isNotEmpty()) {
-                PrecompilerService.start(context, PrecompilerServiceAction.Install, isos)
             }
         }
     }

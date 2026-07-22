@@ -48,7 +48,12 @@ class MainActivity : AppCompatActivity() {
                 createNotificationChannel(channel)
             }
 
-            RPCSX.rootDirectory = applicationContext.getExternalFilesDir(null).toString()
+            val customRoot = GeneralSettings["custom_root_directory"] as? String
+            RPCSX.rootDirectory = if (!customRoot.isNullOrEmpty() && File(customRoot).exists()) {
+                customRoot
+            } else {
+                applicationContext.getExternalFilesDir(null).toString()
+            }
             if (!RPCSX.rootDirectory.endsWith("/")) {
                 RPCSX.rootDirectory += "/"
             }

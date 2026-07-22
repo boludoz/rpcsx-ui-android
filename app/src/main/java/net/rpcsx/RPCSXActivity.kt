@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.hardware.input.InputManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.InputDevice
@@ -81,11 +82,120 @@ class RPCSXActivity : Activity() {
         super.onResume()
         inputBindingsBySlot.clear()
         showOverlayAndResetTimer()
+        startRumblePoller()
     }
 
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(hideOverlayRunnable)
+        stopRumblePoller()
+    }
+
+    // Phone vibrator, used for backend rumble on the touch-overlay port when no
+    // physical controller is assigned to it.
+    private val phoneVibrator by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            getSystemService(android.os.VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(android.os.Vibrator::class.java)
+        }
+    }
+
+    @Volatile
+    private var rumbleRunning = false
+    private var rumbleThread: Thread? = null
+    // Edge-trigger state for the phone vibrator (overlay port), packed the same
+    // way as the controller path so a steady strength holds without re-trigger.
+    private var lastPhoneRumble = -1L
+
+    // Long continuous one-shot, replaced only when the strength changes.
+    private val phoneRumbleHoldMs = 60_000L
+
+    private fun applyPhoneRumble(large: Int, small: Int) {
+        val l = large.coerceIn(0, 255)
+        val s = small.coerceIn(0, 255)
+        val packed = (l.toLong() shl 8) or s.toLong()
+        if (lastPhoneRumble == packed) return
+        lastPhoneRumble = packed
+        try {
+            val v = phoneVibrator ?: return
+            if (!v.hasVibrator()) return
+            val amplitude = maxOf(l, s)
+            if (amplitude <= 0) {
+                v.cancel()
+                return
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(
+                    android.os.VibrationEffect.createOneShot(
+                        phoneRumbleHoldMs,
+                        amplitude.coerceIn(1, 255)
+                    )
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                v.vibrate(phoneRumbleHoldMs)
+            }
+        } catch (_: Exception) {}
+    }
+
+    private fun cancelPhoneVibration() {
+        lastPhoneRumble = -1L
+        try { phoneVibrator?.cancel() } catch (_: Exception) {}
+    }
+
+    // Backend rumble: the core writes per-pad motor strength (cellPadSetActDirect);
+    // poll it once per frame and drive the mapped physical controller (or the
+    // phone for the touch overlay). Event-driven input can't carry this, and
+    // Android exposes no rumble callback, so a tight poll is the low-latency
+    // path most emulators use. applyRumble/applyPhoneRumble are edge-triggered,
+    // so a per-frame poll is cheap and the latency floor is one frame (~16ms).
+    private fun startRumblePoller() {
+        if (rumbleThread != null) return
+        if (GeneralSettings["pad_vibration"] == false) return
+
+        rumbleRunning = true
+        rumbleThread = thread(isDaemon = true, name = "rumble-poller") {
+            val pollMs = 16L // one frame @60fps
+            val activeDevices = HashSet<Int>()
+            var overlayTouched = false
+
+            while (rumbleRunning) {
+                try {
+                    for (slot in 0 until maxVirtualPads) {
+                        val vib = RPCSX.instance.getPadVibration(slot)
+                        val large = (vib shr 8) and 0xff
+                        val small = vib and 0xff
+
+                        val deviceId = GamepadRepository.deviceIdForSlot(slot)
+                        if (deviceId != null) {
+                            GamepadRepository.applyRumble(deviceId, large, small)
+                            activeDevices.add(deviceId)
+                        } else if (slot == overlaySlot) {
+                            // Touch overlay with no physical pad -> phone.
+                            applyPhoneRumble(large, small)
+                            overlayTouched = true
+                        }
+                    }
+                } catch (_: Exception) {}
+
+                try {
+                    Thread.sleep(pollMs)
+                } catch (_: InterruptedException) {
+                    break
+                }
+            }
+
+            activeDevices.forEach { GamepadRepository.cancelDeviceRumble(it) }
+            if (overlayTouched) cancelPhoneVibration()
+        }
+    }
+
+    private fun stopRumblePoller() {
+        rumbleRunning = false
+        rumbleThread?.interrupt()
+        rumbleThread = null
     }
 
     private var bootThread: Thread? = null
@@ -263,6 +373,7 @@ class RPCSXActivity : Activity() {
         unregisterGamepadListener()
         RPCSX.state.value = EmulatorState.Paused
         unregisterUsbEventListener()
+        stopRumblePoller()
         bootThread?.interrupt()
         bootThread?.join()
     }
@@ -341,6 +452,13 @@ class RPCSXActivity : Activity() {
         return slot
     }
 
+    // Hot path: called on every key/motion event. Once a device is assigned,
+    // slotFor is a plain map lookup, so the costly InputDevice.getDevice()
+    // binder call in assignGamepadSlot only runs the first time a device is
+    // seen - not on every button press / stick sample during gameplay.
+    private fun resolveSlot(deviceId: Int): Int? =
+        GamepadRepository.slotFor(deviceId) ?: assignGamepadSlot(deviceId)
+
     private fun keyCodeToPadBit(keyCode: Int, deviceId: Int, slot: Int): Pair<Int, Int> {
         val event = bindingsForSlot(slot)[keyCode] ?: Pair(0, 0)
 
@@ -360,7 +478,7 @@ class RPCSXActivity : Activity() {
             return super.onKeyDown(keyCode, event)
         }
 
-        val slot = assignGamepadSlot(event.deviceId) ?: return super.onKeyDown(keyCode, event)
+        val slot = resolveSlot(event.deviceId) ?: return super.onKeyDown(keyCode, event)
         val padBit = keyCodeToPadBit(keyCode, event.deviceId, slot)
         if (padBit.first == 0) {
             return super.onKeyDown(keyCode, event)
@@ -395,7 +513,7 @@ class RPCSXActivity : Activity() {
             return super.onGenericMotionEvent(event)
         }
 
-        val slot = assignGamepadSlot(event.deviceId) ?: return super.onGenericMotionEvent(event)
+        val slot = resolveSlot(event.deviceId) ?: return super.onGenericMotionEvent(event)
         val deviceId = event.deviceId
         val state = gamepadStates.getOrPut(deviceId) { State() }
 
@@ -499,9 +617,16 @@ class RPCSXActivity : Activity() {
     // center, falling back to `extra` (a controller from another slot being
     // funneled into slot 0 on engine builds that only support one virtual
     // pad) and finally to the port's physical gamepad.
+    // Reused across events so the input hot path allocates nothing. Safe: all
+    // key/motion events run on the main thread, and sendPadData reads the six
+    // fields into the JNI call immediately without retaining the object.
+    private val scratchMergedState = State()
+    // Never mutated: stand-in for "no controller on the overlay port".
+    private val neutralState = State()
+
     private fun mergedOverlayState(extra: State?): State {
         val overlayPadDeviceId = GamepadRepository.slots[overlaySlot]?.deviceId
-        val gamepadState = overlayPadDeviceId?.let { gamepadStates[it] } ?: State()
+        val gamepadState = overlayPadDeviceId?.let { gamepadStates[it] } ?: neutralState
         val overlayState = binding.padOverlay.currentState
 
         fun isCentered(s: State) =
@@ -513,16 +638,14 @@ class RPCSXActivity : Activity() {
             else -> gamepadState
         }
 
-        return State(
-            digital = intArrayOf(
-                gamepadState.digital[0] or overlayState.digital[0] or (extra?.digital?.get(0) ?: 0),
-                gamepadState.digital[1] or overlayState.digital[1] or (extra?.digital?.get(1) ?: 0),
-            ),
-            leftStickX = stickSource.leftStickX,
-            leftStickY = stickSource.leftStickY,
-            rightStickX = stickSource.rightStickX,
-            rightStickY = stickSource.rightStickY,
-        )
+        val out = scratchMergedState
+        out.digital[0] = gamepadState.digital[0] or overlayState.digital[0] or (extra?.digital?.get(0) ?: 0)
+        out.digital[1] = gamepadState.digital[1] or overlayState.digital[1] or (extra?.digital?.get(1) ?: 0)
+        out.leftStickX = stickSource.leftStickX
+        out.leftStickY = stickSource.leftStickY
+        out.rightStickX = stickSource.rightStickX
+        out.rightStickY = stickSource.rightStickY
+        return out
     }
 
     private fun enableFullScreenImmersive() {
