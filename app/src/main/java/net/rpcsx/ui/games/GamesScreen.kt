@@ -425,7 +425,8 @@ fun GameItem(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = game.info.path.substringAfterLast("/").substringBeforeLast("."),
+                                text = game.info.titleId.value
+                                    ?: game.info.path.substringAfterLast("/").substringBeforeLast("."),
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -819,8 +820,13 @@ fun SonyUpdateDialog(
     var statusText by remember { mutableStateOf("Conectando con el servidor de Sony...") }
 
     val serial = remember(game) {
-        val pathSegment = game.info.path.substringAfterLast("/").substringBeforeLast(".")
-        net.rpcsx.utils.SonyGameUpdateDownloader.cleanTitleId(pathSegment)
+        // Prefer the real PARAM.SFO TITLE_ID (net.rpcsx.GameInfo.titleId,
+        // recovered by ParamSfoParser) over the path's file name, which for
+        // a game registered from a loose folder/ISO is just the display
+        // title (e.g. "PES 2010") and not a valid serial for Sony's server.
+        val raw = game.info.titleId.value
+            ?: game.info.path.substringAfterLast("/").substringBeforeLast(".")
+        net.rpcsx.utils.SonyGameUpdateDownloader.cleanTitleId(raw)
     }
 
     LaunchedEffect(serial) {

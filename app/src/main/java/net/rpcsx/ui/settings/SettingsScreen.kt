@@ -683,19 +683,34 @@ fun SettingsScreen(
             }
 
             item(key = "auto_download_updates") {
-                val autoDownload = (GeneralSettings["auto_download_updates"] as? Boolean) ?: true
-                SwitchPreference(
-                    checked = autoDownload,
-                    title = { Text("Descarga automática de actualizaciones") },
-                    leadingIcon = { PreferenceIcon(icon = painterResource(R.drawable.ic_cloud_download)) },
-                    subtitle = { Text("Descargar e instalar automáticamente actualizaciones de emulador y parches al iniciar") },
-                    onClick = { value -> GeneralSettings["auto_download_updates"] = value }
+                var autoDownload by remember {
+                    mutableStateOf((GeneralSettings["auto_download_updates"] as? Boolean) ?: true)
+                }
+                HomePreference(
+                    title = "Descarga automática de actualizaciones",
+                    icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_cloud_download)) },
+                    description = if (autoDownload) "Activada" else "Desactivada",
+                    onClick = {
+                        AlertDialogQueue.showDialog(
+                            title = "Descarga automática de actualizaciones",
+                            message = "Descargar e instalar automáticamente actualizaciones de emulador y parches al iniciar.\n\n" +
+                                if (autoDownload) "¿Desactivarla?" else "¿Activarla?",
+                            confirmText = if (autoDownload) "Desactivar" else "Activar",
+                            onConfirm = {
+                                val newValue = !autoDownload
+                                GeneralSettings["auto_download_updates"] = newValue
+                                autoDownload = newValue
+                            }
+                        )
+                    }
                 )
             }
 
             item(key = "custom_root_directory") {
-                val currentRoot = (GeneralSettings["custom_root_directory"] as? String)
-                    ?: context.getExternalFilesDir(null)?.toString() ?: ""
+                var customRoot by remember {
+                    mutableStateOf(GeneralSettings["custom_root_directory"] as? String)
+                }
+                val currentRoot = customRoot ?: context.getExternalFilesDir(null)?.toString() ?: ""
                 val customRootLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
                     if (uri != null) {
                         try {
@@ -709,13 +724,29 @@ fun SettingsScreen(
                         val pathToSave = if (!resolvedPath.isNullOrEmpty()) resolvedPath else uri.toString()
                         GeneralSettings["custom_root_directory"] = pathToSave
                         RPCSX.rootDirectory = if (pathToSave.endsWith("/")) pathToSave else "$pathToSave/"
+                        customRoot = pathToSave
                     }
                 }
-                RegularPreference(
-                    title = { Text("Directorio de datos del emulador") },
-                    leadingIcon = { PreferenceIcon(icon = painterResource(R.drawable.ic_folder)) },
-                    value = { PreferenceValue(currentRoot) },
-                    onClick = { customRootLauncher.launch(null) }
+                HomePreference(
+                    title = "Directorio de datos del emulador",
+                    icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_folder)) },
+                    description = if (customRoot != null) "Personalizado: $currentRoot" else "Predeterminado: $currentRoot",
+                    onClick = { customRootLauncher.launch(null) },
+                    onLongClick = {
+                        if (customRoot != null) {
+                            val defaultPath = context.getExternalFilesDir(null)?.toString() ?: ""
+                            AlertDialogQueue.showDialog(
+                                title = "Restaurar directorio predeterminado",
+                                message = "¿Restaurar el directorio de datos del emulador a la ubicación predeterminada?\n\n$defaultPath",
+                                confirmText = "Restaurar",
+                                onConfirm = {
+                                    GeneralSettings["custom_root_directory"] = null
+                                    RPCSX.rootDirectory = if (defaultPath.endsWith("/")) defaultPath else "$defaultPath/"
+                                    customRoot = null
+                                }
+                            )
+                        }
+                    }
                 )
             }
 
