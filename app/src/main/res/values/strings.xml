@@ -4,10 +4,12 @@
 
     <string name="add">Add</string>
     <string name="close">Close</string>
+    <string name="enable">Enable</string>
     <string name="error">Error</string>
     <string name="export">Export</string>
     <string name="import_">Import</string>
     <string name="none">None</string>
+    <string name="not_now">Not now</string>
     <string name="reset">Reset</string>
 
     <!-- AppNavHost -->
@@ -16,6 +18,8 @@
     <string name="device_info">Device Info</string>
     <string name="driver_download_channel">GPU Driver Download Channel</string>
     <string name="edit_overlay">Edit Overlay</string>
+    <string name="fast_pkg_install_message">Grant \"All files access\" so PKG/PUP installs read the file directly instead of through Android\'s slower storage layer. You can still install without it.</string>
+    <string name="fast_pkg_install_title">Faster installs</string>
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">RPCSX Download Channel</string>
     <string name="select_game_file">Install PKG, ISO or RAP</string>

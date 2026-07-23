@@ -112,6 +112,7 @@ import net.rpcsx.PrecompilerServiceAction
 import net.rpcsx.ProgressRepository
 import net.rpcsx.R
 import net.rpcsx.RPCSX
+import net.rpcsx.StorageAccess
 import net.rpcsx.UserRepository
 import androidx.documentfile.provider.DocumentFile
 import net.rpcsx.dialogs.AlertDialogQueue
@@ -138,6 +139,8 @@ import net.rpcsx.ui.settings.PlayerControllerSettings
 import net.rpcsx.ui.settings.SettingsScreen
 import net.rpcsx.ui.user.UsersScreen
 import net.rpcsx.utils.GameConfig
+import net.rpcsx.utils.GeneralSettings
+import net.rpcsx.utils.GeneralSettings.boolean
 import net.rpcsx.utils.RpcsxUpdater
 import org.json.JSONObject
 
@@ -210,13 +213,19 @@ fun AppNavHost() {
     val showDock = currentRoute in listOf("games", "settings", "controls", "game_directories")
 
     val installPkgLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument(),
+        // GetContent (ACTION_GET_CONTENT) rather than OpenDocument
+        // (ACTION_OPEN_DOCUMENT): many third-party file managers only
+        // implement the former, so requiring OpenDocument silently excluded
+        // them from the PKG/PUP/ISO picker on those devices.
+        contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
             if (uri != null) {
                 // ISOs are booted straight from the content URI later (fd
                 // boot - works for any provider, including Downloads), so
                 // keep long-term read access to it. PKG/EDAT/PUP files are
                 // consumed during install and need no persistent grant.
+                // GetContent grants are not always persistable (depends on
+                // the source provider), so failure here is expected and fine.
                 val name = DocumentFile.fromSingleUri(context, uri)?.name
                 if (name?.endsWith(".iso", ignoreCase = true) == true) {
                     try {
@@ -235,6 +244,26 @@ fun AppNavHost() {
             }
         }
     )
+
+    // Offered once, the first time the user installs a PKG/PUP, when "All
+    // files access" isn't granted yet (see PrecompilerService.install for
+    // what it speeds up). Declining just proceeds through the normal SAF
+    // path - this never blocks the install, only offers a faster one.
+    val requestFastPkgInstall = {
+        if (StorageAccess.isGranted() || GeneralSettings["asked_fast_pkg_install"].boolean()) {
+            installPkgLauncher.launch("*/*")
+        } else {
+            GeneralSettings["asked_fast_pkg_install"] = true
+            AlertDialogQueue.showDialog(
+                title = context.getString(R.string.fast_pkg_install_title),
+                message = context.getString(R.string.fast_pkg_install_message),
+                onConfirm = { StorageAccess.requestAccess(context) },
+                onDismiss = { installPkgLauncher.launch("*/*") },
+                confirmText = context.getString(R.string.enable),
+                dismissText = context.getString(R.string.not_now)
+            )
+        }
+    }
 
     val installFwLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -768,7 +797,7 @@ fun AppNavHost() {
                             restoreState = true
                         }
                     },
-                    onAddGameFile = { installPkgLauncher.launch(arrayOf("*/*")) },
+                    onAddGameFile = requestFastPkgInstall,
                     onAddGameFolder = { gameFolderPickerLauncher.launch(null) },
                     onAddIsoFolder = { isoDirPickerLauncher.launch(null) }
                 )

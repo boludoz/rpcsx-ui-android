@@ -4,10 +4,12 @@
 
     <string name="add">Añadir</string>
     <string name="close">Cerrar</string>
+    <string name="enable">Activar</string>
     <string name="error">Error</string>
     <string name="export">Exportar</string>
     <string name="import_">Importar</string>
     <string name="none">Ninguno</string>
+    <string name="not_now">Ahora no</string>
     <string name="reset">Restablecer</string>
 
     <!-- AppNavHost -->
@@ -16,6 +18,8 @@
     <string name="device_info">Información del dispositivo</string>
     <string name="driver_download_channel">Canal de descarga del controlador de GPU</string>
     <string name="edit_overlay">Editar controles en pantalla</string>
+    <string name="fast_pkg_install_message">Activá \"Acceso a todos los archivos\" para que la instalación de PKG/PUP lea el archivo directamente en vez de pasar por la capa de almacenamiento más lenta de Android. Igual podés instalar sin activarlo.</string>
+    <string name="fast_pkg_install_title">Instalaciones más rápidas</string>
     <string name="firmware">Firmware</string>
     <string name="rpcsx_download_channel">Canal de descarga de RPCSX</string>
     <string name="select_game_file">Instalar PKG, ISO o RAP</string>

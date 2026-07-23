@@ -256,6 +256,12 @@ class GameRepository {
                         // after the user re-adds the ISO.
                         existsGame.info.sourceUri.value =
                             info.sourceUri ?: existsGame.info.sourceUri.value
+                        // A newer PARAM.SFO (e.g. from an update PKG install)
+                        // must overwrite the displayed version, or the game
+                        // card keeps showing the version it was first
+                        // installed with forever.
+                        existsGame.info.version.value =
+                            info.version ?: existsGame.info.version.value
                         // The same game can be reported by more than one scan
                         // (nested registered directories, or a rescan while an
                         // install is still pending). addProgress() throws on a

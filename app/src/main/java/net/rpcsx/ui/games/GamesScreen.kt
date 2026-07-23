@@ -396,39 +396,50 @@ fun GameItem(
                     }
                 }
 
+                // The install placeholder (see GameRepository.createGameInstallEntry)
+                // uses path "$" and no name until the real GameInfo arrives, which for
+                // some install kinds (e.g. RAP/EDAT key installs, which never call
+                // sendGameInfo) doesn't happen at all - so this card can sit in
+                // placeholder state for the whole install regardless. Show it as
+                // "Installing..." instead of leaking the raw "$" path / null name.
+                val isInstallPlaceholder = game.info.path == "$"
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Text(
-                        text = game.info.name.value ?: "Unknown Game",
+                        text = if (isInstallPlaceholder) stringResource(R.string.installing)
+                        else game.info.name.value ?: "Unknown Game",
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = game.info.path.substringAfterLast("/").substringBeforeLast("."),
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = "v${game.info.version.value ?: "1.00"}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(start = 4.dp)
-                        )
+                    if (!isInstallPlaceholder) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = game.info.path.substringAfterLast("/").substringBeforeLast("."),
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "v${game.info.version.value ?: "1.00"}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                        }
                     }
                 }
             }

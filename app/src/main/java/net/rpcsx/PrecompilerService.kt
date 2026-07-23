@@ -7,10 +7,12 @@ import android.content.pm.ServiceInfo
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.IntentCompat
+import java.io.File
 import kotlin.concurrent.thread
 
 enum class PrecompilerServiceAction {
@@ -63,18 +65,42 @@ class PrecompilerService : Service() {
     }
 
     fun install(isFw: Boolean, uri: Uri, installProgress: Long): Boolean {
-        val descriptor = try {
-            contentResolver.openAssetFileDescriptor(uri, "r")
-        } catch (e: Throwable) {
-            Log.e("PrecompilerService", "openAssetFileDescriptor failed", e)
-            reportFailure(installProgress, e.message ?: "Cannot open file")
-            return false
-        }
+        // On API 30+ a SAF content:// read is proxied through the
+        // scoped-storage FUSE daemon, which adds real overhead on top of
+        // plain file I/O - noticeable on a multi-GB PUP or a big PKG. When
+        // "All files access" is granted, resolveTreeUriToPath (already used
+        // for registering game/ISO folders in place, see StorageAccess/
+        // GameDirectoryRepository) can usually turn the picked document back
+        // into its real path on primary storage or Downloads; open that
+        // directly instead and skip FUSE entirely. Anything it can't resolve
+        // (cloud providers, SD cards without access, etc.) falls back to the
+        // SAF fd exactly as before.
+        val directPfd = if (StorageAccess.isGranted()) {
+            try {
+                RPCSX.instance.resolveTreeUriToPath(uri.toString())
+                    ?.let(::File)
+                    ?.takeIf { it.canRead() }
+                    ?.let { ParcelFileDescriptor.open(it, ParcelFileDescriptor.MODE_READ_ONLY) }
+            } catch (e: Exception) {
+                Log.w("PrecompilerService", "Direct file open failed, falling back to SAF", e)
+                null
+            }
+        } else null
 
-        val fd = descriptor?.parcelFileDescriptor?.fd
+        val assetDescriptor = if (directPfd == null) {
+            try {
+                contentResolver.openAssetFileDescriptor(uri, "r")
+            } catch (e: Throwable) {
+                Log.e("PrecompilerService", "openAssetFileDescriptor failed", e)
+                reportFailure(installProgress, e.message ?: "Cannot open file")
+                return false
+            }
+        } else null
+
+        val fd = directPfd?.fd ?: assetDescriptor?.parcelFileDescriptor?.fd
 
         if (fd == null) {
-            try { descriptor?.close() } catch (e: Exception) { e.printStackTrace() }
+            try { assetDescriptor?.close() } catch (e: Exception) { e.printStackTrace() }
             reportFailure(installProgress, "Cannot open file descriptor")
             return false
         }
@@ -99,7 +125,8 @@ class PrecompilerService : Service() {
             return false
         } finally {
             try {
-                descriptor.close()
+                directPfd?.close()
+                assetDescriptor?.close()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
