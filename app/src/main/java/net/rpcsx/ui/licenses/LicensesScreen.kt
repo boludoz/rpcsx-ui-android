@@ -53,7 +53,7 @@ private fun LicenseItem(entry: LicenseEntry, onDelete: () -> Unit) {
     val displayName = entry.gameName ?: entry.titleId ?: stringResource(R.string.license_unassociated)
 
     TooltipBox(
-        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
         state = tooltipState,
         tooltip = {
             RichTooltip(

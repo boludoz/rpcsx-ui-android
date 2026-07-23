@@ -173,7 +173,7 @@ object PerGameConfigRepository {
             client.newCall(request).execute().use { resp ->
                 if (!resp.isSuccessful) return CommunityConfigFetch.Error("HTTP ${resp.code}")
 
-                val root = JSONObject(resp.body?.string().orEmpty())
+                val root = JSONObject(resp.body.string())
                 when (val rc = root.optInt("return_code", -255)) {
                     in 0..Int.MAX_VALUE -> Unit
                     -2 -> return CommunityConfigFetch.Error("Server in maintenance mode")
