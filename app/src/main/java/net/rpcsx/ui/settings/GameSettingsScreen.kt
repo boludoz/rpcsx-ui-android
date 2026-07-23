@@ -1,18 +1,28 @@
 package net.rpcsx.ui.settings
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -20,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -28,6 +39,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.rpcsx.GameRepository
 import net.rpcsx.MaxGamepadPlayers
 import net.rpcsx.R
@@ -38,15 +52,31 @@ import net.rpcsx.ui.settings.components.core.PreferenceValue
 import net.rpcsx.ui.settings.components.preference.RegularPreference
 import net.rpcsx.ui.settings.components.preference.SingleSelectionDialog
 import net.rpcsx.ui.settings.components.preference.SliderPreference
+import net.rpcsx.utils.CommunityConfigFetch
 import net.rpcsx.utils.FileUtil
-import net.rpcsx.utils.GameConfig
 import net.rpcsx.utils.InputBindingPrefs
+import net.rpcsx.utils.PerGameConfigRepository
 import org.json.JSONObject
 
+/** Fallback identity for a game entry that somehow has no titleId yet
+ *  (ParamSfoParser couldn't read its PARAM.SFO). Matches the layout the
+ *  engine itself uses: hdd0 games live in .../game/<TITLE_ID>/, disc/ISO
+ *  games in .../games/<TITLE_ID>/ (path may point at <TITLE_ID>.iso directly),
+ *  so the path's last segment is usually the title id anyway. */
+private fun titleIdForPath(path: String): String {
+    var id = path.trimEnd('/').substringAfterLast('/')
+    if (id.endsWith(".iso", ignoreCase = true)) {
+        id = id.dropLast(4)
+    }
+    return id.uppercase()
+}
+
 /**
- * Per-game settings: graphics and advanced overrides stored in the entry's
- * custom config (config_<uuid>_<TITLE_ID>.json, passed to the emulator at
- * boot), per-game key mappings, cache clearing and reset to global defaults.
+ * Per-game settings: a one-tap RPCS3 community config, graphics and advanced
+ * overrides stored in the core's own per-title custom config
+ * (config/custom_configs/config_<TITLE_ID>.yml, applied at boot via
+ * cfg_mode::custom), per-game key mappings, cache clearing and reset to
+ * global defaults.
  *
  * Long-pressing an overridden value reverts it to the global setting.
  */
@@ -59,14 +89,20 @@ fun GameSettingsScreen(
     navigateTo: (path: String) -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val game = remember(gamePath) { GameRepository.find(gamePath) }
-    val uuid = remember(game) { game?.info?.uuid ?: "" }
-    val titleId = remember(gamePath) { GameConfig.titleIdForPath(gamePath) }
+    val titleId = remember(game, gamePath) {
+        game?.info?.titleId?.value?.takeIf { it.isNotEmpty() } ?: titleIdForPath(gamePath)
+    }
     val gameName = remember(gamePath) {
         game?.info?.name?.value ?: titleId
     }
 
-    val rootSettingsJson = remember {
+    var reloadKey by remember { mutableStateOf(0) }
+    var communityConfigBusy by remember { mutableStateOf(false) }
+    val hasCustomConfig = remember(titleId, reloadKey) { PerGameConfigRepository.hasCustomConfig(titleId) }
+
+    val rootSettingsJson = remember(reloadKey) {
         try {
             JSONObject(RPCSX.instance.settingsGet("", ""))
         } catch (e: Exception) {
@@ -116,15 +152,99 @@ fun GameSettingsScreen(
                 )
             }
 
+            item(key = "community_config") {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        tonalElevation = 2.dp
+                    ) {
+                        Text(
+                            text = if (hasCustomConfig) {
+                                stringResource(R.string.custom_config_active_note)
+                            } else {
+                                stringResource(R.string.custom_config_global_note)
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(20.dp)
+                        )
+                    }
+
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                communityConfigBusy = true
+                                val fetch = withContext(Dispatchers.IO) {
+                                    PerGameConfigRepository.fetchCommunityConfig(titleId)
+                                }
+                                communityConfigBusy = false
+                                when (fetch) {
+                                    is CommunityConfigFetch.Found -> {
+                                        AlertDialogQueue.showDialog(
+                                            title = context.getString(R.string.apply_community_config_title),
+                                            message = context.getString(R.string.apply_community_config_message, fetch.yaml.trim()),
+                                            confirmText = context.getString(R.string.apply),
+                                            onConfirm = {
+                                                scope.launch {
+                                                    communityConfigBusy = true
+                                                    val ok = withContext(Dispatchers.IO) {
+                                                        PerGameConfigRepository.importConfig(titleId, fetch.yaml)
+                                                    }
+                                                    communityConfigBusy = false
+                                                    if (ok) reloadKey++
+                                                    Toast.makeText(
+                                                        context,
+                                                        context.getString(
+                                                            if (ok) R.string.community_config_applied
+                                                            else R.string.community_config_rejected
+                                                        ),
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            }
+                                        )
+                                    }
+                                    is CommunityConfigFetch.NotFound ->
+                                        Toast.makeText(context, context.getString(R.string.community_config_not_found), Toast.LENGTH_SHORT).show()
+                                    is CommunityConfigFetch.Error ->
+                                        Toast.makeText(context, context.getString(R.string.community_config_failed, fetch.message), Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        },
+                        enabled = !communityConfigBusy,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (communityConfigBusy) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Icon(painter = painterResource(R.drawable.ic_cloud_download), contentDescription = null)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.use_community_config))
+                    }
+                }
+            }
+
             item { HorizontalDivider() }
 
             item { PreferenceHeader(stringResource(R.string.graphics)) }
 
-            item { GameEnumSetting(uuid, titleId, rendererPath) }
-            item { GameEnumSetting(uuid, titleId, resolutionPath) }
-            item { GameSliderSetting(uuid, titleId, VideoResolutionScalePath, "%") }
-            item { GameEnumSetting(uuid, titleId, OutputScalingPath) }
-            item { GameSliderSetting(uuid, titleId, FsrSharpeningPath, "%") }
+            item { GameEnumSetting(titleId, rendererPath) }
+            item { GameEnumSetting(titleId, resolutionPath) }
+            item { GameSliderSetting(titleId, VideoResolutionScalePath, "%") }
+            item { GameEnumSetting(titleId, OutputScalingPath) }
+            item { GameSliderSetting(titleId, FsrSharpeningPath, "%") }
 
             item { HorizontalDivider() }
 
@@ -134,7 +254,7 @@ fun GameSettingsScreen(
                 RegularPreference(
                     title = stringResource(R.string.advanced_settings),
                     leadingIcon = null,
-                    onClick = { navigateTo("game_adv/$uuid/$titleId@@$") }
+                    onClick = { navigateTo("game_adv/$titleId@@$") }
                 )
             }
 
@@ -190,7 +310,7 @@ fun GameSettingsScreen(
                             title = context.getString(R.string.reset_game_settings),
                             message = context.getString(R.string.ask_if_reset_game, gameName),
                             onConfirm = {
-                                GameConfig.reset(uuid, titleId)
+                                PerGameConfigRepository.deleteCustomConfig(titleId)
                                 InputBindingPrefs.clearTitleBindings(titleId)
                                 Toast.makeText(
                                     context,
@@ -211,8 +331,8 @@ fun GameSettingsScreen(
  *  ("value" is the effective value, "overridden" marks per-title ones).
  *  Long-press reverts to the global value. */
 @Composable
-private fun GameEnumSetting(uuid: String, titleId: String, path: String, title: String? = null) {
-    val node = remember(uuid, titleId, path) { GameConfig.node(uuid, titleId, path) }
+private fun GameEnumSetting(titleId: String, path: String, title: String? = null) {
+    val node = remember(titleId, path) { PerGameConfigRepository.node(titleId, path) }
     val variants = remember(node) {
         if (node.has("variants")) {
             val arr = node.getJSONArray("variants")
@@ -230,14 +350,14 @@ private fun GameEnumSetting(uuid: String, titleId: String, path: String, title: 
         icon = null,
         title = (title ?: path.substringAfterLast("@@")) + if (isOverridden) " *" else "",
         onValueChange = { newValue ->
-            if (GameConfig.set(uuid, titleId, path, newValue)) {
+            if (PerGameConfigRepository.set(titleId, path, newValue)) {
                 value = newValue
                 isOverridden = true
             }
         },
         onLongClick = {
-            GameConfig.remove(uuid, titleId, path)
-            value = GameConfig.node("", "", path).optString("value")
+            PerGameConfigRepository.remove(titleId, path)
+            value = PerGameConfigRepository.node("", path).optString("value")
             isOverridden = false
         }
     )
@@ -245,8 +365,8 @@ private fun GameEnumSetting(uuid: String, titleId: String, path: String, title: 
 
 /** Numeric setting (int/uint) with min/max from the merged schema node. */
 @Composable
-private fun GameSliderSetting(uuid: String, titleId: String, path: String, unit: String = "") {
-    val node = remember(uuid, titleId, path) { GameConfig.node(uuid, titleId, path) }
+private fun GameSliderSetting(titleId: String, path: String, unit: String = "") {
+    val node = remember(titleId, path) { PerGameConfigRepository.node(titleId, path) }
     val min = node.optString("min").toFloatOrNull() ?: return
     val max = node.optString("max").toFloatOrNull() ?: return
     if (min >= max) return
@@ -262,15 +382,15 @@ private fun GameSliderSetting(uuid: String, titleId: String, path: String, unit:
         steps = (max - min).toInt() - 1,
         title = path.substringAfterLast("@@") + if (isOverridden) " *" else "",
         onValueChange = { newValue ->
-            if (GameConfig.set(uuid, titleId, path, newValue.toLong())) {
+            if (PerGameConfigRepository.set(titleId, path, newValue.toLong())) {
                 value = newValue.toLong().toFloat()
                 isOverridden = true
             }
         },
         valueContent = { PreferenceValue(text = "${value.toInt()}$unit") },
         onLongClick = {
-            GameConfig.remove(uuid, titleId, path)
-            value = GameConfig.node("", "", path).optString("value").toFloatOrNull() ?: min
+            PerGameConfigRepository.remove(titleId, path)
+            value = PerGameConfigRepository.node("", path).optString("value").toFloatOrNull() ?: min
             isOverridden = false
         }
     )

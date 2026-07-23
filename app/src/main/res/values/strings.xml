@@ -131,6 +131,16 @@
     <string name="manage_directories">Manage Directories</string>
     <string name="game_settings">Game Settings</string>
     <string name="per_game_overrides_note">Changes here only apply to this game. Long-press a value to revert it to the global setting.</string>
+    <string name="custom_config_active_note">This game uses a custom configuration. Changes below apply only to this game.</string>
+    <string name="custom_config_global_note">This game uses the global configuration. Changing any setting below, or applying the community config, creates a custom configuration just for this game.</string>
+    <string name="use_community_config">Use RPCS3 community config</string>
+    <string name="apply">Apply</string>
+    <string name="apply_community_config_title">Apply community config?</string>
+    <string name="apply_community_config_message">RPCS3\'s recommended settings for this game (this becomes a custom config, overriding the global one):\n\n%1$s</string>
+    <string name="community_config_applied">Community configuration applied</string>
+    <string name="community_config_rejected">Config rejected by emulator</string>
+    <string name="community_config_not_found">No community configuration for this game</string>
+    <string name="community_config_failed">Failed: %1$s</string>
     <string name="custom_mapping">Custom mapping</string>
     <string name="delete_cache">Delete caches</string>
     <string name="delete_cache_desc">Deletes this game\'s compiled shader and PPU caches</string>
@@ -168,6 +178,30 @@
     <string name="users">Users</string>
     <string name="view_internal_dir">View Internal Directory</string>
     <string name="view_internal_dir_description">Open internal directory of RPCSX in file manager</string>
+    <string name="auto_download_updates">Automatic update downloads</string>
+    <string name="auto_download_updates_desc">Automatically download and install emulator and patch updates on launch</string>
+    <string name="auto_download_state_enabled">Enabled</string>
+    <string name="auto_download_state_disabled">Disabled</string>
+    <string name="auto_download_ask_enable">Enable it?</string>
+    <string name="auto_download_ask_disable">Disable it?</string>
+    <string name="disable">Disable</string>
+    <string name="emulator_data_directory">Emulator data directory</string>
+    <string name="directory_custom_with_path">Custom: %1$s</string>
+    <string name="directory_default_with_path">Default: %1$s</string>
+    <string name="restore_default_directory">Restore default directory</string>
+    <string name="ask_restore_default_directory">Restore the emulator data directory to its default location?\n\n%1$s</string>
+    <string name="restore">Restore</string>
+
+    <!-- LicensesScreen -->
+    <string name="licenses">Installed Licenses (RAP/EDAT)</string>
+    <string name="licenses_description">View and delete installed licenses, matched to their games</string>
+    <string name="no_licenses_installed">No RAP/EDAT files installed for this user.</string>
+    <string name="license_unassociated">Unassociated</string>
+    <string name="license_info_type">Type: %1$s</string>
+    <string name="license_info_content_id">CONTENT_ID: %1$s</string>
+    <string name="license_info_title_id">TITLE_ID: %1$s</string>
+    <string name="delete_license">Delete license</string>
+    <string name="ask_delete_license">Delete %1$s? This cannot be undone.</string>
 
     <!-- SliderPreference -->
     <string name="slider_value_supporting">Value must be a multiple of step size %1$d within %2$.0f to %3$.0f</string>

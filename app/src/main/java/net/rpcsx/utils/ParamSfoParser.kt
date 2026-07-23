@@ -76,9 +76,9 @@ object ParamSfoParser {
     /**
      * Looks for PARAM.SFO under the common layouts (flat, as used by
      * installed games under dev_hdd0/game/<ID>/, and disc-style PS3_GAME/)
-     * and returns TITLE_ID if found.
+     * and returns its parsed entries if found (TITLE_ID, CATEGORY, ...).
      */
-    fun findTitleId(gamePath: String): String? {
+    fun findGameMeta(gamePath: String): Map<String, String>? {
         val base = File(gamePath)
         // The real file is always named "PARAM.SFO" on PS3, but user storage
         // can surface it with different casing (SAF-backed folders, some
@@ -89,9 +89,15 @@ object ParamSfoParser {
         for (dir in dirs) {
             val file = dir.listFiles()?.firstOrNull { it.isFile && it.name.equals("PARAM.SFO", ignoreCase = true) }
                 ?: continue
-            val id = parse(file)?.get("TITLE_ID")?.trim()
-            if (!id.isNullOrEmpty()) return id
+            val meta = parse(file) ?: continue
+            if (!meta["TITLE_ID"].isNullOrBlank()) return meta
         }
         return null
     }
+
+    fun findTitleId(gamePath: String): String? =
+        findGameMeta(gamePath)?.get("TITLE_ID")?.trim()?.takeIf { it.isNotEmpty() }
+
+    fun findCategory(gamePath: String): String? =
+        findGameMeta(gamePath)?.get("CATEGORY")?.trim()?.takeIf { it.isNotEmpty() }
 }

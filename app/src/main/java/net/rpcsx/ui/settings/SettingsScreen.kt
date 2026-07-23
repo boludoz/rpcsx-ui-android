@@ -682,20 +682,33 @@ fun SettingsScreen(
                 )
             }
 
+            item(key = "licenses") {
+                HomePreference(
+                    title = stringResource(R.string.licenses),
+                    icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_lock)) },
+                    description = stringResource(R.string.licenses_description),
+                    onClick = {
+                        navigateTo("licenses")
+                    }
+                )
+            }
+
             item(key = "auto_download_updates") {
                 var autoDownload by remember {
                     mutableStateOf((GeneralSettings["auto_download_updates"] as? Boolean) ?: true)
                 }
                 HomePreference(
-                    title = "Descarga automática de actualizaciones",
+                    title = stringResource(R.string.auto_download_updates),
                     icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_cloud_download)) },
-                    description = if (autoDownload) "Activada" else "Desactivada",
+                    description = stringResource(
+                        if (autoDownload) R.string.auto_download_state_enabled else R.string.auto_download_state_disabled
+                    ),
                     onClick = {
                         AlertDialogQueue.showDialog(
-                            title = "Descarga automática de actualizaciones",
-                            message = "Descargar e instalar automáticamente actualizaciones de emulador y parches al iniciar.\n\n" +
-                                if (autoDownload) "¿Desactivarla?" else "¿Activarla?",
-                            confirmText = if (autoDownload) "Desactivar" else "Activar",
+                            title = context.getString(R.string.auto_download_updates),
+                            message = context.getString(R.string.auto_download_updates_desc) + "\n\n" +
+                                context.getString(if (autoDownload) R.string.auto_download_ask_disable else R.string.auto_download_ask_enable),
+                            confirmText = context.getString(if (autoDownload) R.string.disable else R.string.enable),
                             onConfirm = {
                                 val newValue = !autoDownload
                                 GeneralSettings["auto_download_updates"] = newValue
@@ -728,17 +741,21 @@ fun SettingsScreen(
                     }
                 }
                 HomePreference(
-                    title = "Directorio de datos del emulador",
+                    title = stringResource(R.string.emulator_data_directory),
                     icon = { PreferenceIcon(icon = painterResource(R.drawable.ic_folder)) },
-                    description = if (customRoot != null) "Personalizado: $currentRoot" else "Predeterminado: $currentRoot",
+                    description = if (customRoot != null) {
+                        stringResource(R.string.directory_custom_with_path, currentRoot)
+                    } else {
+                        stringResource(R.string.directory_default_with_path, currentRoot)
+                    },
                     onClick = { customRootLauncher.launch(null) },
                     onLongClick = {
                         if (customRoot != null) {
                             val defaultPath = context.getExternalFilesDir(null)?.toString() ?: ""
                             AlertDialogQueue.showDialog(
-                                title = "Restaurar directorio predeterminado",
-                                message = "¿Restaurar el directorio de datos del emulador a la ubicación predeterminada?\n\n$defaultPath",
-                                confirmText = "Restaurar",
+                                title = context.getString(R.string.restore_default_directory),
+                                message = context.getString(R.string.ask_restore_default_directory, defaultPath),
+                                confirmText = context.getString(R.string.restore),
                                 onConfirm = {
                                     GeneralSettings["custom_root_directory"] = null
                                     RPCSX.rootDirectory = if (defaultPath.endsWith("/")) defaultPath else "$defaultPath/"

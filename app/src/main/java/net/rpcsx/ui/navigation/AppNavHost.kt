@@ -138,7 +138,7 @@ import net.rpcsx.ui.settings.GraphicsSettings
 import net.rpcsx.ui.settings.PlayerControllerSettings
 import net.rpcsx.ui.settings.SettingsScreen
 import net.rpcsx.ui.user.UsersScreen
-import net.rpcsx.utils.GameConfig
+import net.rpcsx.utils.PerGameConfigRepository
 import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.GeneralSettings.boolean
 import net.rpcsx.utils.RpcsxUpdater
@@ -450,6 +450,14 @@ fun AppNavHost() {
         }
 
         composable(
+            route = "licenses"
+        ) {
+            net.rpcsx.ui.licenses.LicensesScreen(
+                navigateBack = navController::navigateUp
+            )
+        }
+
+        composable(
             route = "game_settings/{gamePath}",
             arguments = listOf(navArgument("gamePath") { type = NavType.StringType })
         ) { entry ->
@@ -477,23 +485,23 @@ fun AppNavHost() {
         // Per-game advanced settings: same dynamic tree as the global
         // "settings" routes, but values are merged with (and written to) the
         // title's custom config overrides instead of the emulator's global
-        // config. Registered per settings-tree node, parameterized by title.
+        // config. Registered per settings-tree node, parameterized by title
+        // id (the core's own per-game config key - see
+        // PerGameConfigRepository / config/custom_configs/config_<id>.yml).
         fun registerGameAdvanced(obj: JSONObject, path: String) {
             composable(
-                route = "game_adv/{uuid}/{titleId}$path${if (path.isEmpty()) "@@$" else ""}",
+                route = "game_adv/{titleId}$path${if (path.isEmpty()) "@@$" else ""}",
                 arguments = listOf(
-                    navArgument("uuid") { type = NavType.StringType },
                     navArgument("titleId") { type = NavType.StringType }
                 )
             ) { entry ->
-                val uuid = entry.arguments?.getString("uuid") ?: ""
                 val titleId = entry.arguments?.getString("titleId") ?: ""
-                var merged by remember(uuid, titleId) { mutableStateOf(GameConfig.mergedSettings(uuid, titleId)) }
+                var merged by remember(titleId) { mutableStateOf(PerGameConfigRepository.mergedSettings(titleId)) }
                 val lifecycleOwner = LocalLifecycleOwner.current
-                DisposableEffect(lifecycleOwner, uuid, titleId) {
+                DisposableEffect(lifecycleOwner, titleId) {
                     val observer = LifecycleEventObserver { _, event ->
                         if (event == Lifecycle.Event.ON_RESUME) {
-                            merged = GameConfig.mergedSettings(uuid, titleId)
+                            merged = PerGameConfigRepository.mergedSettings(titleId)
                         }
                     }
                     lifecycleOwner.lifecycle.addObserver(observer)
@@ -502,9 +510,9 @@ fun AppNavHost() {
                 AdvancedSettingsScreen(
                     navigateBack = navController::navigateUp,
                     navigateTo = navigateTo,
-                    settings = GameConfig.subtree(merged, path) ?: JSONObject(),
+                    settings = PerGameConfigRepository.subtree(merged, path) ?: JSONObject(),
                     path = path,
-                    routePrefix = "game_adv/$uuid/$titleId",
+                    routePrefix = "game_adv/$titleId",
                     applySetting = { p, v ->
                         val value: Any = when {
                             v == "true" -> true
@@ -512,7 +520,7 @@ fun AppNavHost() {
                             v.startsWith("\"") && v.endsWith("\"") -> v.substring(1, v.length - 1)
                             else -> v.toLongOrNull() ?: v.toDoubleOrNull() ?: v
                         }
-                        GameConfig.set(uuid, titleId, p, value)
+                        PerGameConfigRepository.set(titleId, p, value)
                     },
                     showInstallRpcsx = false
                 )

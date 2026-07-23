@@ -32,27 +32,34 @@ data class GameInfo @Keep constructor(
     var version: String? = "1.00",
     var uuid: String = java.util.UUID.randomUUID().toString(),
     // Real PARAM.SFO TITLE_ID (e.g. "BLES01253"). Sent directly by a native
-    // core new enough to include it (7-arg constructor below); otherwise
-    // recovered locally from disk by GameRepository.add() - see
-    // ParamSfoParser.
-    var titleId: String? = null
+    // core new enough to include it; otherwise recovered locally from disk
+    // by GameRepository.add() - see ParamSfoParser.
+    var titleId: String? = null,
+    // PARAM.SFO CATEGORY ("DG" disc game, "HG" HDD game, "GD" disc-game
+    // update, ...). Used to rank which source should represent a title when
+    // the same TITLE_ID is reported from more than one place - see
+    // entryRank().
+    var category: String? = null
 ) {
-    // Called from native (sendGameInfo). All three signatures are kept so
-    // the APK works against an old core (5-arg, no version/titleId), a
-    // mid-generation one (6-arg, with version) and a new one (7-arg, with
-    // titleId). Keep in sync with the JNI constructor lookup in
-    // android/src/rpcsx-android.cpp.
+    // Called from native (sendGameInfo). All four signatures are kept so the
+    // APK works against a core from any prior generation (5-arg with no
+    // version/titleId/category, up to the newest 8-arg one). Keep in sync
+    // with the JNI constructor lookup in android/src/rpcsx-android.cpp.
     @Keep
     constructor(path: String, name: String?, iconPath: String?, gameFlags: Int, sourceUri: String?)
-        : this(path, name, iconPath, gameFlags, sourceUri, "1.00", java.util.UUID.randomUUID().toString(), null)
+        : this(path, name, iconPath, gameFlags, sourceUri, "1.00", java.util.UUID.randomUUID().toString(), null, null)
 
     @Keep
     constructor(path: String, name: String?, iconPath: String?, gameFlags: Int, sourceUri: String?, version: String?)
-        : this(path, name, iconPath, gameFlags, sourceUri, version ?: "1.00", java.util.UUID.randomUUID().toString(), null)
+        : this(path, name, iconPath, gameFlags, sourceUri, version ?: "1.00", java.util.UUID.randomUUID().toString(), null, null)
 
     @Keep
     constructor(path: String, name: String?, iconPath: String?, gameFlags: Int, sourceUri: String?, version: String?, titleId: String?)
-        : this(path, name, iconPath, gameFlags, sourceUri, version ?: "1.00", java.util.UUID.randomUUID().toString(), titleId)
+        : this(path, name, iconPath, gameFlags, sourceUri, version ?: "1.00", java.util.UUID.randomUUID().toString(), titleId, null)
+
+    @Keep
+    constructor(path: String, name: String?, iconPath: String?, gameFlags: Int, sourceUri: String?, version: String?, titleId: String?, category: String?)
+        : this(path, name, iconPath, gameFlags, sourceUri, version ?: "1.00", java.util.UUID.randomUUID().toString(), titleId, category)
 }
 
 data class GameInfoStore(
@@ -63,7 +70,8 @@ data class GameInfoStore(
     val sourceUri: MutableState<String?> = mutableStateOf(null),
     val version: MutableState<String?> = mutableStateOf("1.00"),
     val uuid: String = java.util.UUID.randomUUID().toString(),
-    val titleId: MutableState<String?> = mutableStateOf(null)
+    val titleId: MutableState<String?> = mutableStateOf(null),
+    val category: MutableState<String?> = mutableStateOf(null)
 )
 
 enum class GameProgressType {
@@ -105,14 +113,24 @@ data class Game(
 // register the same game a second time instead of updating it in place.
 private fun normalizePath(path: String) = path.trimEnd('/')
 
-// True only for the exact directory the native core uses to install/patch a
-// given TITLE_ID (dev_hdd0/game/<TITLE_ID>/) - never for a user's own,
-// independently chosen folder or ISO path, even if it happens to carry the
-// same titleId. Keeps the titleId merge fallback in add() from ever folding
-// two deliberately separate library entries (e.g. a folder copy and an ISO
-// copy of the same game) into one.
-private fun isStandardInstallStubPath(path: String, titleId: String) =
-    normalizePath(path) == normalizePath(RPCSX.rootDirectory + "config/dev_hdd0/game/" + titleId)
+// A library entry that plays directly from a raw .iso, as opposed to an
+// installed copy under dev_hdd0/game or config/games (a directory path).
+private fun isIsoPath(path: String) = normalizePath(path).endsWith(".iso", ignoreCase = true)
+
+// How strongly an entry should represent its title when the same TITLE_ID
+// is reported from more than one source (an installed copy, a raw ISO, a
+// loose folder). Higher wins; the loser is dropped from the in-memory list
+// only - this never touches, moves or deletes anything on disk. A full
+// installed/registered game (any category other than a bare "GD" disc-game
+// update) is best; a directly-playable .iso beats a lone "GD" update, which
+// isn't standalone-bootable on its own - an ISO/HDD boot applies dev_hdd0's
+// update data automatically by TITLE_ID (see fetchGameInfo's version
+// lookup in rpcsx-android.cpp).
+private fun entryRank(path: String, category: String?): Int = when {
+    !isIsoPath(path) && category != "GD" -> 3
+    isIsoPath(path) -> 2
+    else -> 1
+}
 
 private fun toStore(info: GameInfo) =
     GameInfoStore(
@@ -123,11 +141,22 @@ private fun toStore(info: GameInfo) =
         mutableStateOf(info.sourceUri),
         mutableStateOf(info.version ?: "1.00"),
         info.uuid.ifEmpty { java.util.UUID.randomUUID().toString() },
-        mutableStateOf(info.titleId)
+        mutableStateOf(info.titleId),
+        mutableStateOf(info.category)
     )
 
 private fun toInfo(store: GameInfoStore) =
-    GameInfo(store.path, store.name.value, store.iconPath.value, store.gameFlags.intValue, store.sourceUri.value, store.version.value ?: "1.00", store.uuid, store.titleId.value)
+    GameInfo(
+        store.path,
+        store.name.value,
+        store.iconPath.value,
+        store.gameFlags.intValue,
+        store.sourceUri.value,
+        store.version.value ?: "1.00",
+        store.uuid,
+        store.titleId.value,
+        store.category.value
+    )
 
 class GameRepository {
     private val games = mutableStateListOf<Game>()
@@ -139,34 +168,23 @@ class GameRepository {
         val isRefreshing = mutableStateOf(false)
         private var isRefreshInCooldown = false
 
-        // One JSON file per game, keyed by uuid, under games_db/. Placeholder
-        // install entries (path == "$") are never persisted.
-        private val gamesDbDir get() = File(RPCSX.rootDirectory, "games_db")
-
-        private fun gameFile(info: GameInfo) = File(gamesDbDir, "${info.uuid}.json")
+        // Single consolidated file (replaces the old one-json-file-per-uuid
+        // games_db/ scheme, which left orphaned duplicate files behind any
+        // time a game got registered twice - see entryRank()/add() for how
+        // duplicates are now prevented instead of cleaned up after the
+        // fact). Placeholder install entries (path == "$") are never
+        // persisted. Lenient parsing so a games.json written by a newer
+        // build (extra GameInfo fields) still loads on an older one.
+        private val gamesJsonLenient = Json { ignoreUnknownKeys = true }
+        private fun gamesJsonFile() = File(RPCSX.rootDirectory, "games.json")
 
         fun save() {
             synchronized(instance) {
                 try {
-                    val dir = gamesDbDir
-                    dir.mkdirs()
-
-                    val keep = HashSet<String>()
-                    instance.games
+                    val infos = instance.games
                         .filter { game -> game.info.path != "$" }
-                        .forEach { game ->
-                            val info = toInfo(game.info)
-                            val file = gameFile(info)
-                            file.writeText(Json.encodeToString(info))
-                            keep.add(file.name)
-                        }
-
-                    // Drop files for games no longer in the list.
-                    dir.listFiles()?.forEach { file ->
-                        if (file.name.endsWith(".json") && file.name !in keep) {
-                            file.delete()
-                        }
-                    }
+                        .map { game -> toInfo(game.info) }
+                    gamesJsonFile().writeText(gamesJsonLenient.encodeToString(infos))
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -176,88 +194,22 @@ class GameRepository {
         suspend fun load() {
             withContext(Dispatchers.IO) {
                 try {
-                    val dir = gamesDbDir
-                    val files = dir.listFiles()?.filter { it.name.endsWith(".json") }.orEmpty()
-                    val loaded = files.mapNotNull { file ->
-                        try {
-                            val info = Json.decodeFromString<GameInfo>(file.readText())
-                            if (info.titleId.isNullOrEmpty() && info.path != "$") {
-                                info.titleId = net.rpcsx.utils.ParamSfoParser.findTitleId(info.path)
-                            }
-                            info to file.lastModified()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            null
+                    val file = gamesJsonFile()
+                    if (!file.isFile) return@withContext
+
+                    val infos = gamesJsonLenient.decodeFromString<List<GameInfo>>(file.readText())
+                    infos.forEach { info ->
+                        if (info.titleId.isNullOrEmpty() && info.path != "$") {
+                            info.titleId = net.rpcsx.utils.ParamSfoParser.findTitleId(info.path)
+                        }
+                        if (info.category.isNullOrEmpty() && info.path != "$") {
+                            info.category = net.rpcsx.utils.ParamSfoParser.findCategory(info.path)
                         }
                     }
-
-                    // An update/patch PKG is installed by the native core
-                    // into the standard dev_hdd0/game/<TITLE_ID>/ directory
-                    // even when the playable game itself was registered from
-                    // an unrelated ISO or loose folder. Before the native
-                    // core started sending titleId directly (see
-                    // GameInfo.titleId / rpcsx-android.cpp), that path
-                    // mismatch could register the same game twice under
-                    // different uuids. Collapse any such leftover duplicates
-                    // here so an already-corrupted games_db self-heals on
-                    // next launch - but only the core's own install stub
-                    // (isStandardInstallStubPath) gets folded away. Two
-                    // independently registered copies of the same title (a
-                    // folder AND an ISO, say) share a titleId too and must
-                    // stay as two separate entries.
-                    val deduped = loaded
-                        .groupBy { (info, _) ->
-                            when {
-                                info.path == "$" -> "uuid:${info.uuid}"
-                                !info.titleId.isNullOrEmpty() -> "tid:${info.titleId}"
-                                else -> "path:${normalizePath(info.path)}"
-                            }
-                        }
-                        .flatMap { (_, group) ->
-                            if (group.size == 1) {
-                                return@flatMap listOf(group[0].first)
-                            }
-
-                            val (stubs, real) = group.partition { (info, _) ->
-                                isStandardInstallStubPath(info.path, info.titleId ?: "")
-                            }
-
-                            if (real.isEmpty()) {
-                                // Every duplicate is the core's own stub (e.g.
-                                // repeated updates before this fix) - collapse
-                                // them like any other path duplicate.
-                                val base = group.minByOrNull { it.second }!!.first
-                                val newest = group.maxByOrNull { it.first.version ?: "" }!!.first
-                                listOf(base.apply {
-                                    version = newest.version ?: version
-                                    name = newest.name ?: name
-                                    iconPath = newest.iconPath ?: iconPath
-                                })
-                            } else if (stubs.isEmpty()) {
-                                // No stub involved - genuinely separate copies.
-                                real.map { it.first }
-                            } else {
-                                // Fold the leftover stub's newer version/name/
-                                // icon into the oldest real (user-registered)
-                                // entry and drop the stub; keep any other real
-                                // entries untouched.
-                                val base = real.minByOrNull { it.second }!!.first
-                                val newest = group.maxByOrNull { it.first.version ?: "" }!!.first
-                                val merged = base.apply {
-                                    version = newest.version ?: version
-                                    name = newest.name ?: name
-                                    iconPath = newest.iconPath ?: iconPath
-                                }
-                                listOf(merged) + real.filter { it.first !== base }.map { it.first }
-                            }
-                        }
 
                     synchronized(instance) {
                         instance.games.clear()
-                        instance.games += deduped.map { info -> Game(toStore(info)) }
-                    }
-                    if (deduped.size != loaded.size) {
-                        save()
+                        instance.games += infos.map { info -> Game(toStore(info)) }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -334,36 +286,58 @@ class GameRepository {
                         if (info.version == null) info.version = prev.version
                         if (prev.uuid.isNotEmpty()) info.uuid = prev.uuid
                         if (info.titleId.isNullOrEmpty()) info.titleId = prev.titleId
+                        if (info.category.isNullOrEmpty()) info.category = prev.category
                     }
 
-                    // The native scan never reports the real PARAM.SFO
-                    // TITLE_ID, only the display name - so a game registered
-                    // from a loose folder/ISO named after its title (e.g.
-                    // "PES 2010") would otherwise show that name where the
-                    // serial is expected (game card subtitle, Sony update
-                    // lookup). Recover it locally from disk instead.
+                    // Older cores don't send titleId/category at all, and a
+                    // game registered from a loose folder/ISO named after its
+                    // title (e.g. "PES 2010") has neither in its path either
+                    // - recover both locally from disk instead. Needed for
+                    // the game card subtitle / Sony update lookup (titleId)
+                    // and the cross-source ranking below (category).
                     if (info.titleId.isNullOrEmpty()) {
                         info.titleId = net.rpcsx.utils.ParamSfoParser.findTitleId(info.path)
                     }
+                    if (info.category.isNullOrEmpty()) {
+                        info.category = net.rpcsx.utils.ParamSfoParser.findCategory(info.path)
+                    }
 
-                    // Path match first. An update/patch PKG is installed by
-                    // the native core into the standard
-                    // dev_hdd0/game/<TITLE_ID>/ directory regardless of where
-                    // the game itself was registered from (e.g. a loose ISO
-                    // or folder elsewhere), so that report needs a titleId
-                    // fallback or it reads as a brand new game and produces a
-                    // duplicate entry (see normalizePath doc comment).
-                    //
-                    // The fallback is deliberately restricted to that one
-                    // standard stub path rather than "any game sharing this
-                    // titleId" - two independently registered copies of the
-                    // same game (e.g. a folder AND an ISO of the same title)
-                    // must stay as two separate library entries; only the
-                    // core's own patch-install stub should ever get folded
-                    // into an existing entry.
+                    // Cross-source de-duplication by title id: the SAME game
+                    // must never appear twice when it's known from more than
+                    // one source (an installed copy under dev_hdd0/game,
+                    // and/or a raw ISO or loose folder registered by the
+                    // user). Keep only the highest-ranked copy (entryRank): a
+                    // full installed/registered game beats a playable .iso,
+                    // which beats a bare "GD" update (e.g. the stub an
+                    // update-PKG install reports at dev_hdd0/game/<id> when
+                    // the real game lives elsewhere). Ties keep the copy
+                    // already listed. This only prunes the on-screen list -
+                    // it never touches, moves or deletes anything on disk;
+                    // the version an update installed is picked up next scan
+                    // via fetchGameInfo's own dev_hdd0/game/<id> lookup.
+                    val incomingTid = info.titleId?.takeIf { it.isNotBlank() }
+                    if (incomingTid != null) {
+                        val incomingRank = entryRank(info.path, info.category)
+                        val twins = instance.games.filter { g ->
+                            g.info.path != "$" &&
+                                normalizePath(g.info.path) != normalizePath(info.path) &&
+                                g.info.titleId.value?.takeIf { it.isNotBlank() } == incomingTid
+                        }
+                        if (twins.isNotEmpty()) {
+                            val bestTwinRank = twins.maxOf { entryRank(it.info.path, it.info.category.value) }
+                            if (incomingRank > bestTwinRank) {
+                                // Incoming is the better representation - drop
+                                // the weaker twins and fall through to add it.
+                                twins.forEach { instance.games.remove(it) }
+                            } else {
+                                // An equal-or-better twin already represents
+                                // this title - discard the duplicate report.
+                                return@forEach
+                            }
+                        }
+                    }
+
                     val existsGame = instance.games.find { x -> normalizePath(x.info.path) == normalizePath(info.path) }
-                        ?: info.titleId?.takeIf { it.isNotEmpty() && isStandardInstallStubPath(info.path, it) }
-                            ?.let { tid -> instance.games.find { x -> x.info.titleId.value == tid } }
                     if (existsGame == null) {
                         val newGame = Game(toStore(info))
                         if (progressId >= 0) {
@@ -389,6 +363,8 @@ class GameRepository {
                             info.version ?: existsGame.info.version.value
                         existsGame.info.titleId.value =
                             info.titleId ?: existsGame.info.titleId.value
+                        existsGame.info.category.value =
+                            info.category ?: existsGame.info.category.value
                         // The same game can be reported by more than one scan
                         // (nested registered directories, or a rescan while an
                         // install is still pending). addProgress() throws on a

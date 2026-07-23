@@ -106,7 +106,8 @@ class RPCSX {
     external fun systemInfo(): String
     // Settings bridge for the GLOBAL config.json (JSON content, edited by
     // the core itself). titleId is ignored (kept for JNI compatibility);
-    // per-game overrides are handled entirely by GameConfig.kt.
+    // per-game overrides are handled by PerGameConfigRepository/the
+    // customConfig* calls below.
     external fun settingsGet(titleId: String, path: String): String
     external fun settingsSet(titleId: String, path: String, value: String): Boolean
     external fun settingsRemove(titleId: String, path: String): Boolean
@@ -114,7 +115,19 @@ class RPCSX {
     // file is touched; dynamic settings only). Empty value = revert to the
     // effective global value.
     external fun settingsLiveApply(path: String, value: String): Boolean
-    
+
+    // Per-game custom configuration (config/custom_configs/config_<serial>
+    // .yml, serial = the game's title id - same file desktop RPCS3 boots
+    // with via cfg_mode::custom). Storage-only: PerGameConfigRepository
+    // merges customConfigGetOverrides onto the schema from settingsGet
+    // itself to render "value"/"overridden" for the UI.
+    external fun customConfigExists(serial: String): Boolean
+    external fun customConfigDelete(serial: String): Boolean
+    external fun customConfigGetOverrides(serial: String): String
+    external fun customConfigSet(serial: String, path: String, value: String): Boolean
+    external fun customConfigRemove(serial: String, path: String): Boolean
+    external fun customConfigImportYaml(serial: String, yaml: String): Boolean
+
     external fun shutdown()
     external fun getState() : Int
     external fun kill()

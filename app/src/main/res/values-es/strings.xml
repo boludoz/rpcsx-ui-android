@@ -135,6 +135,30 @@
     <string name="users">Usuarios</string>
     <string name="view_internal_dir">Ver directorio interno</string>
     <string name="view_internal_dir_description">Abrir el directorio interno de RPCSX en el administrador de archivos</string>
+    <string name="auto_download_updates">Descarga automática de actualizaciones</string>
+    <string name="auto_download_updates_desc">Descargar e instalar automáticamente actualizaciones de emulador y parches al iniciar</string>
+    <string name="auto_download_state_enabled">Activada</string>
+    <string name="auto_download_state_disabled">Desactivada</string>
+    <string name="auto_download_ask_enable">¿Activarla?</string>
+    <string name="auto_download_ask_disable">¿Desactivarla?</string>
+    <string name="disable">Desactivar</string>
+    <string name="emulator_data_directory">Directorio de datos del emulador</string>
+    <string name="directory_custom_with_path">Personalizado: %1$s</string>
+    <string name="directory_default_with_path">Predeterminado: %1$s</string>
+    <string name="restore_default_directory">Restaurar directorio predeterminado</string>
+    <string name="ask_restore_default_directory">¿Restaurar el directorio de datos del emulador a la ubicación predeterminada?\n\n%1$s</string>
+    <string name="restore">Restaurar</string>
+
+    <!-- LicensesScreen -->
+    <string name="licenses">Licencias instaladas (RAP/EDAT)</string>
+    <string name="licenses_description">Ver y borrar licencias instaladas, asociadas a sus juegos</string>
+    <string name="no_licenses_installed">No hay archivos RAP/EDAT instalados para este usuario.</string>
+    <string name="license_unassociated">Sin asociar</string>
+    <string name="license_info_type">Tipo: %1$s</string>
+    <string name="license_info_content_id">CONTENT_ID: %1$s</string>
+    <string name="license_info_title_id">TITLE_ID: %1$s</string>
+    <string name="delete_license">Eliminar licencia</string>
+    <string name="ask_delete_license">¿Eliminar %1$s? Esta acción no se puede deshacer.</string>
 
     <!-- SliderPreference -->
     <string name="slider_value_supporting">El valor debe ser múltiplo de %1$d entre %2$.0f y %3$.0f</string>
@@ -172,6 +196,16 @@
     <string name="manage_directories">Administrar directorios</string>
     <string name="game_settings">Ajustes del juego</string>
     <string name="per_game_overrides_note">Los cambios aquí solo se aplican a este juego. Mantén presionado un valor para revertirlo a la configuración global.</string>
+    <string name="custom_config_active_note">Este juego usa una configuración personalizada. Los cambios de abajo solo aplican a este juego.</string>
+    <string name="custom_config_global_note">Este juego usa la configuración global. Cambiar cualquier ajuste de abajo, o aplicar la configuración de la comunidad, crea una configuración personalizada solo para este juego.</string>
+    <string name="use_community_config">Usar configuración de la comunidad de RPCS3</string>
+    <string name="apply">Aplicar</string>
+    <string name="apply_community_config_title">¿Aplicar configuración de la comunidad?</string>
+    <string name="apply_community_config_message">Ajustes recomendados de RPCS3 para este juego (esto crea una configuración personalizada, reemplazando la global):\n\n%1$s</string>
+    <string name="community_config_applied">Configuración de la comunidad aplicada</string>
+    <string name="community_config_rejected">El emulador rechazó la configuración</string>
+    <string name="community_config_not_found">No hay configuración de la comunidad para este juego</string>
+    <string name="community_config_failed">Error: %1$s</string>
     <string name="custom_mapping">Mapeo personalizado</string>
     <string name="delete_cache">Borrar cachés</string>
     <string name="delete_cache_desc">Borra los cachés de shaders y PPU compilados de este juego</string>

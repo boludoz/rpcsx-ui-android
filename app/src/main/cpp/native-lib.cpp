@@ -75,6 +75,13 @@ struct RPCSXApi {
                       std::string_view valueString);
   bool (*settingsRemove)(std::string_view titleId, std::string_view path);
   bool (*settingsLiveApply)(std::string_view path, std::string_view valueString);
+  bool (*customConfigExists)(std::string_view serial);
+  bool (*customConfigDelete)(std::string_view serial);
+  std::string (*customConfigGetOverrides)(std::string_view serial);
+  bool (*customConfigSet)(std::string_view serial, std::string_view path,
+                          std::string_view valueString);
+  bool (*customConfigRemove)(std::string_view serial, std::string_view path);
+  bool (*customConfigImportYaml)(std::string_view serial, std::string_view yaml);
   std::string (*getVersion)();
   void *(*setCustomDriver)(void *driverHandle);
 };
@@ -146,6 +153,12 @@ struct RPCSXLibrary : RPCSXApi {
     result.settingsSet = reinterpret_cast<decltype(settingsSet)>(dlsym(handle, "_rpcsx_configSet"));
     result.settingsRemove = reinterpret_cast<decltype(settingsRemove)>(dlsym(handle, "_rpcsx_configRemove"));
     result.settingsLiveApply = reinterpret_cast<decltype(settingsLiveApply)>(dlsym(handle, "_rpcsx_configLiveApply"));
+    result.customConfigExists = reinterpret_cast<decltype(customConfigExists)>(dlsym(handle, "_rpcsx_customConfigExists"));
+    result.customConfigDelete = reinterpret_cast<decltype(customConfigDelete)>(dlsym(handle, "_rpcsx_customConfigDelete"));
+    result.customConfigGetOverrides = reinterpret_cast<decltype(customConfigGetOverrides)>(dlsym(handle, "_rpcsx_customConfigGetOverrides"));
+    result.customConfigSet = reinterpret_cast<decltype(customConfigSet)>(dlsym(handle, "_rpcsx_customConfigSet"));
+    result.customConfigRemove = reinterpret_cast<decltype(customConfigRemove)>(dlsym(handle, "_rpcsx_customConfigRemove"));
+    result.customConfigImportYaml = reinterpret_cast<decltype(customConfigImportYaml)>(dlsym(handle, "_rpcsx_customConfigImportYaml"));
     result.getVersion = reinterpret_cast<decltype(getVersion)>(dlsym(handle, "_rpcsx_getVersion"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
     // clang-format on
@@ -423,6 +436,66 @@ extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_settingsLiveApply(
     return false;
   }
   return rpcsxLib.settingsLiveApply(unwrap(env, jpath), unwrap(env, jvalue));
+}
+
+// Per-game custom configuration bridge (config/custom_configs/config_<serial>
+// .yml, serial = title id). Storage-only: the UI merges customConfigGetOverrides
+// onto the global schema from settingsGet itself - see PerGameConfigRepository.
+extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_customConfigExists(
+    JNIEnv *env, jobject, jstring jserial) {
+  if (rpcsxLib.customConfigExists == nullptr) {
+    return false;
+  }
+  return rpcsxLib.customConfigExists(unwrap(env, jserial));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_customConfigDelete(
+    JNIEnv *env, jobject, jstring jserial) {
+  if (rpcsxLib.customConfigDelete == nullptr) {
+    return false;
+  }
+  return rpcsxLib.customConfigDelete(unwrap(env, jserial));
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_net_rpcsx_RPCSX_customConfigGetOverrides(JNIEnv *env, jobject,
+                                              jstring jserial) {
+  if (rpcsxLib.customConfigGetOverrides == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "customConfigGetOverrides: core library too old - update the core .so");
+    return wrap(env, "{}");
+  }
+  return wrap(env, rpcsxLib.customConfigGetOverrides(unwrap(env, jserial)));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_customConfigSet(
+    JNIEnv *env, jobject, jstring jserial, jstring jpath, jstring jvalue) {
+  if (rpcsxLib.customConfigSet == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "customConfigSet: core library too old - update the core .so");
+    return false;
+  }
+  return rpcsxLib.customConfigSet(unwrap(env, jserial), unwrap(env, jpath),
+                                  unwrap(env, jvalue));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_customConfigRemove(
+    JNIEnv *env, jobject, jstring jserial, jstring jpath) {
+  if (rpcsxLib.customConfigRemove == nullptr) {
+    return false;
+  }
+  return rpcsxLib.customConfigRemove(unwrap(env, jserial), unwrap(env, jpath));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_net_rpcsx_RPCSX_customConfigImportYaml(JNIEnv *env, jobject,
+                                            jstring jserial, jstring jyaml) {
+  if (rpcsxLib.customConfigImportYaml == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "customConfigImportYaml: core library too old - update the core .so");
+    return false;
+  }
+  return rpcsxLib.customConfigImportYaml(unwrap(env, jserial), unwrap(env, jyaml));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

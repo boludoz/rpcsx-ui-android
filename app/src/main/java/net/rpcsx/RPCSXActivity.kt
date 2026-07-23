@@ -21,7 +21,6 @@ import androidx.core.view.updateLayoutParams
 import net.rpcsx.databinding.ActivityRpcs3Binding
 import net.rpcsx.dialogs.AlertDialogQueue
 import net.rpcsx.overlay.State
-import net.rpcsx.utils.GameConfig
 import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.InputBindingPrefs
 import android.net.Uri
@@ -205,7 +204,14 @@ class RPCSXActivity : Activity() {
     // precedence over the global ones when present.
     private val inputBindingsBySlot = mutableMapOf<Int, Map<Int, Pair<Int, Int>>>()
     private val activeTitleId by lazy {
-        GameConfig.titleIdForPath(intent.getStringExtra("path") ?: "")
+        val path = intent.getStringExtra("path") ?: ""
+        GameRepository.find(path)?.info?.titleId?.value?.takeIf { it.isNotEmpty() } ?: run {
+            var id = path.trimEnd('/').substringAfterLast('/')
+            if (id.endsWith(".iso", ignoreCase = true)) {
+                id = id.dropLast(4)
+            }
+            id.uppercase()
+        }
     }
     private fun bindingsForSlot(slot: Int) =
         inputBindingsBySlot.getOrPut(slot) { InputBindingPrefs.loadBindings(slot, activeTitleId) }
@@ -308,7 +314,12 @@ class RPCSXActivity : Activity() {
                 }
             var sourceGone = false
 
-            val configPathFile = GameConfig.getCustomConfigPath(game?.info?.uuid ?: "", activeTitleId)
+            // Matches rpcs3::utils::get_custom_config_path(serial) on the
+            // native side exactly (config/custom_configs/config_<serial>.yml)
+            // - PerGameConfigRepository writes there directly now, keyed by
+            // title id instead of a uuid, so this must resolve to the same
+            // path the core itself would for cfg_mode::custom.
+            val configPathFile = File(RPCSX.rootDirectory, "config/custom_configs/config_${activeTitleId}.yml")
             val configPath = if (configPathFile.exists()) configPathFile.absolutePath else ""
 
             // SAF-backed ISO (any DocumentsProvider, Downloads included):
