@@ -255,6 +255,28 @@ class GameRepository {
                     RPCSX.rootDirectory + "/config/dev_hdd0/game", -1
                 )
                 RPCSX.instance.collectGameInfo(RPCSX.rootDirectory + "/config/games", -1)
+
+                // clear() above wipes every entry, including ones sourced from
+                // user-added "Manage Directories" folders (ISO or loose game
+                // folders), which live outside the two paths scanned above.
+                // Those are otherwise only (re-)scanned once, at app startup
+                // in MainActivity - so without this, any refresh (pull-to-
+                // refresh, or a user switch via UserRepository) permanently
+                // dropped them from the list until the app was fully
+                // restarted. Storage access was already granted when the
+                // directory was added, so no permission prompt is needed here.
+                GameDirectoryRepository.directories.forEach { dir ->
+                    try {
+                        when (dir.kind) {
+                            GameDirectoryKind.Games ->
+                                RPCSX.instance.collectGameInfoFromUri(dir.uri, -1)
+                            GameDirectoryKind.Iso ->
+                                RPCSX.instance.collectIsoInfoFromUri(dir.uri, -1)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
             } finally {
                 preservedMetadata = emptyMap()
             }
