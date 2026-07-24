@@ -170,6 +170,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        for (slot in 0 until MaxGamepadPlayers) {
+            GamepadRepository.updateLightbarForSlot(slot)
+        }
+    }
+
     private var lastStickDirection = 0
     private var lastStickFireTime = 0L
     private var stickRepeatCount = 0
@@ -198,6 +205,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (isGamepadDevice(event.device) && (event.source and android.view.InputDevice.SOURCE_JOYSTICK) == android.view.InputDevice.SOURCE_JOYSTICK) {
+            val slot = GamepadRepository.slotFor(event.deviceId)
+            if (slot != null) {
+                val leftX = (event.getAxisValue(android.view.MotionEvent.AXIS_X) * 127 + 128).toInt().coerceIn(0, 255)
+                val leftY = (event.getAxisValue(android.view.MotionEvent.AXIS_Y) * 127 + 128).toInt().coerceIn(0, 255)
+                val rightX = (event.getAxisValue(android.view.MotionEvent.AXIS_Z) * 127 + 128).toInt().coerceIn(0, 255)
+                val rightY = (event.getAxisValue(android.view.MotionEvent.AXIS_RZ) * 127 + 128).toInt().coerceIn(0, 255)
+
+                GamepadRepository.updateStickPosition(slot, leftX, leftY, rightX, rightY)
+            }
+
             val rawX = event.getAxisValue(android.view.MotionEvent.AXIS_X)
             val rawY = event.getAxisValue(android.view.MotionEvent.AXIS_Y)
             val hatX = event.getAxisValue(android.view.MotionEvent.AXIS_HAT_X)

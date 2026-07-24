@@ -21,8 +21,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,6 +78,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
@@ -95,6 +99,7 @@ import androidx.documentfile.provider.DocumentFile
 import net.rpcsx.ui.settings.components.base.BaseDialogPreference
 import net.rpcsx.ui.settings.components.core.PreferenceHeader
 import net.rpcsx.ui.settings.components.core.PreferenceIcon
+import net.rpcsx.ui.settings.components.core.PreferenceTitle
 import net.rpcsx.ui.settings.components.core.PreferenceValue
 import net.rpcsx.ui.settings.components.preference.HomePreference
 import net.rpcsx.ui.settings.components.preference.RegularPreference
@@ -118,7 +123,9 @@ import net.rpcsx.utils.FileUtil
 import net.rpcsx.utils.GamepadAutoMapper
 import net.rpcsx.utils.GeneralSettings
 import net.rpcsx.utils.InputBindingPrefs
+import net.rpcsx.utils.PadTuningRepository
 import net.rpcsx.utils.RpcsxUpdater
+import kotlinx.coroutines.delay
 import org.json.JSONObject
 import java.io.File
 import kotlin.math.ceil
@@ -1454,8 +1461,6 @@ fun PlayerControllerSettings(
     playerSlot: Int,
     modifier: Modifier = Modifier,
     navigateBack: () -> Unit,
-    // When set, edits this title's private key mappings instead of the
-    // global ones (used from the per-game settings screen).
     titleId: String? = null
 ) {
     val topBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -1537,6 +1542,17 @@ fun PlayerControllerSettings(
                         }
                     }
                 )
+            }
+
+            item {
+                HorizontalDivider()
+            }
+
+            // Deadzone/anti-deadzone/squircle/trigger/vibration tuning - backed
+            // by the same per-player cfg_pad desktop RPCS3's Qt pad dialog
+            // reads/writes (PadTuningRepository), not a Android-only setting.
+            item {
+                PadTuningSection(playerSlot, context)
             }
 
             item {
@@ -1632,6 +1648,392 @@ fun PlayerControllerSettings(
                 requester.requestFocus()
             }
         }
+    }
+}
+
+// Qt's own pad dialog caps these UI sliders at the practical stick/trigger
+// byte range (m_handler->thumb_max / trigger_max, both 255) rather than the
+// theoretical cfg::uint<0,1000000> max - see pad_settings_dialog.cpp. This
+// mirrors that, instead of exposing the raw (mostly unusable) cfg range.
+private const val PadTuningStickMax = 32767f
+private val PadTuningStickRange = 0f..32767f
+private val PadTuningTriggerRange = 0f..255f
+private val PadTuningVibrationMultiplierRange = 0f..200f
+private val PadTuningVibrationThresholdRange = 0f..255f
+// Squircling has no small practical ceiling (Qt exposes it as a spin box,
+// not a drag slider, using the raw cfg range directly) - default is 4000.
+private val PadTuningSquirclingRange = 0f..20000f
+
+private val PadTuningPeripheralTypes = listOf(
+    0 to R.string.pad_tuning_peripheral_standard,
+    1 to R.string.pad_tuning_peripheral_guitar,
+    2 to R.string.pad_tuning_peripheral_drum,
+    3 to R.string.pad_tuning_peripheral_dj,
+    4 to R.string.pad_tuning_peripheral_dancemat,
+    5 to R.string.pad_tuning_peripheral_navigation,
+)
+
+// Renders as a single LazyColumn item (a Column internally) rather than one
+// item per row: the per-field state below must be shared across every
+// control (e.g. a slider's value feeding the live preview's rings), and
+// LazyListScope's own `item {}` blocks are separate composition scopes that
+// can't share `remember` state with each other or with code outside any
+// `item {}` - unlike a plain Column, which composes as one subtree.
+@Composable
+private fun PadTuningSection(playerSlot: Int, context: android.content.Context) {
+    fun intState(path: String, default: Int) =
+        mutableFloatStateOf((PadTuningRepository.getInt(playerSlot, path) ?: default).toFloat())
+
+    var lDeadzone by remember(playerSlot) { intState(PadTuningRepository.LEFT_STICK_DEADZONE, 0) }
+    var lAntiDeadzone by remember(playerSlot) { intState(PadTuningRepository.LEFT_STICK_ANTI_DEADZONE, 0) }
+    var rDeadzone by remember(playerSlot) { intState(PadTuningRepository.RIGHT_STICK_DEADZONE, 0) }
+    var rAntiDeadzone by remember(playerSlot) { intState(PadTuningRepository.RIGHT_STICK_ANTI_DEADZONE, 0) }
+    var lSquircling by remember(playerSlot) { intState(PadTuningRepository.LEFT_SQUIRCLING, 4000) }
+    var rSquircling by remember(playerSlot) { intState(PadTuningRepository.RIGHT_SQUIRCLING, 4000) }
+    var lTriggerThreshold by remember(playerSlot) { intState(PadTuningRepository.LEFT_TRIGGER_THRESHOLD, 0) }
+    var rTriggerThreshold by remember(playerSlot) { intState(PadTuningRepository.RIGHT_TRIGGER_THRESHOLD, 0) }
+    var vibrationLarge by remember(playerSlot) { intState(PadTuningRepository.VIBRATION_LARGE_MULTIPLIER, 100) }
+    var vibrationSmall by remember(playerSlot) { intState(PadTuningRepository.VIBRATION_SMALL_MULTIPLIER, 100) }
+    var vibrationThreshold by remember(playerSlot) { intState(PadTuningRepository.VIBRATION_THRESHOLD, 0) }
+    var vibrationSwitch by remember(playerSlot) {
+        mutableStateOf(PadTuningRepository.getBool(playerSlot, PadTuningRepository.SWITCH_VIBRATION_MOTORS) ?: false)
+    }
+    val defaultR = if (playerSlot == 0) 0 else if (playerSlot == 1) 255 else if (playerSlot == 2) 0 else 255
+    val defaultG = if (playerSlot == 0) 0 else if (playerSlot == 1) 0 else if (playerSlot == 2) 255 else 0
+    val defaultB = if (playerSlot == 0) 255 else if (playerSlot == 1) 0 else if (playerSlot == 2) 0 else 255
+
+    var colorR by remember(playerSlot) { intState(PadTuningRepository.COLOR_R, defaultR) }
+    var colorG by remember(playerSlot) { intState(PadTuningRepository.COLOR_G, defaultG) }
+    var colorB by remember(playerSlot) { intState(PadTuningRepository.COLOR_B, defaultB) }
+    var playerLedEnabled by remember(playerSlot) {
+        mutableStateOf(PadTuningRepository.getBool(playerSlot, PadTuningRepository.PLAYER_LED_ENABLED) ?: true)
+    }
+    var ledBatteryIndicator by remember(playerSlot) {
+        mutableStateOf(PadTuningRepository.getBool(playerSlot, PadTuningRepository.LED_BATTERY_INDICATOR) ?: false)
+    }
+    var ledLowBatteryBlink by remember(playerSlot) {
+        mutableStateOf(PadTuningRepository.getBool(playerSlot, PadTuningRepository.LED_LOW_BATTERY_BLINK) ?: true)
+    }
+    var ledBatteryBrightness by remember(playerSlot) { intState(PadTuningRepository.LED_BATTERY_BRIGHTNESS, 50) }
+    var peripheralType by remember(playerSlot) { intState(PadTuningRepository.DEVICE_CLASS_TYPE, 0) }
+    var advancedExpanded by remember(playerSlot) { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        PreferenceHeader(stringResource(R.string.pad_tuning_sticks))
+
+        PadStickPreview(playerSlot, lDeadzone, lAntiDeadzone, rDeadzone, rAntiDeadzone)
+
+        fun percentText(valFloat: Float) = "${((valFloat / PadTuningStickMax) * 100f).toInt()}%"
+
+        SliderPreference(
+            value = lDeadzone,
+            valueRange = PadTuningStickRange,
+            title = stringResource(R.string.pad_tuning_left_stick_deadzone),
+            valueContent = { PreferenceValue(text = percentText(lDeadzone)) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.LEFT_STICK_DEADZONE, value.toInt())) {
+                    lDeadzone = value
+                }
+            }
+        )
+        SliderPreference(
+            value = rDeadzone,
+            valueRange = PadTuningStickRange,
+            title = stringResource(R.string.pad_tuning_right_stick_deadzone),
+            valueContent = { PreferenceValue(text = percentText(rDeadzone)) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.RIGHT_STICK_DEADZONE, value.toInt())) {
+                    rDeadzone = value
+                }
+            }
+        )
+        SliderPreference(
+            value = lAntiDeadzone,
+            valueRange = PadTuningStickRange,
+            title = stringResource(R.string.pad_tuning_left_stick_anti_deadzone),
+            valueContent = { PreferenceValue(text = percentText(lAntiDeadzone)) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.LEFT_STICK_ANTI_DEADZONE, value.toInt())) {
+                    lAntiDeadzone = value
+                }
+            }
+        )
+        SliderPreference(
+            value = rAntiDeadzone,
+            valueRange = PadTuningStickRange,
+            title = stringResource(R.string.pad_tuning_right_stick_anti_deadzone),
+            valueContent = { PreferenceValue(text = percentText(rAntiDeadzone)) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.RIGHT_STICK_ANTI_DEADZONE, value.toInt())) {
+                    rAntiDeadzone = value
+                }
+            }
+        )
+        SliderPreference(
+            value = lSquircling,
+            valueRange = PadTuningSquirclingRange,
+            title = stringResource(R.string.pad_tuning_left_squircling),
+            valueContent = { PreferenceValue(text = lSquircling.toInt().toString()) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.LEFT_SQUIRCLING, value.toInt())) {
+                    lSquircling = value
+                }
+            }
+        )
+        SliderPreference(
+            value = rSquircling,
+            valueRange = PadTuningSquirclingRange,
+            title = stringResource(R.string.pad_tuning_right_squircling),
+            valueContent = { PreferenceValue(text = rSquircling.toInt().toString()) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.RIGHT_SQUIRCLING, value.toInt())) {
+                    rSquircling = value
+                }
+            }
+        )
+
+        PreferenceHeader(stringResource(R.string.pad_tuning_triggers))
+        SliderPreference(
+            value = lTriggerThreshold,
+            valueRange = PadTuningTriggerRange,
+            title = stringResource(R.string.pad_tuning_left_trigger_threshold),
+            valueContent = { PreferenceValue(text = lTriggerThreshold.toInt().toString()) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.LEFT_TRIGGER_THRESHOLD, value.toInt())) {
+                    lTriggerThreshold = value
+                }
+            }
+        )
+        SliderPreference(
+            value = rTriggerThreshold,
+            valueRange = PadTuningTriggerRange,
+            title = stringResource(R.string.pad_tuning_right_trigger_threshold),
+            valueContent = { PreferenceValue(text = rTriggerThreshold.toInt().toString()) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.RIGHT_TRIGGER_THRESHOLD, value.toInt())) {
+                    rTriggerThreshold = value
+                }
+            }
+        )
+
+        PreferenceHeader(stringResource(R.string.pad_tuning_vibration))
+        SwitchPreference(
+            checked = vibrationSwitch,
+            title = { PreferenceTitle(title = stringResource(R.string.pad_tuning_vibration_switch_motors)) },
+            onClick = { checked ->
+                if (PadTuningRepository.setBool(playerSlot, PadTuningRepository.SWITCH_VIBRATION_MOTORS, checked)) {
+                    vibrationSwitch = checked
+                }
+            }
+        )
+        SliderPreference(
+            value = vibrationLarge,
+            valueRange = PadTuningVibrationMultiplierRange,
+            title = stringResource(R.string.pad_tuning_vibration_large_multiplier),
+            valueContent = { PreferenceValue(text = "${vibrationLarge.toInt()}%") },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.VIBRATION_LARGE_MULTIPLIER, value.toInt())) {
+                    vibrationLarge = value
+                }
+            }
+        )
+        SliderPreference(
+            value = vibrationSmall,
+            valueRange = PadTuningVibrationMultiplierRange,
+            title = stringResource(R.string.pad_tuning_vibration_small_multiplier),
+            valueContent = { PreferenceValue(text = "${vibrationSmall.toInt()}%") },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.VIBRATION_SMALL_MULTIPLIER, value.toInt())) {
+                    vibrationSmall = value
+                }
+            }
+        )
+        SliderPreference(
+            value = vibrationThreshold,
+            valueRange = PadTuningVibrationThresholdRange,
+            title = stringResource(R.string.pad_tuning_vibration_threshold),
+            valueContent = { PreferenceValue(text = vibrationThreshold.toInt().toString()) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.VIBRATION_THRESHOLD, value.toInt())) {
+                    vibrationThreshold = value
+                }
+            }
+        )
+
+        PreferenceHeader(stringResource(R.string.pad_tuning_led_settings))
+        SwitchPreference(
+            title = stringResource(R.string.pad_tuning_player_led_enabled),
+            checked = playerLedEnabled,
+            onClick = { checked ->
+                if (PadTuningRepository.setBool(playerSlot, PadTuningRepository.PLAYER_LED_ENABLED, checked)) {
+                    playerLedEnabled = checked
+                    GamepadRepository.updateLightbarForSlot(playerSlot)
+                }
+            }
+        )
+        SwitchPreference(
+            title = stringResource(R.string.pad_tuning_led_battery_indicator),
+            checked = ledBatteryIndicator,
+            onClick = { checked ->
+                if (PadTuningRepository.setBool(playerSlot, PadTuningRepository.LED_BATTERY_INDICATOR, checked)) {
+                    ledBatteryIndicator = checked
+                }
+            }
+        )
+        SwitchPreference(
+            title = stringResource(R.string.pad_tuning_led_low_battery_blink),
+            checked = ledLowBatteryBlink,
+            onClick = { checked ->
+                if (PadTuningRepository.setBool(playerSlot, PadTuningRepository.LED_LOW_BATTERY_BLINK, checked)) {
+                    ledLowBatteryBlink = checked
+                }
+            }
+        )
+        SliderPreference(
+            value = ledBatteryBrightness,
+            valueRange = 0f..100f,
+            title = stringResource(R.string.pad_tuning_led_battery_brightness),
+            valueContent = { PreferenceValue(text = "${ledBatteryBrightness.toInt()}%") },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.LED_BATTERY_BRIGHTNESS, value.toInt())) {
+                    ledBatteryBrightness = value
+                }
+            }
+        )
+        SliderPreference(
+            value = colorR,
+            valueRange = 0f..255f,
+            title = stringResource(R.string.pad_tuning_color_r),
+            valueContent = { PreferenceValue(text = colorR.toInt().toString()) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.COLOR_R, value.toInt())) {
+                    colorR = value
+                    GamepadRepository.updateLightbarForSlot(playerSlot)
+                }
+            }
+        )
+        SliderPreference(
+            value = colorG,
+            valueRange = 0f..255f,
+            title = stringResource(R.string.pad_tuning_color_g),
+            valueContent = { PreferenceValue(text = colorG.toInt().toString()) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.COLOR_G, value.toInt())) {
+                    colorG = value
+                    GamepadRepository.updateLightbarForSlot(playerSlot)
+                }
+            }
+        )
+        SliderPreference(
+            value = colorB,
+            valueRange = 0f..255f,
+            title = stringResource(R.string.pad_tuning_color_b),
+            valueContent = { PreferenceValue(text = colorB.toInt().toString()) },
+            onValueChange = { value ->
+                if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.COLOR_B, value.toInt())) {
+                    colorB = value
+                    GamepadRepository.updateLightbarForSlot(playerSlot)
+                }
+            }
+        )
+
+        RegularPreference(
+            title = stringResource(R.string.pad_tuning_advanced),
+            leadingIcon = null,
+            onClick = { advancedExpanded = !advancedExpanded }
+        )
+        if (advancedExpanded) {
+            val current = PadTuningPeripheralTypes.firstOrNull { it.first == peripheralType.toInt() } ?: PadTuningPeripheralTypes[0]
+            SingleSelectionDialog(
+                values = PadTuningPeripheralTypes,
+                currentValue = current,
+                key = { it.first },
+                valueToText = { context.getString(it.second) },
+                title = { PreferenceTitle(title = stringResource(R.string.pad_tuning_peripheral_type)) },
+                trailingContent = { PreferenceValue(text = context.getString(current.second)) },
+                onValueChange = { (type, _) ->
+                    if (PadTuningRepository.setInt(playerSlot, PadTuningRepository.DEVICE_CLASS_TYPE, type)) {
+                        peripheralType = type.toFloat()
+                    }
+                }
+            )
+        }
+    }
+}
+
+// Live stick position + configured deadzone/anti-deadzone rings, polled from
+// the native core (already deadzone/squircle-processed - see
+// setVirtualPadData) at a modest rate; this is a settings preview, not the
+// input hot path, so it doesn't need frame-rate polling.
+@Composable
+private fun PadStickPreview(
+    playerSlot: Int,
+    leftDeadzone: Float,
+    leftAntiDeadzone: Float,
+    rightDeadzone: Float,
+    rightAntiDeadzone: Float
+) {
+    var lx by remember { mutableFloatStateOf(127f) }
+    var ly by remember { mutableFloatStateOf(127f) }
+    var rx by remember { mutableFloatStateOf(127f) }
+    var ry by remember { mutableFloatStateOf(127f) }
+
+    LaunchedEffect(playerSlot) {
+        while (true) {
+            val packed = GamepadRepository.getStickPosition(playerSlot)
+            lx = ((packed shr 24) and 0xff).toFloat()
+            ly = ((packed shr 16) and 0xff).toFloat()
+            rx = ((packed shr 8) and 0xff).toFloat()
+            ry = (packed and 0xff).toFloat()
+            delay(50)
+        }
+    }
+
+    val dotColor = MaterialTheme.colorScheme.primary
+    val deadzoneColor = MaterialTheme.colorScheme.error.copy(alpha = 0.6f)
+    val antiDeadzoneColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f)
+    val boundsColor = MaterialTheme.colorScheme.outlineVariant
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        StickPreviewPad(Modifier.weight(1f), lx, ly, leftDeadzone, leftAntiDeadzone, dotColor, deadzoneColor, antiDeadzoneColor, boundsColor)
+        StickPreviewPad(Modifier.weight(1f), rx, ry, rightDeadzone, rightAntiDeadzone, dotColor, deadzoneColor, antiDeadzoneColor, boundsColor)
+    }
+}
+
+@Composable
+private fun StickPreviewPad(
+    modifier: Modifier,
+    x: Float,
+    y: Float,
+    deadzone: Float,
+    antiDeadzone: Float,
+    dotColor: Color,
+    deadzoneColor: Color,
+    antiDeadzoneColor: Color,
+    boundsColor: Color
+) {
+    Canvas(modifier = modifier.size(96.dp)) {
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val radius = minOf(size.width, size.height) / 2f - 4.dp.toPx()
+
+        drawCircle(color = boundsColor, radius = radius, center = center, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx()))
+        if (deadzone > 0f) {
+            drawCircle(color = deadzoneColor, radius = radius * (deadzone / PadTuningStickMax), center = center, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx()))
+        }
+        if (antiDeadzone > 0f) {
+            drawCircle(color = antiDeadzoneColor, radius = radius * (antiDeadzone / PadTuningStickMax), center = center, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx()))
+        }
+
+        val dotOffset = Offset(
+            center.x + (x - 127f) / 127f * radius,
+            center.y + (y - 127f) / 127f * radius
+        )
+        drawCircle(color = dotColor, radius = 5.dp.toPx(), center = dotOffset)
     }
 }
 

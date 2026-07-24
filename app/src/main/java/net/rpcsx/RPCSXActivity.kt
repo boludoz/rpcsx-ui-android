@@ -82,6 +82,9 @@ class RPCSXActivity : Activity() {
         inputBindingsBySlot.clear()
         showOverlayAndResetTimer()
         startRumblePoller()
+        for (slot in 0 until MaxGamepadPlayers) {
+            GamepadRepository.updateLightbarForSlot(slot)
+        }
     }
 
     override fun onPause() {
@@ -528,21 +531,25 @@ class RPCSXActivity : Activity() {
         val deviceId = event.deviceId
         val state = gamepadStates.getOrPut(deviceId) { State() }
 
-        if (event.getAxisValue(MotionEvent.AXIS_LTRIGGER) > 0.1) {
+        val rawLTrigger = event.getAxisValue(MotionEvent.AXIS_LTRIGGER)
+        if (rawLTrigger > 0.1) {
             state.digital[1] = state.digital[1] or Digital2Flags.CELL_PAD_CTRL_L2.bit
             usesAxisL2[deviceId] = true
         } else if (usesAxisL2[deviceId] == true) {
             usesAxisL2[deviceId] = false
             state.digital[1] = state.digital[1] and Digital2Flags.CELL_PAD_CTRL_L2.bit.inv()
         }
+        state.leftTrigger = if (usesAxisL2[deviceId] == true) (rawLTrigger * 255).toInt().coerceIn(0, 255) else -1
 
-        if (event.getAxisValue(MotionEvent.AXIS_RTRIGGER) > 0.1) {
+        val rawRTrigger = event.getAxisValue(MotionEvent.AXIS_RTRIGGER)
+        if (rawRTrigger > 0.1) {
             state.digital[1] = state.digital[1] or Digital2Flags.CELL_PAD_CTRL_R2.bit
             usesAxisR2[deviceId] = true
         } else if (usesAxisR2[deviceId] == true) {
             usesAxisR2[deviceId] = false
             state.digital[1] = state.digital[1] and Digital2Flags.CELL_PAD_CTRL_R2.bit.inv()
         }
+        state.rightTrigger = if (usesAxisR2[deviceId] == true) (rawRTrigger * 255).toInt().coerceIn(0, 255) else -1
 
         val dpadX = event.getAxisValue(MotionEvent.AXIS_HAT_X)
         val dpadY = event.getAxisValue(MotionEvent.AXIS_HAT_Y)
@@ -595,7 +602,9 @@ class RPCSXActivity : Activity() {
                     merged.leftStickX,
                     merged.leftStickY,
                     merged.rightStickX,
-                    merged.rightStickY
+                    merged.rightStickY,
+                    merged.leftTrigger,
+                    merged.rightTrigger
                 )
             } else {
                 RPCSX.instance.multiPadData(
@@ -605,7 +614,9 @@ class RPCSXActivity : Activity() {
                     merged.leftStickX,
                     merged.leftStickY,
                     merged.rightStickX,
-                    merged.rightStickY
+                    merged.rightStickY,
+                    merged.leftTrigger,
+                    merged.rightTrigger
                 )
             }
         } else {
@@ -616,7 +627,9 @@ class RPCSXActivity : Activity() {
                 state.leftStickX,
                 state.leftStickY,
                 state.rightStickX,
-                state.rightStickY
+                state.rightStickY,
+                state.leftTrigger,
+                state.rightTrigger
             )
         }
     }
@@ -656,6 +669,10 @@ class RPCSXActivity : Activity() {
         out.leftStickY = stickSource.leftStickY
         out.rightStickX = stickSource.rightStickX
         out.rightStickY = stickSource.rightStickY
+        // Prefer whichever source actually has an analog reading (the touch
+        // overlay never does); ties keep the gamepad's.
+        out.leftTrigger = listOf(gamepadState, overlayState, extra).firstOrNull { it != null && it.leftTrigger >= 0 }?.leftTrigger ?: -1
+        out.rightTrigger = listOf(gamepadState, overlayState, extra).firstOrNull { it != null && it.rightTrigger >= 0 }?.rightTrigger ?: -1
         return out
     }
 

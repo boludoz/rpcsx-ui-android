@@ -89,12 +89,19 @@ class RPCSX {
     external fun usbDeviceEvent(fd: Int, vendorId: Int, productId: Int, event: Int): Boolean
     external fun processCompilationQueue(): Boolean
     external fun startMainThreadProcessor(): Boolean
-    external fun overlayPadData(digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
-    external fun multiPadData(playerIndex: Int, digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int): Boolean
+    // leftTrigger/rightTrigger are analog L2/R2 axis values (0-255), or -1
+    // if the caller has no analog reading for that trigger (falls back to
+    // digital1/digital2's L2/R2 bits on the native side).
+    external fun overlayPadData(digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int, leftTrigger: Int, rightTrigger: Int): Boolean
+    external fun multiPadData(playerIndex: Int, digital1: Int, digital2: Int, leftStickX: Int, leftStickY: Int, rightStickX: Int, rightStickY: Int, leftTrigger: Int, rightTrigger: Int): Boolean
     external fun getMaxVirtualPads(): Int
     // Backend rumble strength for a virtual pad: (large << 8) | small, each
     // 0-255. 0 when idle. Polled by RPCSXActivity to drive the vibrator.
     external fun getPadVibration(playerIndex: Int): Int
+    // Live stick position for a virtual pad, already deadzone/squircle-
+    // processed by the core: (lx<<24)|(ly<<16)|(rx<<8)|ry, each 0-255.
+    // Polled by the pad tuning screen's live preview canvas.
+    external fun getStickPosition(playerIndex: Int): Int
     external fun collectGameInfo(rootDir: String, progressId: Long): Boolean
     // Resolves a SAF tree URI to a real filesystem path natively and scans it
     // in place (no copy). Returns false if the URI cannot be resolved to a
@@ -127,6 +134,15 @@ class RPCSX {
     external fun customConfigSet(serial: String, path: String, value: String): Boolean
     external fun customConfigRemove(serial: String, path: String): Boolean
     external fun customConfigImportYaml(serial: String, yaml: String): Boolean
+
+    // Per-player-slot pad tuning (deadzone, anti-deadzone, squircle, trigger
+    // threshold, vibration multiplier/threshold/switch-motors, PS3
+    // peripheral type). Bridges directly to g_cfg_input.player[i]->config -
+    // the same per-player cfg_pad desktop RPCS3's Qt pad dialog reads/writes
+    // - global scope only, no per-game override. See PadTuningRepository.
+    external fun padConfigGet(playerIndex: Int, path: String): String
+    external fun padConfigSet(playerIndex: Int, path: String, value: String): Boolean
+    external fun padConfigResetToDefault(playerIndex: Int, path: String): Boolean
 
     external fun shutdown()
     external fun getState() : Int

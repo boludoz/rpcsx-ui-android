@@ -37,7 +37,12 @@ data class State(
     var leftStickX: Int = 127,
     var leftStickY: Int = 127,
     var rightStickX: Int = 127,
-    var rightStickY: Int = 127
+    var rightStickY: Int = 127,
+    // Analog L2/R2 (0-255), or -1 when this source has no analog trigger
+    // reading (e.g. the touch overlay, or a controller exposing L2/R2 only
+    // as digital buttons) - falls back to the digital bits natively.
+    var leftTrigger: Int = -1,
+    var rightTrigger: Int = -1
 )
 interface PadOverlayItem {
     fun draw(canvas: Canvas)

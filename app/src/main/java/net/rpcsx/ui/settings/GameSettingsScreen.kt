@@ -260,23 +260,6 @@ fun GameSettingsScreen(
 
             item { HorizontalDivider() }
 
-            item { PreferenceHeader(stringResource(R.string.controls)) }
-
-            items(MaxGamepadPlayers) { playerIndex ->
-                RegularPreference(
-                    title = stringResource(R.string.player_slot, playerIndex + 1),
-                    leadingIcon = null,
-                    value = {
-                        if (InputBindingPrefs.hasTitleBindings(titleId, playerIndex)) {
-                            PreferenceValue(stringResource(R.string.custom_mapping))
-                        }
-                    },
-                    onClick = { navigateTo("game_controls/$titleId/$playerIndex") }
-                )
-            }
-
-            item { HorizontalDivider() }
-
             item {
                 RegularPreference(
                     title = stringResource(R.string.delete_cache),

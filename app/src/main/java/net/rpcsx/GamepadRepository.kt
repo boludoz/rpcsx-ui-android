@@ -88,6 +88,19 @@ class GamepadRepository {
 
         private val vibratorCache = java.util.concurrent.ConcurrentHashMap<Int, android.os.Vibrator>()
         private val vibratorManagerCache = java.util.concurrent.ConcurrentHashMap<Int, android.os.VibratorManager>()
+        private val stickPositions = java.util.concurrent.ConcurrentHashMap<Int, Int>()
+
+        fun updateStickPosition(slot: Int, lx: Int, ly: Int, rx: Int, ry: Int) {
+            val packed = (lx shl 24) or (ly shl 16) or (rx shl 8) or ry
+            stickPositions[slot] = packed
+        }
+
+        fun getStickPosition(slot: Int): Int {
+            if (RPCSX.activeGame.value != null || RPCSX.state.value != EmulatorState.Stopped) {
+                return RPCSX.instance.getStickPosition(slot)
+            }
+            return stickPositions[slot] ?: (127 shl 24 or (127 shl 16) or (127 shl 8) or 127)
+        }
         // Last strength sent to each device, packed (large shl 8) or small, so
         // backend rumble is edge-triggered: the continuous effect is only
         // replaced when the game actually changes the motor strength.
@@ -228,6 +241,42 @@ class GamepadRepository {
             stopVibrator(deviceId)
         }
 
+        private val lightSessions = java.util.concurrent.ConcurrentHashMap<Int, Any>()
+
+        fun updateLightbarForSlot(slot: Int) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+            try {
+                val gamepadSlot = slots[slot] ?: return
+                val device = InputDevice.getDevice(gamepadSlot.deviceId) ?: return
+                val lm = device.lightsManager ?: return
+                val lights = lm.lights ?: return
+                if (lights.isEmpty()) return
+
+                val playerLedEnabled = net.rpcsx.utils.PadTuningRepository.getBool(slot, net.rpcsx.utils.PadTuningRepository.PLAYER_LED_ENABLED) ?: true
+                val defaultR = if (slot == 0) 0 else if (slot == 1) 255 else if (slot == 2) 0 else 255
+                val defaultG = if (slot == 0) 0 else if (slot == 1) 0 else if (slot == 2) 255 else 0
+                val defaultB = if (slot == 0) 255 else if (slot == 1) 0 else if (slot == 2) 0 else 255
+
+                val r = if (!playerLedEnabled) 0 else (net.rpcsx.utils.PadTuningRepository.getInt(slot, net.rpcsx.utils.PadTuningRepository.COLOR_R) ?: defaultR)
+                val g = if (!playerLedEnabled) 0 else (net.rpcsx.utils.PadTuningRepository.getInt(slot, net.rpcsx.utils.PadTuningRepository.COLOR_G) ?: defaultG)
+                val b = if (!playerLedEnabled) 0 else (net.rpcsx.utils.PadTuningRepository.getInt(slot, net.rpcsx.utils.PadTuningRepository.COLOR_B) ?: defaultB)
+
+                val colorInt = (0xFF shl 24) or ((r and 0xFF) shl 16) or ((g and 0xFF) shl 8) or (b and 0xFF)
+
+                var session = lightSessions[gamepadSlot.deviceId] as? android.hardware.lights.LightsManager.LightsSession
+                if (session == null) {
+                    session = lm.openSession()
+                    lightSessions[gamepadSlot.deviceId] = session
+                }
+
+                val builder = android.hardware.lights.LightsRequest.Builder()
+                for (light in lights) {
+                    builder.addLight(light, android.hardware.lights.LightState.Builder().setColor(colorInt).build())
+                }
+                session.requestLights(builder.build())
+            } catch (_: Throwable) {}
+        }
+
         fun attach(deviceId: Int, deviceName: String): Int? {
             slotFor(deviceId)?.let { return it }
             val device = InputDevice.getDevice(deviceId)
@@ -242,6 +291,7 @@ class GamepadRepository {
             slots[slot] = GamepadSlot(deviceId, deviceName, vendorId, productId, descriptor)
             // Trigger brief identification vibration pulse when connected
             vibrateDevice(deviceId, 250L)
+            updateLightbarForSlot(slot)
             return slot
         }
 

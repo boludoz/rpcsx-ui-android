@@ -35,12 +35,14 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 
 struct RPCSXApi {
   bool (*overlayPadData)(int digital1, int digital2, int leftStickX,
-                         int leftStickY, int rightStickX, int rightStickY);
+                         int leftStickY, int rightStickX, int rightStickY,
+                         int leftTrigger, int rightTrigger);
   bool (*multiPadData)(int playerIndex, int digital1, int digital2,
                        int leftStickX, int leftStickY, int rightStickX,
-                       int rightStickY);
+                       int rightStickY, int leftTrigger, int rightTrigger);
   int (*getMaxVirtualPads)();
   int (*getPadVibration)(int playerIndex);
+  int (*getStickPosition)(int playerIndex);
   bool (*initialize)(std::string_view rootDir, std::string_view user);
   bool (*processCompilationQueue)(JNIEnv *env);
   bool (*startMainThreadProcessor)(JNIEnv *env);
@@ -82,6 +84,10 @@ struct RPCSXApi {
                           std::string_view valueString);
   bool (*customConfigRemove)(std::string_view serial, std::string_view path);
   bool (*customConfigImportYaml)(std::string_view serial, std::string_view yaml);
+  std::string (*padConfigGet)(int playerIndex, std::string_view path);
+  bool (*padConfigSet)(int playerIndex, std::string_view path,
+                       std::string_view valueString);
+  bool (*padConfigResetToDefault)(int playerIndex, std::string_view path);
   std::string (*getVersion)();
   void *(*setCustomDriver)(void *driverHandle);
 };
@@ -124,6 +130,7 @@ struct RPCSXLibrary : RPCSXApi {
     result.multiPadData = reinterpret_cast<decltype(multiPadData)>(dlsym(handle, "_rpcsx_multiPadData"));
     result.getMaxVirtualPads = reinterpret_cast<decltype(getMaxVirtualPads)>(dlsym(handle, "_rpcsx_getMaxVirtualPads"));
     result.getPadVibration = reinterpret_cast<decltype(getPadVibration)>(dlsym(handle, "_rpcsx_getPadVibration"));
+    result.getStickPosition = reinterpret_cast<decltype(getStickPosition)>(dlsym(handle, "_rpcsx_getStickPosition"));
     result.initialize = reinterpret_cast<decltype(initialize)>(dlsym(handle, "_rpcsx_initialize"));
     result.processCompilationQueue = reinterpret_cast<decltype(processCompilationQueue)>(dlsym(handle, "_rpcsx_processCompilationQueue"));
     result.startMainThreadProcessor = reinterpret_cast<decltype(startMainThreadProcessor)>(dlsym(handle, "_rpcsx_startMainThreadProcessor"));
@@ -159,6 +166,9 @@ struct RPCSXLibrary : RPCSXApi {
     result.customConfigSet = reinterpret_cast<decltype(customConfigSet)>(dlsym(handle, "_rpcsx_customConfigSet"));
     result.customConfigRemove = reinterpret_cast<decltype(customConfigRemove)>(dlsym(handle, "_rpcsx_customConfigRemove"));
     result.customConfigImportYaml = reinterpret_cast<decltype(customConfigImportYaml)>(dlsym(handle, "_rpcsx_customConfigImportYaml"));
+    result.padConfigGet = reinterpret_cast<decltype(padConfigGet)>(dlsym(handle, "_rpcsx_padConfigGet"));
+    result.padConfigSet = reinterpret_cast<decltype(padConfigSet)>(dlsym(handle, "_rpcsx_padConfigSet"));
+    result.padConfigResetToDefault = reinterpret_cast<decltype(padConfigResetToDefault)>(dlsym(handle, "_rpcsx_padConfigResetToDefault"));
     result.getVersion = reinterpret_cast<decltype(getVersion)>(dlsym(handle, "_rpcsx_getVersion"));
     result.setCustomDriver = reinterpret_cast<decltype(setCustomDriver)>(dlsym(handle, "_rpcsx_setCustomDriver"));
     // clang-format on
@@ -205,22 +215,26 @@ Java_net_rpcsx_RPCSX_getLibraryVersion(JNIEnv *env, jobject, jstring path) {
 
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_overlayPadData(
     JNIEnv *, jobject, jint digital1, jint digital2, jint leftStickX,
-    jint leftStickY, jint rightStickX, jint rightStickY) {
+    jint leftStickY, jint rightStickX, jint rightStickY, jint leftTrigger,
+    jint rightTrigger) {
   return rpcsxLib.overlayPadData(digital1, digital2, leftStickX, leftStickY,
-                                 rightStickX, rightStickY);
+                                 rightStickX, rightStickY, leftTrigger,
+                                 rightTrigger);
 }
 
 // Older downloaded engine builds may not export _rpcsx_multiPadData yet, so
 // these two calls must tolerate a null function pointer instead of crashing.
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_multiPadData(
     JNIEnv *, jobject, jint playerIndex, jint digital1, jint digital2,
-    jint leftStickX, jint leftStickY, jint rightStickX, jint rightStickY) {
+    jint leftStickX, jint leftStickY, jint rightStickX, jint rightStickY,
+    jint leftTrigger, jint rightTrigger) {
   if (rpcsxLib.multiPadData == nullptr) {
     return false;
   }
 
   return rpcsxLib.multiPadData(playerIndex, digital1, digital2, leftStickX,
-                               leftStickY, rightStickX, rightStickY);
+                               leftStickY, rightStickX, rightStickY,
+                               leftTrigger, rightTrigger);
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -239,6 +253,15 @@ Java_net_rpcsx_RPCSX_getPadVibration(JNIEnv *, jobject, jint playerIndex) {
   }
 
   return rpcsxLib.getPadVibration(playerIndex);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_net_rpcsx_RPCSX_getStickPosition(JNIEnv *, jobject, jint playerIndex) {
+  if (rpcsxLib.getStickPosition == nullptr) {
+    return 0;
+  }
+
+  return rpcsxLib.getStickPosition(playerIndex);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL Java_net_rpcsx_RPCSX_initialize(
@@ -496,6 +519,40 @@ Java_net_rpcsx_RPCSX_customConfigImportYaml(JNIEnv *env, jobject,
     return false;
   }
   return rpcsxLib.customConfigImportYaml(unwrap(env, jserial), unwrap(env, jyaml));
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_net_rpcsx_RPCSX_padConfigGet(JNIEnv *env, jobject,
+                                  jint playerIndex, jstring jpath) {
+  if (rpcsxLib.padConfigGet == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "padConfigGet: core library too old - update the core .so");
+    return wrap(env, "{}");
+  }
+  return wrap(env, rpcsxLib.padConfigGet(playerIndex, unwrap(env, jpath)));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_net_rpcsx_RPCSX_padConfigSet(JNIEnv *env, jobject,
+                                  jint playerIndex, jstring jpath,
+                                  jstring jvalue) {
+  if (rpcsxLib.padConfigSet == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, "RPCSX-UI",
+                        "padConfigSet: core library too old - update the core .so");
+    return false;
+  }
+  return rpcsxLib.padConfigSet(playerIndex, unwrap(env, jpath),
+                               unwrap(env, jvalue));
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_net_rpcsx_RPCSX_padConfigResetToDefault(JNIEnv *env, jobject,
+                                             jint playerIndex,
+                                             jstring jpath) {
+  if (rpcsxLib.padConfigResetToDefault == nullptr) {
+    return false;
+  }
+  return rpcsxLib.padConfigResetToDefault(playerIndex, unwrap(env, jpath));
 }
 
 extern "C" JNIEXPORT jboolean JNICALL

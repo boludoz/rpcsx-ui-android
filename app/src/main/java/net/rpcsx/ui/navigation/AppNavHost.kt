@@ -468,19 +468,7 @@ fun AppNavHost() {
             )
         }
 
-        composable(
-            route = "game_controls/{titleId}/{slot}",
-            arguments = listOf(
-                navArgument("titleId") { type = NavType.StringType },
-                navArgument("slot") { type = NavType.IntType }
-            )
-        ) { entry ->
-            PlayerControllerSettings(
-                playerSlot = entry.arguments?.getInt("slot") ?: 0,
-                navigateBack = navController::navigateUp,
-                titleId = entry.arguments?.getString("titleId")
-            )
-        }
+
 
         // Per-game advanced settings: same dynamic tree as the global
         // "settings" routes, but values are merged with (and written to) the
