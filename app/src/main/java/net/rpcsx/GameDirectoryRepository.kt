@@ -167,18 +167,12 @@ object GameDirectoryRepository {
     // calls: safe to run before the core library is loaded.
     fun pruneInvalid(context: Context) {
         directories.filter { dir ->
-            val path = try {
-                RPCSX.instance.resolveTreeUriToPath(dir.uri)
+            val doc = try {
+                DocumentFile.fromTreeUri(context, Uri.parse(dir.uri))
             } catch (_: Exception) {
                 null
             }
-            if (!path.isNullOrEmpty() && java.io.File(path).exists()) {
-                false
-            } else {
-                val docTree = try { DocumentFile.fromTreeUri(context, Uri.parse(dir.uri)) } catch (_: Exception) { null }
-                val docSingle = try { DocumentFile.fromSingleUri(context, Uri.parse(dir.uri)) } catch (_: Exception) { null }
-                docTree?.exists() != true && docSingle?.exists() != true
-            }
+            doc?.exists() != true
         }.forEach { dir ->
             remove(dir)
             GameRepository.removeByDirectory(dir.uri)

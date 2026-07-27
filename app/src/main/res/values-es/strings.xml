@@ -24,11 +24,6 @@
     <string name="rpcsx_download_channel">Canal de descarga de RPCSX</string>
     <string name="select_game_file">Instalar PKG, ISO o RAP</string>
     <string name="select_game_folder">Añadir carpeta de juego</string>
-    <string name="select_iso_folder">Añadir directorio ISO</string>
-    <string name="select_iso_file">Añadir archivo ISO</string>
-    <string name="add_game_folder">+ Carpeta de juegos</string>
-    <string name="add_iso_folder">+ Carpeta de ISOs</string>
-    <string name="add_iso_file">+ Archivo ISO</string>
     <string name="settings">Ajustes</string>
     <string name="ui_update_channel">Canal de actualización de RPCSX UI Android</string>
 
@@ -235,4 +230,5 @@
     <string name="seconds_15">15 segundos</string>
     <string name="seconds_30">30 segundos</string>
     <string name="controller_port">Puerto</string>
+    <string name="select_iso_folder">Añadir Directorio ISO</string>
 </resources>
