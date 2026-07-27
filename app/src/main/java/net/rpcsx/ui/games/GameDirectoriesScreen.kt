@@ -73,6 +73,18 @@ fun GameDirectoriesScreen(
         }
     }
 
+    val isoFileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            try {
+                context.contentResolver.takePersistableUriPermission(
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            } catch (_: Exception) {}
+            GameDirectoryRepository.add(uri, GameDirectoryKind.Iso)
+            GameDirectoryRepository.scanIsoDirectory(context, uri)
+        }
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(topBarScrollBehavior.nestedScrollConnection),
         topBar = {
@@ -103,23 +115,34 @@ fun GameDirectoriesScreen(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = net.rpcsx.ui.navigation.LocalDockPadding.current)
         ) {
             item {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    androidx.compose.material3.Button(
-                        modifier = Modifier.weight(1f),
-                        onClick = { gameDirLauncher.launch(null) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("+ Carpeta de Juegos")
+                        androidx.compose.material3.Button(
+                            modifier = Modifier.weight(1f),
+                            onClick = { gameDirLauncher.launch(null) }
+                        ) {
+                            Text(stringResource(R.string.add_game_folder))
+                        }
+                        androidx.compose.material3.OutlinedButton(
+                            modifier = Modifier.weight(1f),
+                            onClick = { isoDirLauncher.launch(null) }
+                        ) {
+                            Text(stringResource(R.string.add_iso_folder))
+                        }
                     }
-                    androidx.compose.material3.OutlinedButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = { isoDirLauncher.launch(null) }
+                    androidx.compose.material3.FilledTonalButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { isoFileLauncher.launch("*/*") }
                     ) {
-                        Text("+ Carpeta ISOs")
+                        Text(stringResource(R.string.add_iso_file))
                     }
                 }
             }
@@ -167,8 +190,13 @@ private fun GameDirectoryRow(
 ) {
     val context = LocalContext.current
     val displayName = remember(dir.uri) {
-        runCatching { DocumentFile.fromTreeUri(context, Uri.parse(dir.uri))?.name }
-            .getOrNull() ?: Uri.parse(dir.uri).lastPathSegment ?: dir.uri
+        runCatching {
+            DocumentFile.fromTreeUri(context, Uri.parse(dir.uri))?.name
+                ?: DocumentFile.fromSingleUri(context, Uri.parse(dir.uri))?.name
+        }.getOrNull() ?: Uri.parse(dir.uri).lastPathSegment ?: dir.uri
+    }
+    val isSingleFile = remember(dir.uri) {
+        runCatching { DocumentFile.fromSingleUri(context, Uri.parse(dir.uri))?.isFile }.getOrNull() == true
     }
 
     Card(
@@ -184,7 +212,7 @@ private fun GameDirectoryRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_folder),
+                painter = painterResource(id = if (isSingleFile) R.drawable.ic_description else R.drawable.ic_folder),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
